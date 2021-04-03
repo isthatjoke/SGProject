@@ -5,11 +5,18 @@ NULLABLE = {'blank': True, 'null': True}
 # Create your models here.
 
 
+class Hub(models.Model):
+    name = models.CharField(max_length=150, verbose_name='название',)
+    description = models.CharField(max_length=500, verbose_name='описание', **NULLABLE,)
+
+
 class HubCategory(models.Model):
     name = models.CharField(max_length=150, verbose_name='название',)
     short_desc = models.CharField(max_length=150, verbose_name='краткое описание',)
     description = models.CharField(max_length=500, verbose_name='описание', **NULLABLE,)
     tags = models.CharField(max_length=300, verbose_name='тэги', **NULLABLE,)
+    category = models.ForeignKey(Hub, related_name='categories', verbose_name='категории', on_delete=models.CASCADE,
+                                 **NULLABLE)
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True,)
     updated_at = models.DateTimeField(verbose_name='время обновления', auto_now=True,)
 
