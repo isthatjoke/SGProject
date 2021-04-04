@@ -16,6 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+import hub.views as hub
+
 urlpatterns = [
+    path('', hub.main, name='main'),
     path('admin/', admin.site.urls),
 ]
