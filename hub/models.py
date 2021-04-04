@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+from authapp.models import HubUser
+
 NULLABLE = {'blank': True, 'null': True}
 # Create your models here.
 
@@ -22,10 +24,9 @@ class HubCategory(models.Model):
 
 
 class HubCategoryUsers(models.Model):
-    user = models.ForeignKey(User, related_name='users', on_delete=models.CASCADE)
+    user = models.ForeignKey(HubUser, related_name='users', on_delete=models.CASCADE, **NULLABLE)
     hub_category = models.ForeignKey(HubCategory, related_name='hubs', on_delete=models.CASCADE,)
 
     @staticmethod
     def get_category_users(pk):
         return HubCategoryUsers.objects.filter(hub_category=pk).count()
-
