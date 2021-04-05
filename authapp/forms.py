@@ -35,6 +35,7 @@ class HubUserRegisterForm(UserCreationForm):
         email = self.cleaned_data['email']
         if email and HubUser.objects.filter(email=email).exists():
             raise forms.ValidationError('такой email уже зарегистрирован')
+        return email
 
 
 class HubUserUpdateForm(forms.ModelForm):

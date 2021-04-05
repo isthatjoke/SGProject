@@ -14,7 +14,7 @@ class Post(models.Model):
     hub_category = models.ForeignKey(HubCategory, related_name='hub_category',
                                      verbose_name='подкатегория', on_delete=models.CASCADE, **NULLABLE)
     published = models.BooleanField(default=False)
-    user_id = models.ForeignKey(HubUserProfile, related_name='user_id', on_delete=models.CASCADE, **NULLABLE)
+    user_id = models.ForeignKey(HubUser, related_name='user_id', on_delete=models.CASCADE, **NULLABLE)
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True, )
     updated_at = models.DateTimeField(verbose_name='время обновления', auto_now=True, )
 
