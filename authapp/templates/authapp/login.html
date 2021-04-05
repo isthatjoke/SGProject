@@ -1,16 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<form id="signinform" action="{% url 'authapp:login' %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div class="form-button">
-                        <button id="submit" type="submit" class="ybtn ybtn-accent-color">Войти</button>
-                    </div>
-                </form>
-</body>
-</html>
+{% extends 'hub/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="card">
+        <div class="user__login">
+            <form id="signinform" action="{% url 'authapp:login' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-button">
+                    <button id="submit" type="submit" class="ybtn ybtn-accent-color">Войти</button>
+                </div>
+            </form>
+            <div class="social">
+                <div class="social__link"><a href="https://google.com" target="_blank"><i class="fa fa-google fa-3x"></i></a></div>
+                <div class="social__link"><a href="https://github.com" target="_blank"><i class="fa fa-github-alt fa-3x"></i></a></div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

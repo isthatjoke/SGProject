@@ -30,4 +30,3 @@ class HubCategoryUsers(models.Model):
     @staticmethod
     def get_category_users(pk):
         return HubCategoryUsers.objects.filter(hub_category=pk).count()
-
