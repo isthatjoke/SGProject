@@ -1,0 +1,15 @@
+/* скрываем выпадающие списки по умолчанию
+ * и задаем абсолютное позиционирование */
+
+nav ul ul {
+    display: none;
+    position: absolute;
+    top: 100%;
+}
+
+nav ul, li {
+    display: flex;
+    padding: 5px 15px;
+    font-size: 20px;
+    margin-left: 5px;
+}
