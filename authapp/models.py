@@ -24,7 +24,7 @@ class HubUserProfile(models.Model):
         (FEMALE, 'ж'),
     )
 
-    user = models.OneToOneField(HubUser, on_delete=models.CASCADE, unique=True)
+    user = models.OneToOneField(HubUser, on_delete=models.CASCADE, unique=True, db_index=True)
     specialization = models.CharField(verbose_name='специализация', max_length=150, **NULLABLE)
     name = models.CharField(verbose_name='имя', max_length=150, **NULLABLE)
     sex = models.CharField(choices=SEX_CHOICES, max_length=1, **NULLABLE)
