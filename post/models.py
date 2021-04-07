@@ -26,4 +26,9 @@ class Post(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.hub_category.name})'
-    
+
+    # Метод возвращает все посты всех пользователей и сортирует по дате
+    @staticmethod
+    def get_all_posts():
+        return Post.objects.all().order_by('updated_at')
+
