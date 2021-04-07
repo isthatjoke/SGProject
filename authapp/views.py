@@ -15,7 +15,7 @@ class HubUserLoginView(LoginView):
 
     def get_success_url(self):
 
-        return reverse('authapp:success')
+        return reverse('hub:main')
 
 
 class HubUserRegisterView(CreateView):
