@@ -18,7 +18,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+import hub.views as hub
+
 urlpatterns = [
+    path('', hub.main, name='main'),
     path('admin/', admin.site.urls),
     path('', include('authapp.urls', namespace='authapp')),
 ]
