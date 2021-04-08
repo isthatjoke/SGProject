@@ -21,9 +21,10 @@ from django.urls import path, include
 import hub.views as hub
 
 urlpatterns = [
-    path('', hub.main, name='main'),
+    path('', include('hub.urls', namespace='hub')),
     path('admin/', admin.site.urls),
     path('', include('authapp.urls', namespace='authapp')),
+    path('post/', include('post.urls', namespace='post'))
 ]
 
 

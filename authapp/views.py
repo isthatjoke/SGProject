@@ -15,20 +15,20 @@ class HubUserLoginView(LoginView):
 
     def get_success_url(self):
 
-        return reverse('authapp:success')
+        return reverse('hub:main')
 
 
 class HubUserRegisterView(CreateView):
     form_class = HubUserRegisterForm
     template_name = 'authapp/register.html'
-    success_url = reverse_lazy('authapp:success')
+    success_url = reverse_lazy('authapp:login')
 
 
 class HubUserUpdateView(UpdateView):
     model = HubUser
     template_name = 'authapp/update.html'
     form_class = HubUserUpdateForm
-    success_url = reverse_lazy('authapp:success')
+    success_url = reverse_lazy('authapp:update')
 
     def get_object(self, queryset=None):
         return self.request.user

@@ -8,6 +8,12 @@ NULLABLE = {'blank': True, 'null': True}
 
 
 class Post(models.Model):
+
+    class Meta:
+        verbose_name = 'Пост'
+        verbose_name_plural = 'Посты'
+        ordering = ('-created_at',)
+
     name = models.CharField(max_length=200, verbose_name='название', )
     short_desc = models.CharField(max_length=200, verbose_name='краткое описание', )
     post_text = models.TextField(verbose_name='пост', blank=False, null=True)
