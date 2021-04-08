@@ -9,6 +9,12 @@ NULLABLE = {'blank': True, 'null': True}
 
 
 class HubUser(AbstractUser):
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('-created_at',)
+
     avatar = models.ImageField(verbose_name='аватарка', upload_to='avatars', blank=True)
     age = models.IntegerField(verbose_name='возраст', **NULLABLE)
     created_at = models.DateTimeField(verbose_name='зарегистрирован', auto_now_add=True)
@@ -16,6 +22,12 @@ class HubUser(AbstractUser):
 
 
 class HubUserProfile(models.Model):
+
+    class Meta:
+        verbose_name = 'Профиль'
+        verbose_name_plural = 'Профили'
+        ordering = ('-created_at',)
+
     MALE = 'M'
     FEMALE = 'F'
 
@@ -31,6 +43,8 @@ class HubUserProfile(models.Model):
     birthdate = models.DateField(verbose_name='день рождения', **NULLABLE)
     location = models.CharField(verbose_name='страна', max_length=50, **NULLABLE)
     location_city = models.CharField(verbose_name='город', max_length=100, **NULLABLE)
+    created_at = models.DateTimeField(verbose_name='создан', auto_now_add=True)
+    updated_at = models.DateTimeField(verbose_name='обновлен', auto_now=True)
 
     @receiver(post_save, sender=HubUser)
     def create_user_profile(sender, instance, created, **kwargs):

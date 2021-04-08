@@ -1,0 +1,20 @@
+<nav>
+    <ul>
+        {% for key, cats in head_menu_object_list.items %}
+
+            <li><a href="{% url 'hub:hub_category' key.id %}">{{ key.name|title }}</a>
+
+                <!-- уровень выпадающего списка -->
+                <ul>
+                {% for cat in cats.0 %}
+
+
+			                <li><a href="/hub/{{ key.id }}/{{ cat.id }}">{{ cat.name }}</a></li>
+
+                {% endfor %}
+                </ul>
+            </li>
+
+        {% endfor %}
+    </ul>
+</nav>
