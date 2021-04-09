@@ -169,6 +169,14 @@ main {
 }
 
 
+.post__karma {
+    text-align: right;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: darkgoldenrod;
+}
+
+
 .user__login {
     display: flex;
     flex-direction: column;
