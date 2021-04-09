@@ -10,11 +10,25 @@ NULLABLE = {'blank': True, 'null': True}
 
 
 class Hub(models.Model):
+
+    class Meta:
+        verbose_name = 'Поток'
+        verbose_name_plural = 'Потоки'
+        ordering = ('-created_at',)
+
     name = models.CharField(max_length=150, verbose_name='название', )
     description = models.CharField(max_length=500, verbose_name='описание', **NULLABLE, )
+    created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True, )
+    updated_at = models.DateTimeField(verbose_name='время обновления', auto_now=True, )
 
 
 class HubCategory(models.Model):
+
+    class Meta:
+        verbose_name = 'Хаб'
+        verbose_name_plural = 'Хабы'
+        ordering = ('-created_at',)
+
     name = models.CharField(max_length=150, verbose_name='название', )
     short_desc = models.CharField(max_length=150, verbose_name='краткое описание', )
     description = models.CharField(max_length=500, verbose_name='описание', **NULLABLE, )
@@ -26,8 +40,16 @@ class HubCategory(models.Model):
 
 
 class HubCategoryUsers(models.Model):
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        ordering = ('-created_at',)
+
     user = models.ForeignKey(HubUser, related_name='users', on_delete=models.CASCADE, **NULLABLE)
     hub_category = models.ForeignKey(HubCategory, related_name='hubs', on_delete=models.CASCADE, )
+    created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True, )
+    updated_at = models.DateTimeField(verbose_name='время обновления', auto_now=True, )
 
     @staticmethod
     def get_category_users(pk):

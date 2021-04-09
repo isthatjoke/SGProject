@@ -8,6 +8,12 @@ NULLABLE = {'blank': True, 'null': True}
 
 
 class Post(models.Model):
+
+    class Meta:
+        verbose_name = 'Пост'
+        verbose_name_plural = 'Посты'
+        ordering = ('-created_at',)
+
     name = models.CharField(max_length=200, verbose_name='название', )
     short_desc = models.CharField(max_length=200, verbose_name='краткое описание', )
     post_text = models.TextField(verbose_name='пост', blank=False, null=True)
@@ -26,4 +32,9 @@ class Post(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.hub_category.name})'
-    
+
+    # Метод возвращает все посты всех пользователей и сортирует по дате
+    @staticmethod
+    def get_all_posts():
+        return Post.objects.all().order_by('updated_at')
+

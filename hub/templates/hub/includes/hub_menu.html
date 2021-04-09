@@ -2,7 +2,7 @@
     <ul>
         {% for key, cats in head_menu_object_list.items %}
 
-            <li><a href="/hub/{{ key.id }}">{{ key.name|title }}</a>
+            <li><a href="{% url 'hub:hub_category' key.id %}">{{ key.name|title }}</a>
 
                 <!-- уровень выпадающего списка -->
                 <ul>
