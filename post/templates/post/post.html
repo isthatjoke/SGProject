@@ -10,17 +10,27 @@
             <div class="post__container">
                 <div class="post__user">Пользователь: <span>{{ post.user_id }}</span></div>
                 <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
+                <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
                 <div class="post__title"><h3>{{ post.name }}</h3></div>
                 <div class="post__body">
                     <p>
-                        {{ post.post_text }}
+                        {{ post.content|safe }}
                     </p>
 
                 </div>
+
+                <div class="post__button__read">
+                    <a href="/post/{{ post.id }}">
+                        <button>Читать далее...</button>
+                    </a>
+                </div>
+
+                <div class="post__statistic">
+                    <div class="post__karma"><i class="fa fa-bar-chart" aria-hidden="true"></i><span
+                            class="post__karma__count">{{ post.post_karma }}</span>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
-
-
 {% endblock %}

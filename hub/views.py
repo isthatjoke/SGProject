@@ -30,7 +30,7 @@ def main(request):
 
     content = {
         'head_menu_object_list': head_menu_object_list,
-        'all_posts_object_list': all_posts,
+        'posts': all_posts,
     }
 
     return render(request, 'hub/index.html', context=content)
@@ -40,7 +40,7 @@ class HubCategoryPostListView(ListView):
     model = HubCategory
     context_object_name = 'posts'
     paginate_by = 10
-    template_name = 'hub/hubcategory_list.html'
+    template_name = 'hub/index.html'
 
     def get_queryset(self):
         return Post.objects.filter(hub_category__category_id=self.kwargs.get('pk', '')).select_related()

@@ -2,84 +2,36 @@
 {% load static %}
 {% block content %}
     <div class="posts">
-        {% for post in all_posts_object_list %}
-        <div class="card">
+        {% for post in posts %}
+            <div class="card" >
 
-            <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
-                 alt="preview">
-            <div class="post__container">
-                <div class="post__user">Пользователь: <span>{{ post.user_id }}</span></div>
-                <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
-                <div class="post__title"><h3>{{ post.name }}</h3></div>
-                <div class="post__body">
-                    <p>
-                        {{ post.short_desc }}
-                    </p>
+                <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
+                     alt="preview">
+                <div class="post__container">
+                    <div class="post__user">Пользователь: <span>{{ post.user_id }}</span></div>
+                    <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
+                    <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
+                    <div class="post__title"><h3>{{ post.name }}</h3></div>
+                    <div class="post__body">
+                        <p>
+                            {{ post.short_desc }}
+                        </p>
 
-                </div>
+                    </div>
 
-                <div class="post__button__read">
-                    <a href="/post/{{post.id}}"><button>Читать далее...</button></a>
+                    <div class="post__button__read">
+                        <a href="/post/{{ post.id }}">
+                            <button>Читать далее...</button>
+                        </a>
+                    </div>
+                    <div class="post__statistic">
+                        <div class="post__karma"><i class="fa fa-bar-chart" aria-hidden="true"></i><span
+                                class="post__karma__count">{{ post.post_karma }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
         {% endfor %}
-
-        <div class="card">
-            <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
-                 alt="preview">
-            <div class="post__container">
-                <div class="post__user">Пользователь: <span>Admin</span></div>
-                <div class="post__date">Дата публицкации: <span>01.01.1920</span></div>
-                <div class="post__title"><h3>TITLE</h3></div>
-                <div class="post__body">
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur dolores
-                        totam modi
-                        odit a. Quo, perspiciatis cupiditate reiciendis voluptates in quae, quibusdam repellendus
-                        numquam
-                        quaerat. Voluptas architecto sed dignissimos voluptates itaque doloribus nihil iste
-                        repellat.
-                        Accusantium fuga explicabo voluptatum nostrum in porro repellat, aliquid enim ipsum totam
-                        aperiam,
-                        nam
-                        voluptatem.
-                    </p>
-
-                </div>
-                <div class="post__button__read">
-                    <button>Читать далее...</button>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-
-            <img src="https://catalog.master-dom30.ru/image/cache/catalog/catalog/oboi6/168359-02-600x300.jpg"
-                 alt="preview">
-            <div class="post__container">
-                <div class="post__user">Пользователь: <span>Admin</span></div>
-                <div class="post__date">Дата публицкации: <span>01.01.1920</span></div>
-
-                <div class="post__title"><h3>TITLE</h3></div>
-                <div class="post__body">
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur dolores
-                        totam modi
-                        odit a. Quo, perspiciatis cupiditate reiciendis voluptates in quae, quibusdam repellendus
-                        numquam
-                        quaerat. Voluptas architecto sed dignissimos voluptates itaque doloribus nihil iste
-                        repellat.
-                        Accusantium fuga explicabo voluptatum nostrum in porro repellat, aliquid enim ipsum totam
-                        aperiam,
-                        nam
-                        voluptatem.
-                    </p>
-                </div>
-                <div class="post__button__read">
-                    <button>Читать далее...</button>
-                </div>
-            </div>
-        </div>
     </div>
     {#    <div class="side__right">#}
     {#        <div class="popular__post">#}
