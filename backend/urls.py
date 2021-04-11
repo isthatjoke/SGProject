@@ -24,7 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('authapp.urls', namespace='authapp')),
     path('post/', include('post.urls', namespace='post')),
-    path('tinymce/', include('tinymce.urls')),
+    path('ckeditor/', include('ckeditor_uploader.urls')),
+
 ]
 
 

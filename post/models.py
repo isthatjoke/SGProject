@@ -1,8 +1,7 @@
 from django.db import models
 from authapp.models import HubUser, HubUserProfile
 from hub.models import HubCategory, Hub
-
-from tinymce.models import HTMLField
+from ckeditor.fields import RichTextField
 
 # Create your models here.
 
@@ -16,14 +15,15 @@ class Post(models.Model):
         ordering = ('-created_at',)
 
     name = models.CharField(max_length=200, verbose_name='название', )
-    short_desc = models.CharField(max_length=200, verbose_name='краткое описание', )
-    post_text = models.TextField(verbose_name='пост', blank=False, null=True)
+    # short_desc = models.CharField(max_length=200, verbose_name='краткое описание', )
+    # post_text = models.TextField(verbose_name='пост', blank=False, null=True)
     hub_category = models.ForeignKey(HubCategory, related_name='hub_category',
                                      verbose_name='подкатегория', on_delete=models.CASCADE, **NULLABLE)
     published = models.BooleanField(default=False)
     user_id = models.ForeignKey(HubUser, related_name='user_id', on_delete=models.CASCADE, **NULLABLE)
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True, )
     updated_at = models.DateTimeField(verbose_name='время обновления', auto_now=True, )
+    content = RichTextField()
     post_karma = models.IntegerField(verbose_name='карма поста', default=0, blank=False, )
 
     # Метод возвращает посты конкретного пользователя
