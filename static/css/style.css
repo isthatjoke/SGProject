@@ -107,7 +107,6 @@ main {
 .popular__post {
     display: flex;
     flex-direction: column;
-    /*background: white;*/
 }
 
 .posts {
@@ -115,6 +114,16 @@ main {
     flex-direction: column;
     justify-content: center;
     width: 70%;
+}
+
+.post__title {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.post__body {
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .card {
@@ -137,7 +146,7 @@ main {
 }
 
 .post__container {
-    padding: 30px 25px;
+    padding: 20px 25px;
     font-size: 18px;
 }
 
@@ -167,15 +176,6 @@ main {
     font-size: 12px;
     color: #4f4f4f;
 }
-
-
-.post__karma {
-    text-align: right;
-    margin-bottom: 10px;
-    font-size: 12px;
-    color: darkgoldenrod;
-}
-
 
 .user__login {
     display: flex;
@@ -255,4 +255,15 @@ main {
 
 .social__link > a {
     color: #4f4f4f;
+}
+
+.post__statistic {
+    margin-top: 15px;
+    border: 1px solid rgba(0, 0, 0, .2);
+    padding: 10px;
+}
+
+.post__karma__count {
+    margin-left: 5px;
+    font-size: 15px;
 }
