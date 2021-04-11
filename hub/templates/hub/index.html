@@ -3,26 +3,29 @@
 {% block content %}
     <div class="posts">
         {% for post in all_posts_object_list %}
-        <div class="card">
+            <div class="card">
 
-            <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
-                 alt="preview">
-            <div class="post__container">
-                <div class="post__user">Пользователь: <span>{{ post.user_id }}</span></div>
-                <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
-                <div class="post__title"><h3>{{ post.name }}</h3></div>
-                <div class="post__body">
-                    <p>
-                        {{ post.short_desc }}
-                    </p>
+                <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
+                     alt="preview">
+                <div class="post__container">
+                    <div class="post__karma">Карма:<span>{{ post.post_karma }}</span></div>
+                    <div class="post__user">Пользователь: <span>{{ post.user_id }}</span></div>
+                    <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
+                    <div class="post__title"><h3>{{ post.name }}</h3></div>
+                    <div class="post__body">
+                        <p>
+                            {{ post.short_desc }}
+                        </p>
 
-                </div>
+                    </div>
 
-                <div class="post__button__read">
-                    <a href="/post/{{post.id}}"><button>Читать далее...</button></a>
+                    <div class="post__button__read">
+                        <a href="/post/{{ post.id }}">
+                            <button>Читать далее...</button>
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
         {% endfor %}
 
         <div class="card">
