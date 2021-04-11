@@ -16,7 +16,7 @@
                 <div class="post__title"><h3>{{ post.name }}</h3></div>
                 <div class="post__body">
                     <p>
-                        {{ post.post_text }}
+                        {{ post.content|safe }}
                     </p>
 
                 </div>
