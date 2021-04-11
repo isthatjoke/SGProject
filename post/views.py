@@ -26,6 +26,11 @@ class PostCreateView(CreateView):
     form_class = PostEditForm
     success_url = reverse_lazy('hub:main')
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(PostCreateView, self).get_context_data(**kwargs)
+        context['form']['user_id'].initial = self.request.user
+        return context
+
     def get_success_url(self):
         return reverse('post:post', kwargs={'pk': self.object.pk})
 

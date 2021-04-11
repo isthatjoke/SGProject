@@ -10,6 +10,7 @@
             <div class="post__container">
                     <form id="form-horizontal m-t-30" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
+                        {{ form.media }}
                         {{ form.as_p }}
 
                         <div class="form-button">

@@ -13,13 +13,13 @@
                 <div class="post__title"><h3>{{ post.name }}</h3></div>
                 <div class="post__body">
                     <p>
-                        {{ post.short_desc }}
+                        {{ post.content|truncatewords:50 }}
                     </p>
 
                 </div>
 
                 <div class="post__button__read">
-                    <a href="/post/{{post.id}}"><button>Читать далее...</button></a>
+                    <a href="{% url 'post:post' post.id %}"><button>Читать далее...</button></a>
                 </div>
             </div>
         </div>
