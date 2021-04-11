@@ -8,7 +8,6 @@ NULLABLE = {'blank': True, 'null': True}
 
 
 class Post(models.Model):
-
     class Meta:
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
@@ -23,6 +22,7 @@ class Post(models.Model):
     user_id = models.ForeignKey(HubUser, related_name='user_id', on_delete=models.CASCADE, **NULLABLE)
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True, )
     updated_at = models.DateTimeField(verbose_name='время обновления', auto_now=True, )
+    post_karma = models.IntegerField(verbose_name='карма поста', default=0, blank=False, )
 
     # Метод возвращает посты конкретного пользователя
     # pk - id пользователя
@@ -38,3 +38,18 @@ class Post(models.Model):
     def get_all_posts():
         return Post.objects.all().order_by('updated_at')
 
+    # Метод добавляет карму посту
+    # pk - id поста
+    @staticmethod
+    def add_karma(post_id: int):
+        post = Post.objects.filter(id=post_id).first()
+        post.post_karma += 1
+        post.save()
+
+    # Метод уменьшает карму посту
+    # pk - id поста
+    @staticmethod
+    def remove_karma(post_id: int):
+        post = Post.objects.filter(id=post_id).first()
+        post.post_karma -= 1
+        post.save()
