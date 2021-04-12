@@ -38,7 +38,7 @@ class Post(models.Model):
     # Метод возвращает все посты всех пользователей и сортирует по дате
     @staticmethod
     def get_all_posts():
-        return Post.objects.all().order_by('updated_at')
+        return Post.objects.filter(published=True).order_by('updated_at')
 
     # Метод добавляет карму посту
     # pk - id поста

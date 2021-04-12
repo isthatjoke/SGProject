@@ -27,10 +27,12 @@ class BaseClassContextMixin(ContextMixin):
 def main(request):
     head_menu_object_list = get_hub_cats_dict()
     all_posts = Post.get_all_posts()
+    title = 'Hub'
 
     content = {
         'head_menu_object_list': head_menu_object_list,
         'posts': all_posts,
+        'title': title,
     }
 
     return render(request, 'hub/index.html', context=content)
@@ -43,11 +45,14 @@ class HubCategoryPostListView(ListView):
     template_name = 'hub/index.html'
 
     def get_queryset(self):
-        return Post.objects.filter(hub_category__category_id=self.kwargs.get('pk', '')).select_related()
+        return Post.objects.filter(hub_category__category_id=self.kwargs.get('pk', '')).\
+            filter(published=True).select_related()
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(HubCategoryPostListView, self).get_context_data(**kwargs)
+        category = Hub.objects.get(pk=self.kwargs.get('pk', ''))
         context['head_menu_object_list'] = get_hub_cats_dict()
+        context['title'] = category.name
 
         return context
 
