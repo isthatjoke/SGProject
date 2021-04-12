@@ -1,8 +1,11 @@
 <nav>
     <ul>
         {% for key, cats in head_menu_object_list.items %}
-
+            {% if key.name == title %}
+            <li><a href="{% url 'hub:hub_category' key.id %}" style="color: black">{{ key.name|title }}</a>
+            {% else %}
             <li><a href="{% url 'hub:hub_category' key.id %}">{{ key.name|title }}</a>
+            {% endif %}
 
                 <!-- уровень выпадающего списка -->
                 <ul>
