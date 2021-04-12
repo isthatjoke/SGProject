@@ -23,7 +23,16 @@
                         <a href="{% url 'post:post' post.id %}">
                             <button>Читать далее...</button>
                         </a>
+                        {% if post.published == False %}
+
+                        <a href="{% url 'post:post_update' post.id %}">
+                            <button>Редактировать</button>
+                        </a>
+
+                        {% endif %}
+
                     </div>
+
                     <div class="post__statistic">
                         <div class="post__karma"><i class="fa fa-bar-chart" aria-hidden="true"></i><span
                                 class="post__karma__count">{{ post.post_karma }}</span>

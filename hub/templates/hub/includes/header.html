@@ -7,6 +7,7 @@
             </div>
             <div class="header__section">
                 {% if user.is_authenticated %}
+                    <div class="header__item"><a href="{% url 'post:users_posts' %}"><i class="fa fa-clipboard" aria-hidden="true"></i></a></div>
                     <div class="header__item"><a href="{% url 'post:post_create' %}"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>
                     <div class="header__item"><a href="{% url 'authapp:update' %}"><i class="fa fa-user" aria-hidden="true"></i></a></div>
                     <div class="header__item"><a href="{% url 'authapp:logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i></a></div>

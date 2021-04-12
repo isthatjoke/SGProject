@@ -16,17 +16,21 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth.decorators import login_required
 from django.urls import path, include
-
+from ckeditor_uploader import views
+from django.views.decorators.cache import never_cache
 
 urlpatterns = [
     path('', include('hub.urls', namespace='hub')),
     path('admin/', admin.site.urls),
     path('', include('authapp.urls', namespace='authapp')),
     path('post/', include('post.urls', namespace='post')),
-    path('ckeditor/', include('ckeditor_uploader.urls')),
+    # path('ckeditor/', include('ckeditor_uploader.urls')),
+    path('ckeditor/upload/', login_required(views.upload), name="ckeditor_upload"),
+    path('ckeditor/browse/', never_cache(login_required(views.browse)), name="ckeditor_browse"),
 
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
 if settings.DEBUG:
