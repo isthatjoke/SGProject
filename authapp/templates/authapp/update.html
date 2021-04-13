@@ -1,18 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<form id="signinform" action="{% url 'authapp:update' %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ update_form.as_p }}
-    {{ profile_form.as_p }}
-    <div class="form-button">
-                        <button id="submit" type="submit" class="ybtn ybtn-accent-color">Сохранить</button>
-                    </div>
-                </form>
+{% extends 'hub/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="card">
+        <div class="user__login">
+            <form id="signinform" action="{% url 'authapp:update' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ update_form.as_p }}
+                {{ profile_form.as_p }}
+                <div class="form-button">
+                    <button id="submit" type="submit" class="ybtn ybtn-reg ybtn-accent-color">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-</body>
-</html>
+    {% if success %}
+<div class="modal" tabindex="-1" role="dialog" id="success">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Заявка отправлена</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Изменения сохранены!</p>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock %}

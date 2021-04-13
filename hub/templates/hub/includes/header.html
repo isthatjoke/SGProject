@@ -7,13 +7,13 @@
             </div>
             <div class="header__section">
                 {% if user.is_authenticated %}
-                    <div class="header__item"><a href="{% url 'post:users_posts' %}"><i class="fa fa-clipboard" aria-hidden="true"></i></a></div>
-                    <div class="header__item"><a href="{% url 'post:post_create' %}"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>
-                    <div class="header__item"><a href="{% url 'authapp:update' %}"><i class="fa fa-user" aria-hidden="true"></i></a></div>
-                    <div class="header__item"><a href="{% url 'authapp:logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i></a></div>
+                    <div class="header__item"><a href="{% url 'post:users_posts' %}" title="мои посты"><i class="fa fa-clipboard" aria-hidden="true"></i></a></div>
+                    <div class="header__item"><a href="{% url 'post:post_create' %}" title="создать пост"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>
+                    <div class="header__item"><a href="{% url 'authapp:update' %}" title="обновить профиль"><i class="fa fa-user" aria-hidden="true"></i></a></div>
+                    <div class="header__item"><a href="{% url 'authapp:logout' %}" title="выйти"><i class="fa fa-sign-out" aria-hidden="true"></i></a></div>
                 {% else %}
-                    <div class="header__item"><a href="{% url 'authapp:login' %}"><i class="fa fa-sign-in" aria-hidden="true"></i></a></div>
-                    <div class="header__item"><a href="{% url 'authapp:register' %}">Регистрация</a></div>
+                    <div class="header__item"><a href="{% url 'authapp:login' %}" title="войти"><i class="fa fa-sign-in" aria-hidden="true"></i></a></div>
+                    <div class="header__item"><a href="{% url 'authapp:register' %}" title="зарегистрироваться">Регистрация</a></div>
                 {% endif %}
             </div>
         </div>

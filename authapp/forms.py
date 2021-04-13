@@ -54,6 +54,8 @@ class HubUserUpdateForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
             field.help_text = ''
+            if field_name == 'username':
+                field.widget.attrs['readonly'] = True
 
 
 class HubUserProfileUpdateForm(forms.ModelForm):

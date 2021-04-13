@@ -1,9 +1,11 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="ru">
 <head>
     {{ form.media }}
     <meta charset="UTF-8">
     <title>{{ title|title }}</title>
+    <link href="{% static '/css/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/menu_style.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
@@ -22,5 +24,12 @@
     <div class="side__right"></div>
 </main>
 {% include 'hub/includes/footer.html' %}
+<script src="{% static 'js/jquery-3.5.1.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script>
+      $(document).ready(function() {
+        $("#success").modal('show');
+      });
+    </script>
 </body>
 </html>

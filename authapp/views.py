@@ -1,5 +1,6 @@
 from django.contrib.auth.views import LoginView, LogoutView
 from django.db import transaction
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView, FormView, CreateView, UpdateView
@@ -42,6 +43,7 @@ class HubUserUpdateView(UpdateView):
         else:
             update_form = HubUserUpdateForm(instance=self.object)
             profile_form = HubUserProfileUpdateForm(instance=self.object.hubuserprofile)
+        context['success'] = self.kwargs.get('success', '')
         context['update_form'] = update_form
         context['profile_form'] = profile_form
 
@@ -55,7 +57,7 @@ class HubUserUpdateView(UpdateView):
             self.object = form.save()
             if hubuserprofile.is_valid():
                 hubuserprofile.save()
-        return super(HubUserUpdateView, self).form_valid(form)
+        return HttpResponseRedirect(reverse('authapp:update_success'))
 
 
 class HubUserLogoutView(LogoutView):
