@@ -217,6 +217,7 @@ class Command(BaseCommand):
 
                                   content=item['content'],
                                   hub_category=hub_category,
+                                  published=True,
                                   user_id=user_id))
         Post.objects.bulk_create(post_list)
 
