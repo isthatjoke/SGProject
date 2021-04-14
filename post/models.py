@@ -40,18 +40,4 @@ class Post(models.Model):
     def get_all_posts():
         return Post.objects.filter(published=True).order_by('updated_at')
 
-    # Метод добавляет карму посту
-    # pk - id поста
-    @staticmethod
-    def add_karma(post_id: int):
-        post = Post.objects.filter(id=post_id).first()
-        post.post_karma += 1
-        post.save()
 
-    # Метод уменьшает карму посту
-    # pk - id поста
-    @staticmethod
-    def remove_karma(post_id: int):
-        post = Post.objects.filter(id=post_id).first()
-        post.post_karma -= 1
-        post.save()
