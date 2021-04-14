@@ -84,6 +84,12 @@ def karma_update(request, pk, pk2):
     '''
 
     if request.is_ajax():
+        # проверка пользователя на лайканье всоего поста
+        user = Post.objects.filter(id=pk).first().user_id.id
+
+        if user == request.user.pk:
+            resp = f'читерить запрещено! это ваш пост!'
+            return JsonResponse({'result': resp})
         # print(f'Прилетел ajax запрос: pk={pk}, pk2={pk2}')
         if pk2 == 1:
             # print(f'добавить в карму')
