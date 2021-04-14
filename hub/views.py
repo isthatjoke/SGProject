@@ -38,6 +38,20 @@ def main(request):
     return render(request, 'hub/index.html', context=content)
 
 
+class Main(ListView):
+    model = Post
+    context_object_name = 'posts'
+    paginate_by = 10
+    template_name = 'hub/index.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(Main, self).get_context_data(**kwargs)
+        context['head_menu_object_list'] = get_hub_cats_dict()
+        context['title'] = 'Hub'
+
+        return context
+
+
 class HubPostListView(ListView):
     model = HubCategory
     context_object_name = 'posts'
