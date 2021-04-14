@@ -38,7 +38,7 @@ def main(request):
     return render(request, 'hub/index.html', context=content)
 
 
-class HubCategoryPostListView(ListView):
+class HubPostListView(ListView):
     model = HubCategory
     context_object_name = 'posts'
     paginate_by = 10
@@ -49,7 +49,7 @@ class HubCategoryPostListView(ListView):
             filter(published=True).select_related()
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        context = super(HubCategoryPostListView, self).get_context_data(**kwargs)
+        context = super(HubPostListView, self).get_context_data(**kwargs)
         category = Hub.objects.get(pk=self.kwargs.get('pk', ''))
         context['head_menu_object_list'] = get_hub_cats_dict()
         context['title'] = category.name
@@ -57,4 +57,21 @@ class HubCategoryPostListView(ListView):
         return context
 
 
+class HubCategoryPostListView(ListView):
+    model = HubCategory
+    context_object_name = 'posts'
+    paginate_by = 10
+    template_name = 'hub/index.html'
+
+    def get_queryset(self):
+        return Post.objects.filter(hub_category=self.kwargs.get('cat', '')).\
+            filter(published=True).select_related()
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(HubCategoryPostListView, self).get_context_data(**kwargs)
+        category = Hub.objects.get(pk=self.kwargs.get('pk', ''))
+        context['head_menu_object_list'] = get_hub_cats_dict()
+        context['title'] = category.name
+
+        return context
 
