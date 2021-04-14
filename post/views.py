@@ -1,10 +1,12 @@
-from django.http import HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
+from django.db.models import F
 
 # Create your views here.
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy, reverse
 from django.views.generic import DetailView, CreateView, ListView, UpdateView
-
 
 from hub.models import get_hub_cats_dict
 from post.forms import PostEditForm
@@ -70,3 +72,32 @@ class PostUpdateView(UpdateView):
         if post.published is True:
             return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
 
+@login_required
+def karma_update(request, pk, pk2):
+
+    '''
+    функция обработки ajax запроса на изменение кармы поста
+    :param request:
+    :param pk: id поста в таблице Post
+    :param pk2: сигнал (если 1 - занчит поставили лайк, если 0 - то поставили дизлайк)
+    :return: возвращает карму прочитанную из БД в виде json
+    '''
+
+    if request.is_ajax():
+        # проверка пользователя на лайканье всоего поста
+        user = Post.objects.filter(id=pk).first().user_id.id
+
+        if user == request.user.pk:
+            resp = f'читерить запрещено! это ваш пост!'
+            return JsonResponse({'result': resp})
+        # print(f'Прилетел ajax запрос: pk={pk}, pk2={pk2}')
+        if pk2 == 1:
+            # print(f'добавить в карму')
+            Post.objects.filter(id=pk).update(post_karma=F('post_karma') + 1)
+        elif pk2 == 0:
+            # print(f'минусуем карму')
+            Post.objects.filter(id=pk).update(post_karma=F('post_karma') - 1)
+
+        post = Post.objects.filter(id=pk).first().post_karma
+
+        return JsonResponse({'result': str(post)})
