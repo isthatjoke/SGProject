@@ -92,10 +92,10 @@ class PostUpdateView(UpdateView):
 
         return context
 
-    def get(self, request, *args, **kwargs):
-        post = get_object_or_404(Post, pk=self.kwargs.get('pk', None))
-        if post.published is True:
-            return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
+    # def get(self, request, *args, **kwargs):
+    #     post = get_object_or_404(Post, pk=self.kwargs.get('pk', None))
+    #     if post.published is True:
+    #         return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
 
 
 @login_required
