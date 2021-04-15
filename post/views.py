@@ -60,6 +60,7 @@ class PostCreateView(CreateView):
         context = super(PostCreateView, self).get_context_data(**kwargs)
         context['form']['user_id'].initial = self.request.user
         context['title'] = f'Создание поста'
+        context['head_menu_object_list'] = get_hub_cats_dict()
         return context
 
     def get_success_url(self):
@@ -70,6 +71,7 @@ class PostUserListView(ListView):
     model = Post
     template_name = 'hub/index.html'
     context_object_name = 'posts'
+    paginate_by = 10
 
     def get_queryset(self):
         return Post.objects.filter(user_id=self.request.user)
@@ -77,6 +79,7 @@ class PostUserListView(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostUserListView, self).get_context_data(**kwargs)
         context['title'] = f'Мои посты'
+        context['head_menu_object_list'] = get_hub_cats_dict()
         return context
 
 
@@ -89,7 +92,7 @@ class PostUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(PostUpdateView, self).get_context_data(**kwargs)
         context['title'] = f'Редактирование поста {self.object.name}'
-
+        context['head_menu_object_list'] = get_hub_cats_dict()
         return context
 
     def get(self, request, *args, **kwargs):
