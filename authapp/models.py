@@ -39,7 +39,7 @@ class HubUserProfile(models.Model):
     user = models.OneToOneField(HubUser, on_delete=models.CASCADE, unique=True, db_index=True)
     specialization = models.CharField(verbose_name='специализация', max_length=150, **NULLABLE)
     name = models.CharField(verbose_name='имя', max_length=150, **NULLABLE)
-    sex = models.CharField(choices=SEX_CHOICES, max_length=1, **NULLABLE)
+    sex = models.CharField(verbose_name='пол', choices=SEX_CHOICES, max_length=1, **NULLABLE)
     birthdate = models.DateField(verbose_name='день рождения', **NULLABLE)
     location = models.CharField(verbose_name='страна', max_length=50, **NULLABLE)
     location_city = models.CharField(verbose_name='город', max_length=100, **NULLABLE)
