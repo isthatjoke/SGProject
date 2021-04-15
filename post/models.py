@@ -10,7 +10,7 @@ NULLABLE = {'blank': True, 'null': True}
 
 class Post(models.Model):
     class Meta:
-        verbose_name = 'Пост'
+        verbose_name = 'пост'
         verbose_name_plural = 'Посты'
         ordering = ('-created_at',)
 
@@ -20,11 +20,11 @@ class Post(models.Model):
     hub_category = models.ForeignKey(HubCategory, related_name='hub_category',
                                      verbose_name='подкатегория', on_delete=models.CASCADE, **NULLABLE)
     published = models.BooleanField(default=False, verbose_name='опубликовано', )
-    user_id = models.ForeignKey(HubUser, related_name='user_id', on_delete=models.CASCADE, **NULLABLE)
+    user_id = models.ForeignKey(HubUser, related_name='user_id', verbose_name='пользователь', on_delete=models.CASCADE,
+                                **NULLABLE)
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True, )
     updated_at = models.DateTimeField(verbose_name='время обновления', auto_now=True, )
     content = RichTextField()
-    post_karma = models.IntegerField(verbose_name='карма поста', default=0, blank=False, )
 
     # Метод возвращает посты конкретного пользователя
     # pk - id пользователя
@@ -40,4 +40,28 @@ class Post(models.Model):
     def get_all_posts():
         return Post.objects.filter(published=True).order_by('updated_at')
 
+    # свойство класса для интерактивного подсчета кармы
+    @property
+    def post_karma(self):
+        karma_objects = self.post_id.all()
+        karma = 0
+        for obj in karma_objects:
+            karma += obj.karma
+        return karma
 
+
+class PostKarma(models.Model):
+    class Meta:
+        verbose_name = 'карма поста'
+        verbose_name_plural = 'Карма постов'
+        ordering = ('-created_at',)
+
+    post_id = models.ForeignKey(Post, related_name='post_id', on_delete=models.CASCADE, verbose_name='пост',
+                                **NULLABLE)
+    user_id = models.ForeignKey(HubUser, related_name='post_karma', on_delete=models.CASCADE,
+                                verbose_name='пользователь', **NULLABLE)
+    karma = models.SmallIntegerField(verbose_name='карма', **NULLABLE)
+    created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user_id} - "{self.post_id}": {self.karma}'

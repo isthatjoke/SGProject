@@ -1,16 +1,43 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, get_object_or_404
-from django.db.models import F
+from django.shortcuts import get_object_or_404
 
-# Create your views here.
-from django.template.loader import render_to_string
 from django.urls import reverse_lazy, reverse
 from django.views.generic import DetailView, CreateView, ListView, UpdateView
 
+from authapp.models import HubUser
 from hub.models import get_hub_cats_dict
 from post.forms import PostEditForm
-from post.models import Post
+from post.models import Post, PostKarma
+
+
+def perform_karma_update(post_id: int, user_id: int, karma: int):
+    """
+    Функция выполняющая несколько проверок, прежде чем поставить карму для поста.
+    Сначала функция проверяет, чтобы юзер не оценивал свой собственный пост.
+    Далее функция проверяет, чтобы юзер оценивал пост в первый раз (повторно оценивать пост нельзя).
+    Если все проверки пройдены, то функция возвращает соответствующий ответ в формате JSON.
+
+    :param post_id: идентификатор поста, с которым взаимодействуют
+    :param user_id: идентификатор пользователя, который взаимодействует
+    :param karma: оценка, может быть 1 или -1
+    :return:
+    """
+    already_liked = PostKarma.objects.filter(Q(user_id=user_id) & Q(post_id=post_id))
+    post = get_object_or_404(Post, id=post_id)
+    user = get_object_or_404(HubUser, id=user_id)
+    if user_id == post.user_id.id:
+        resp = 'Нельзя оценивать свой собственный пост!'
+        return JsonResponse({'result': resp})
+    elif not already_liked:
+        new_object = PostKarma.objects.create(post_id=post, user_id=user, karma=karma)
+        new_object.save()
+        post = Post.objects.filter(id=post_id).first().post_karma
+        return JsonResponse({'result': str(post)})
+    else:
+        resp = 'Вы уже оценили этот пост!'
+        return JsonResponse({'result': resp})
 
 
 class PostDetailView(DetailView):
@@ -72,32 +99,23 @@ class PostUpdateView(UpdateView):
         if post.published is True:
             return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
 
+
 @login_required
 def karma_update(request, pk, pk2):
-
     '''
     функция обработки ajax запроса на изменение кармы поста
     :param request:
     :param pk: id поста в таблице Post
-    :param pk2: сигнал (если 1 - занчит поставили лайк, если 0 - то поставили дизлайк)
+    :param pk2: сигнал (если 1 - значит поставили лайк, если 0 - то поставили дизлайк)
     :return: возвращает карму прочитанную из БД в виде json
     '''
 
     if request.is_ajax():
-        # проверка пользователя на лайканье всоего поста
-        user = Post.objects.filter(id=pk).first().user_id.id
-
-        if user == request.user.pk:
-            resp = f'читерить запрещено! это ваш пост!'
-            return JsonResponse({'result': resp})
-        # print(f'Прилетел ajax запрос: pk={pk}, pk2={pk2}')
+        user_id = get_object_or_404(HubUser, id=request.user.id).id
+        result = None
         if pk2 == 1:
-            # print(f'добавить в карму')
-            Post.objects.filter(id=pk).update(post_karma=F('post_karma') + 1)
+            result = perform_karma_update(pk, user_id, 1)
         elif pk2 == 0:
-            # print(f'минусуем карму')
-            Post.objects.filter(id=pk).update(post_karma=F('post_karma') - 1)
-
-        post = Post.objects.filter(id=pk).first().post_karma
-
-        return JsonResponse({'result': str(post)})
+            result = perform_karma_update(pk, user_id, -1)
+        if result:
+            return result
