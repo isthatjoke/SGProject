@@ -12,28 +12,26 @@ from post.forms import PostEditForm
 from post.models import Post, PostKarma
 
 
-def perform_karma_update(post_id: int, user_id: int, karma: int):
+def perform_karma_update(post, user, karma):
     """
     Функция выполняющая несколько проверок, прежде чем поставить карму для поста.
     Сначала функция проверяет, чтобы юзер не оценивал свой собственный пост.
     Далее функция проверяет, чтобы юзер оценивал пост в первый раз (повторно оценивать пост нельзя).
     Если все проверки пройдены, то функция возвращает соответствующий ответ в формате JSON.
 
-    :param post_id: идентификатор поста, с которым взаимодействуют
-    :param user_id: идентификатор пользователя, который взаимодействует
+    :param post: идентификатор поста, с которым взаимодействуют
+    :param user: идентификатор пользователя, который взаимодействует
     :param karma: оценка, может быть 1 или -1
     :return:
     """
-    already_liked = PostKarma.objects.filter(Q(user_id=user_id) & Q(post_id=post_id))
-    post = get_object_or_404(Post, id=post_id)
-    user = get_object_or_404(HubUser, id=user_id)
-    if user_id == post.user_id.id:
+    already_liked = PostKarma.objects.filter(Q(user_id=user.id) & Q(post_id=post.id))
+    if user.id == post.user_id.id:
         resp = 'Нельзя оценивать свой собственный пост!'
         return JsonResponse({'result': resp})
     elif not already_liked:
         new_object = PostKarma.objects.create(post_id=post, user_id=user, karma=karma)
         new_object.save()
-        post = Post.objects.filter(id=post_id).first().post_karma
+        post = Post.objects.filter(id=post.id).first().post_karma
         return JsonResponse({'result': str(post)})
     else:
         resp = 'Вы уже оценили этот пост!'
@@ -111,11 +109,12 @@ def karma_update(request, pk, pk2):
     '''
 
     if request.is_ajax():
-        user_id = get_object_or_404(HubUser, id=request.user.id).id
+        post = get_object_or_404(Post, id=pk)
+        user = get_object_or_404(HubUser, id=request.user.pk)
         result = None
         if pk2 == 1:
-            result = perform_karma_update(pk, user_id, 1)
+            result = perform_karma_update(post, user, 1)
         elif pk2 == 0:
-            result = perform_karma_update(pk, user_id, -1)
+            result = perform_karma_update(post, user, -1)
         if result:
             return result
