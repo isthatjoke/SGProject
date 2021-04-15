@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 
 from django.urls import reverse_lazy, reverse
 from django.views.generic import DetailView, CreateView, ListView, UpdateView
@@ -92,10 +92,12 @@ class PostUpdateView(UpdateView):
 
         return context
 
-    # def get(self, request, *args, **kwargs):
-    #     post = get_object_or_404(Post, pk=self.kwargs.get('pk', None))
-    #     if post.published is True:
-    #         return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
+    def get(self, request, *args, **kwargs):
+        post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
+        if post.published is True:
+            return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
+        else:
+            return render(request, self.template_name, {'form': self.form_class(instance=post)})
 
 
 @login_required
