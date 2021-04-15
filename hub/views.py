@@ -84,8 +84,10 @@ class HubCategoryPostListView(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(HubCategoryPostListView, self).get_context_data(**kwargs)
         category = Hub.objects.get(pk=self.kwargs.get('pk', ''))
+        hub_category = HubCategory.objects.get(pk=self.kwargs.get('cat', ''))
         context['head_menu_object_list'] = get_hub_cats_dict()
         context['title'] = category.name
+        context['hub_category'] = hub_category.name
 
         return context
 
