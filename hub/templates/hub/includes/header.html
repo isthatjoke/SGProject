@@ -1,28 +1,83 @@
 {% block header %}
-    <div>
-        <div class="main-header"
-            <div class="header">
-                <div class="header__section">
-                    <div class="header__item header__logo"><a href="/" style="text-decoration: none; color: #000">HUB-Logo</a></div>
-                    {% include 'hub/includes/hub_menu.html' %}
-                </div>
-                <div class="header__section">
-                    {% if user.is_authenticated %}
-                        <span>Привет, {{ user.username }}</span>
-                        <div class="header__item" title="Мои посты"><a href="{% url 'post:users_posts' %}"><i class="fa fa-clipboard" aria-hidden="true"></i></a></div>
-                        <div class="header__item" title="Создать пост"><a href="{% url 'post:post_create' %}"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>
-                        <div class="header__item" title="Профиль"><a href="{% url 'authapp:update' %}"><i class="fa fa-user" aria-hidden="true"></i></a></div>
-                        <div class="header__item" title="Выход"><a href="{% url 'authapp:logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i></a></div>
-                    {% else %}
-                        <span>Привет, незнакомец!</span>
-                        <div class="header__item" title="Войти"><a href="{% url 'authapp:login' %}"><i class="fa fa-sign-in" aria-hidden="true"></i></a></div>
-                        <div class="header__item" title="Регистрация"><a href="{% url 'authapp:register' %}">Регистрация</a></div>
-                    {% endif %}
-                </div>
+    <header>
+
+        <div class="header fixed">
+            <div class="header__section">
+                <div class="header__item header__logo"><a href="/" style="text-decoration: none; color: #000">HUB-Logo</a></div>
+                {% include 'hub/includes/hub_menu.html' %}
             </div>
-            <div class="head_sub">
-                <h2><span>{{ hub_category|title }}</span></h2>
+            <div class="header__section">
+                {% if user.is_authenticated %}
+                        <div class="container">
+                            <section class="main">
+                                <div class="wrapper">
+                                    <div id="dd" class="wrapper-dropdown" tabindex="1">
+                                        <img src="/media/{{ user.avatar }}" class="user__avatar" alt="avatar">
+                                        <span style="font-size: 26px; position: relative; left: 30px; top: -15px;">{{ user.username|capfirst }}</span>
+                                        <ul class="dropdown">
+                                            <li>
+                                                <div class="header__item" title="Профиль">
+                                                    <a href="{% url 'authapp:update' %}">
+                                                        <i class="fa fa-user" aria-hidden="true"></i> Профиль</a>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="header__item" title="Мои посты">
+                                                    <a href="{% url 'post:users_posts' %}">
+                                                        <i class="fa fa-clipboard" aria-hidden="true"></i> Посты</a></div>
+                                            </li>
+                                            <li>
+                                                <div class="header__item" title="Создать пост">
+                                                    <a href="{% url 'post:post_create' %}">
+                                                        <i class="fa fa-pencil" aria-hidden="true"></i> Создать пост</a>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="header__item" title="Создать пост">
+                                                    <a href="{% url 'authapp:logout' %}">
+                                                        <i class="fa fa-sign-out" aria-hidden="true"></i> Выйти</a>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                {% else %}
+                    <div class="header__hello">Привет, незнакомец!</div>
+                    <div class="header__item" title="Войти"><a href="{% url 'authapp:login' %}"><i
+                            class="fa fa-sign-in" aria-hidden="true"></i></a></div>
+                    <div class="header__item" title="Регистрация"><a href="{% url 'authapp:register' %}">Регистрация</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
+        {#            <div class="head_sub">#}
+        {#                <h2><span>{{ hub_category|title }}</span></h2>#}
+        {#            </div>#}
+
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script type="text/javascript">
+            function DropDown(el) {
+                this.dd = el;
+                this.initEvents();
+            }
+
+            DropDown.prototype = {
+                initEvents: function () {
+                    var obj = this;
+                    obj.dd.on('click', function (event) {
+                        $(this).toggleClass('active');
+                        event.stopPropagation();
+                    });
+                }
+            }
+            $(function () {
+                var dd = new DropDown($('#dd'));
+                $(document).click(function () {
+                    $('.wrapper-dropdown').removeClass('active');
+                });
+            });
+        </script>
     </header>
 {% endblock %}

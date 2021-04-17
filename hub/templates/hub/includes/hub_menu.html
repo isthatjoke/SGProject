@@ -6,14 +6,10 @@
             {% else %}
             <li><a href="{% url 'hub:hub' key.id %}">{{ key.name|title }}</a>
             {% endif %}
-
                 <!-- уровень выпадающего списка -->
                 <ul class="submenu">
                 {% for cat in cats.0 %}
-
-
 			                <li><a href="{% url 'hub:hub_category' key.id cat.id %}">{{ cat.name|title }}</a></li>
-
                 {% endfor %}
                 </ul>
             </li>

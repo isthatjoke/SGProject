@@ -72,4 +72,5 @@ def get_hub_cats_dict():
         hubcats = HubCategory.objects.filter(category=k.id)
         list_cats.append(hubcats)
         result_dict[k] = list_cats
+    print(result_dict)
     return result_dict

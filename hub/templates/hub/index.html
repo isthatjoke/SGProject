@@ -3,14 +3,15 @@
 {% block content %}
     <div class="posts">
         {% for post in posts %}
-            <div class="card" >
+            <div class="card">
 
                 <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
                      alt="preview">
                 <div class="post__container">
                     <div class="post__user">Пользователь: <span>{{ post.user_id }}</span></div>
                     <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
-                    <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
+                    <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}
+                    </div>
                     <div class="post__title"><h3>{{ post.name }}</h3></div>
                     <div class="post__body">
                         <p>
@@ -18,21 +19,16 @@
                         </p>
 
                     </div>
-
                     <div class="post__button__read">
                         <a href="{% url 'post:post' post.id %}">
                             <button>Читать далее...</button>
                         </a>
                         {% if post.published == False %}
-
-                        <a href="{% url 'post:post_update' post.id %}">
-                            <button>Редактировать</button>
-                        </a>
-
+                            <a href="{% url 'post:post_update' post.id %}">
+                                <button>Редактировать</button>
+                            </a>
                         {% endif %}
-
                     </div>
-
                     <div class="post__statistic">
                         <div class="post__karma"><i class="fa fa-bar-chart" aria-hidden="true"></i><span
                                 class="post__karma__count">{{ post.post_karma }}</span>
@@ -41,39 +37,57 @@
                 </div>
             </div>
         {% endfor %}
+        <nav class="" style="display: flex; flex-direction: row; justify-content: center;">
+            <ul class="pagination">
+                <li class="page-item">
+                    {% if page_obj.has_previous %}
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}"
+                           aria-label="Previous" style="color: black">
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                </li>
+                <li class="page-item"><a class="page-link" href="#" style="color: black">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}
+                </a></li>
+                <li class="page-item">
+                    {% if page_obj.has_next %}
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" style="color: black"
+                           aria-label="Next">
+                            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                </li>
+            </ul>
+        </nav>
     </div>
-    <nav aria-label="Page navigation example" class="mt-3">
-                        <ul class="pagination">
-                            <li class="page-item">
-                                {% if page_obj.has_previous %}
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}"
-                                       aria-label="Previous" style="color: black">
-                                        <span aria-hidden="true">&laquo;</span>
-                                        <span class="sr-only">Previous</span>
-                                    </a>
-                                {% endif %}
-                            </li>
-                            <li class="page-item"><a class="page-link" href="#"  style="color: black">Страница {{ page_obj.number }}
-                                из {{ page_obj.paginator.num_pages }}
-                            </a></li>
-                            <li class="page-item">
-                                {% if page_obj.has_next %}
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}"
-                                       aria-label="Next"  style="color: black">
-                                        <span aria-hidden="true">&raquo;</span>
-                                        <span class="sr-only">Next</span>
-                                    </a>
-                                {% endif %}
-                            </li>
-                        </ul>
-                    </nav>
+{% endblock %}
 
-    {#    <div class="side__right">#}
-    {#        <div class="popular__post">#}
-    {#            <div class="card" style="align-self: stretch; height: 100vh; width: 20vw; padding: 20px">#}
-    {#                Популярное#}
-    {#            </div>#}
-    {#        </div>#}
-    {#    </div>#}
+{% block side_right %}
+    <div style="color: black">
 
+    {% for item in head_menu_object_list %}
+        {{ item.items }}
+    {% endfor %}
+    {% for key, cats in head_menu_object_list.items %}
+{#        {% if key.name == title %}#}
+{#            <li>#}
+{#                <a href="{% url 'hub:hub' key.id %}" style="color: black">{{ key.name|title }}</a>#}
+{#            </li>#}
+{##}
+{#        {% else %}#}
+{#            <li>#}
+{#                <a href="{% url 'hub:hub' key.id %}">{{ key.name|title }}</a>#}
+{#            </li>#}
+{#        {% endif %}#}
+        <!-- уровень выпадающего списка -->
+        <ul style="color: black">
+            {% for cat in cats.0 %}
+                <li ><a href="{% url 'hub:hub_category' key.id cat.id %}" style="color: black">{{ cat.name|title }}
+                {{ key.hub }}
+                </a></li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+
+    </div>
 {% endblock %}
