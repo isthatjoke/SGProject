@@ -13,23 +13,20 @@
 {% include 'hub/includes/header.html' %}
 <main>
     <div class="side__left">
-            <div class="card" style="align-self: stretch; height: 75vh; width: 18vw; padding: 20px">
-                {% block side_left %}
-                {% endblock %}
-            </div>
-
+        <div class="left">
+            {% block side_left %}
+            {% endblock %}
+        </div>
     </div>
     <div class="side__mid">
         {% block content %}
         {% endblock %}
     </div>
     <div class="side__right">
-
-        <div class="card" style="align-self: stretch; height: 75vh; width: 18vw; padding: 20px">
+        <div class="right">
             {% block side_right %}
             {% endblock %}
         </div>
-
     </div>
 </main>
 {% include 'hub/includes/footer.html' %}

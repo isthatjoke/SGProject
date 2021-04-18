@@ -1,13 +1,35 @@
 {% extends 'hub/base.html' %}
 {% load static %}
 {% block content %}
-    <div class="card">
+    <div class="card" style="margin-top: 220px">
         <div class="user__login">
             <form id="signinform" action="{% url 'authapp:register' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                {{ form.as_p }}
+                {{ form.non_field_errors }}
+                <div class="field">
+                    {{ form.username.errors }}
+                    <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
+                    {{ form.username }}
+                </div>
+                <div class="field">
+                    {{ form.password1.errors }}
+                    <label for="{{ form.password1.id_for_label }}">Пароль</label>
+                    {{ form.password1 }}
+                </div>
+                <div class="field">
+                    {{ form.password2.errors }}
+                    <label for="{{ form.password2.id_for_label }}">Повторите пароль</label>
+                    {{ form.password2 }}
+                </div>
+                <div class="field">
+                    {{ form.email.errors }}
+                    <label for="{{ form.email.id_for_label }}">E-mail</label>
+                    {{ form.email }}
+                </div>
+
                 <div class="form-button">
-                    <button id="submit" type="submit" class="ybtn ybtn-reg ybtn-accent-color">Зарегистрироваться</button>
+                    <button id="submit" type="submit" class="ybtn ybtn-reg ybtn-accent-color">Зарегистрироваться
+                    </button>
                 </div>
             </form>
         </div>

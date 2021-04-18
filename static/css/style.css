@@ -11,8 +11,16 @@ html {
 body {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
     font-family: "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+footer {
+    flex: 0 0 auto;
 }
 
 .main-header {
@@ -114,7 +122,6 @@ main {
 
 .side__mid {
     display: flex;
-    margin-top: 120px;
     flex-direction: column;
     align-items: center;
     flex: 1.9;
@@ -125,13 +132,13 @@ main {
 .mid_container {
     display: flex;
     flex-direction: row;
-
 }
 
 .side__left {
     flex: 1.5;
     background: #f1f5f5;
 }
+
 .fixed {
     position: fixed;
     width: 99vw;
@@ -175,10 +182,15 @@ main > .side__right {
 
 .card {
     box-shadow: 0 4px 30px 0 rgba(0, 0, 0, 0.2);
-    margin: 25px;
+    margin: 40px 25px;
     display: flex;
     flex-direction: column;
     align-content: space-between;
+}
+
+.right > .card,
+.left > .card {
+    margin: 50px 40px;
 }
 
 .post__container {
@@ -221,10 +233,13 @@ main > .side__right {
     align-items: center;
     justify-content: center;
     padding: 30px;
-    min-height: 20vh;
     min-width: 20vw;
 }
 
+.card.user__profile {
+    padding: 50px;
+    margin-top: 170px;
+}
 #signinform {
     display: flex;
     flex-direction: column;
@@ -232,20 +247,45 @@ main > .side__right {
     align-items: center;
 }
 
-#signinform > p {
+#signinform > .field {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-#signinform > p > label {
+#signinform > .field > label {
     padding-top: 15px;
     padding-bottom: 10px;
     font-size: 22px;
     color: #4f4f4f;
 }
 
-#signinform > p > input {
+.form-horizontal > .field > label {
+    padding-top: 15px;
+    padding-bottom: 10px;
+    font-size: 22px;
+    color: #4f4f4f;
+}
+
+.form-horizontal > .field > input,
+.form-horizontal > .field > select {
+    font-size: 19px;
+    border: #9bc7de 4px solid;
+    outline: none;
+    width: 300px;
+    height: 40px;
+    margin-bottom: 25px;
+    border-radius: 4px;
+    padding-left: 10px;
+}
+#id_sex {
+    width: 318px;
+}
+#signinform > .field > input,
+.field > select {
+    font-size: 19px;
+    border: #9bc7de 4px solid;
+    outline: none;
     width: 300px;
     height: 40px;
     margin-bottom: 25px;
@@ -280,9 +320,12 @@ main > .side__right {
 
 .social__link {
     display: flex;
-    padding: 20px;
+    padding: 10px 10px;
     font-size: 12px;
-    margin-left: 5px;
+    /*margin-left: 5px;*/
+    margin: 30px 10px;
+    border: #9bc7de 3px solid;
+    border-radius: 70px;
 }
 
 .social__link > a {
@@ -323,7 +366,7 @@ main > .side__right {
 .wrapper-dropdown {
     position: relative;
     width: 280px;
-    margin: 10px 16px 10px 10px;
+    margin: 10px 50px 10px 10px;
     padding: 12px 15px;
     background: #fff;
     border-radius: 5px;

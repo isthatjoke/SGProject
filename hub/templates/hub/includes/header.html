@@ -44,10 +44,8 @@
                             </section>
                         </div>
                 {% else %}
-                    <div class="header__hello">Привет, незнакомец!</div>
-                    <div class="header__item" title="Войти"><a href="{% url 'authapp:login' %}"><i
-                            class="fa fa-sign-in" aria-hidden="true"></i></a></div>
-                    <div class="header__item" title="Регистрация"><a href="{% url 'authapp:register' %}">Регистрация</a>
+                    <div class="header__item" title="Войти" style="margin-right: 40px;"><a href="{% url 'authapp:login' %}"><i
+                            class="fa fa-2x fa-sign-in" aria-hidden="true"></i></a></div>
                     </div>
                 {% endif %}
             </div>

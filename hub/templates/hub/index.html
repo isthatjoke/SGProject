@@ -1,7 +1,7 @@
 {% extends 'hub/base.html' %}
 {% load static %}
 {% block content %}
-    <div class="posts">
+    <div class="posts" style="margin-top: 130px">
         {% for post in posts %}
             <div class="card">
 
@@ -47,7 +47,8 @@
                         </a>
                     {% endif %}
                 </li>
-                <li class="page-item"><a class="page-link" href="#" style="color: black">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}
+                <li class="page-item"><a class="page-link" href="#"
+                                         style="color: black">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}
                 </a></li>
                 <li class="page-item">
                     {% if page_obj.has_next %}
@@ -62,32 +63,15 @@
     </div>
 {% endblock %}
 
-{% block side_right %}
-    <div style="color: black">
-
-    {% for item in head_menu_object_list %}
-        {{ item.items }}
-    {% endfor %}
-    {% for key, cats in head_menu_object_list.items %}
-{#        {% if key.name == title %}#}
-{#            <li>#}
-{#                <a href="{% url 'hub:hub' key.id %}" style="color: black">{{ key.name|title }}</a>#}
-{#            </li>#}
+{#{% block side_right %}#}
+{#    <div class="card" style="align-self: stretch; height: 75vh; width: 18vw; padding: 20px">#}
+{#        <div style="color: black">#}
+{#        </div>#}
+{#    </div>#}
+{#{% endblock %}#}
 {##}
-{#        {% else %}#}
-{#            <li>#}
-{#                <a href="{% url 'hub:hub' key.id %}">{{ key.name|title }}</a>#}
-{#            </li>#}
-{#        {% endif %}#}
-        <!-- уровень выпадающего списка -->
-        <ul style="color: black">
-            {% for cat in cats.0 %}
-                <li ><a href="{% url 'hub:hub_category' key.id cat.id %}" style="color: black">{{ cat.name|title }}
-                {{ key.hub }}
-                </a></li>
-            {% endfor %}
-        </ul>
-    {% endfor %}
-
-    </div>
-{% endblock %}
+{#{% block side_left %}#}
+{#    <div class="card" style="align-self: stretch; height: 75vh; width: 18vw; padding: 20px">#}
+{##}
+{#    </div>#}
+{#{% endblock %}#}

@@ -1,20 +1,63 @@
 {% extends 'hub/base.html' %}
 {% load static %}
 {% block content %}
-    <div class="card">
-        <div class="user__login">
+    <div class="card user__profile">
+        <div class="user__profile">
             <form id="signinform" action="{% url 'authapp:update' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                {{ update_form.as_p }}
-                {{ profile_form.as_p }}
+                {{ form.non_field_errors }}
+{#                <div class="field">#}
+{#                    {{ update_form.username.errors }}#}
+{#                    <label for="{{ update_form.username.id_for_label }}">Имя пользователя</label>#}
+{#                    {{ update_form.username }}#}
+{#                </div>#}
+
+                <div class="field">
+                    {{ update_form.id_avatar.errors }}
+                    <img src="/media/{{ user.avatar }}" alt="avatar" style="border-radius: 150px; width: 180px;">
+{#                    {{ update_form.avatar }}#}
+                </div>
+                <div class="field">
+                    {{ profile_form.name.errors }}
+                    <label for="{{ profile_form.name.id_for_label }}">Имя</label>
+                    {{ profile_form.name }}
+                </div>
+                <div class="field">
+                    {{ update_form.age.errors }}
+                    <label for="{{ update_form.age.id_for_label }}">Возраст</label>
+                    {{ update_form.age }}
+                </div>
+                <div class="field">
+                    {{ profile_form.specialization.errors }}
+                    <label for="{{ profile_form.specialization.id_for_label }}">Специализация</label>
+                    {{ profile_form.specialization }}
+                </div>
+                <div class="field">
+                    {{ profile_form.sex.errors }}
+                    <label for="{{ profile_form.sex.id_for_label }}">Пол</label>
+                    {{ profile_form.sex }}
+                </div>
+                <div class="field">
+                    {{ profile_form.birthdate.errors }}
+                    <label for="{{ profile_form.birthdate.id_for_label }}">Дата рождения</label>
+                    {{ profile_form.birthdate }}
+                </div>
+
+                <div class="field">
+                    {{ profile_form.location.errors }}
+                    <label for="{{ profile_form.location.id_for_label }}">Страна</label>
+                    {{ profile_form.location }}
+                </div>
+
+                <div class="field">
+                    {{ profile_form.location_city.errors }}
+                    <label for="{{ profile_form.location_city.id_for_label }}">Город</label>
+                    {{ profile_form.location_city }}
+                </div>
                 <div class="form-button">
                     <button id="submit" type="submit" class="ybtn ybtn-reg ybtn-accent-color">Сохранить</button>
                 </div>
             </form>
-            <div class="social">
-                <div class="social__link"><a href="https://google.com" target="_blank"><i class="fa fa-google fa-3x"></i></a></div>
-                <div class="social__link"><a href="https://github.com" target="_blank"><i class="fa fa-github-alt fa-3x"></i></a></div>
-            </div>
         </div>
     </div>
 

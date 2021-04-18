@@ -1,34 +1,49 @@
 {% extends 'hub/base.html' %}
 {% load static %}
 {% block content %}
-    <div class="posts">
+    <div class="posts" style="margin-top: 170px">
 
         <div class="card">
 
-            <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
-                 alt="preview">
+            {#            <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"#}
+            {#                 alt="preview">#}
             <div class="post__container">
-                    <form id="form-horizontal m-t-30" method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        {{ form.media }}
-                        {{ form.as_p }}
+                <form id="form-horizontal m-t-30" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.media }}
+{#                    {{ form.as_p }}#}
 
-                        <div class="form-button">
-                            <button id="submit" type="submit"
-                                    class="btn btn-primary w-md waves-effect waves-light">Сохранить
-                            </button>
-                        </div>
+                    {{ form.non_field_errors }}
 
-                    </form>
-{#                <div class="post__user">Пользователь: <span>{{ post.user_id }}</span></div>#}
-{#                <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>#}
-{#                <div class="post__title"><h3>{{ post.name }}</h3></div>#}
-{#                <div class="post__body">#}
-{#                    <p>#}
-{#                        {{ post.post_text }}#}
-{#                    </p>#}
-{##}
-{#                </div>#}
+                    <div class="field">
+                        {{ form.name.errors }}
+                        <label for="{{ form.name.id_for_label }}">Название</label>
+                        {{ form.name }}
+                    </div>
+
+                    <div class="field">
+                        {{ form.content.errors }}
+{#                        <label for="{{ form.content.id_for_label }}">Название</label>#}
+                        {{ form.content }}
+                    </div>
+
+
+                    <div class="form-button">
+                        <button id="submit" type="submit"
+                                class="btn btn-primary w-md waves-effect waves-light">Сохранить
+                        </button>
+                    </div>
+
+                </form>
+                {#                <div class="post__user">Пользователь: <span>{{ post.user_id }}</span></div>#}
+                {#                <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>#}
+                {#                <div class="post__title"><h3>{{ post.name }}</h3></div>#}
+                {#                <div class="post__body">#}
+                {#                    <p>#}
+                {#                        {{ post.post_text }}#}
+                {#                    </p>#}
+                {##}
+                {#                </div>#}
             </div>
         </div>
 
