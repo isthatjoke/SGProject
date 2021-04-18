@@ -1,7 +1,13 @@
 {% extends 'hub/base.html' %}
 {% load static %}
 {% block content %}
+    {% include 'post/includes/menu.html' %}
     <div class="posts">
+
+                                {% if not posts %}
+                                    <h1>Опубликованных постов нет</h1>
+                                {% endif %}
+
         {% for post in posts %}
             <div class="card" >
 
@@ -23,15 +29,36 @@
                         <a href="{% url 'post:post' post.id %}">
                             <button>Читать далее...</button>
                         </a>
-                        {% if post.status == 'published' and post.user_id == user %}
 
-                        <a href="{% url 'post:post_update' post.id %}">
-                            <button>Редактировать</button>
-                        </a>
+                        {% if post.status == 'unpublished' %}
 
-                        <a href="{% url 'post:post_update' post.id %}">
-                            <button>Удалить</button>
-                        </a>
+                                <a href="{% url 'post:post_update' post.id %}">
+                                    <button>Редактировать</button>
+                                </a>
+
+                                <a href="{% url 'post:post_publish' post.id %}">
+                                    <button>Опубликовать</button>
+                                </a>
+
+                                <a href="{% url 'post:post_archive' post.id %}">
+                                    <button>Удалить</button>
+                                </a>
+
+                        {% elif post.status == 'published' %}
+
+                                <a href="{% url 'post:post_update' post.id %}">
+                                    <button>Редактировать</button>
+                                </a>
+
+                                <a href="{% url 'post:post_archive' post.id %}">
+                                    <button>Удалить</button>
+                                </a>
+
+                        {% elif post.status == 'archive' %}
+
+                                <a href="{% url 'post:post_restore' post.id %}">
+                                    <button>Восстановить и перенести в неопубликованные</button>
+                                </a>
 
                         {% endif %}
 
@@ -71,13 +98,5 @@
                             </li>
                         </ul>
                     </nav>
-
-    {#    <div class="side__right">#}
-    {#        <div class="popular__post">#}
-    {#            <div class="card" style="align-self: stretch; height: 100vh; width: 20vw; padding: 20px">#}
-    {#                Популярное#}
-    {#            </div>#}
-    {#        </div>#}
-    {#    </div>#}
 
 {% endblock %}

@@ -9,6 +9,17 @@ NULLABLE = {'blank': True, 'null': True}
 
 
 class Post(models.Model):
+
+    STATUS_PUBLISHED = 'published'
+    STATUS_UNPUBLISHED = 'unpublished'
+    STATUS_ARCHIVE = 'archive'
+
+    STATUSES = (
+        (STATUS_PUBLISHED, 'опубликован'),
+        (STATUS_UNPUBLISHED, 'неопубликован'),
+        (STATUS_ARCHIVE, 'в архиве'),
+    )
+
     class Meta:
         verbose_name = 'пост'
         verbose_name_plural = 'Посты'
@@ -19,7 +30,8 @@ class Post(models.Model):
     # post_text = models.TextField(verbose_name='пост', blank=False, null=True)
     hub_category = models.ForeignKey(HubCategory, related_name='hub_category',
                                      verbose_name='подкатегория', on_delete=models.CASCADE, **NULLABLE)
-    published = models.BooleanField(default=False, verbose_name='опубликовано', )
+    status = models.CharField(verbose_name='статус', choices=STATUSES, default=STATUS_UNPUBLISHED, max_length=11)
+    # published = models.BooleanField(default=False, verbose_name='опубликовано', )
     user_id = models.ForeignKey(HubUser, related_name='user_id', verbose_name='пользователь', on_delete=models.CASCADE,
                                 **NULLABLE)
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True, )
@@ -38,7 +50,7 @@ class Post(models.Model):
     # Метод возвращает все посты всех пользователей и сортирует по дате
     @staticmethod
     def get_all_posts():
-        return Post.objects.filter(published=True).order_by('updated_at')
+        return Post.objects.filter(status=Post.STATUS_PUBLISHED).order_by('updated_at')
 
     # свойство класса для интерактивного подсчета кармы
     @property

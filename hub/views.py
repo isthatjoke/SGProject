@@ -43,6 +43,10 @@ class Main(ListView):
     context_object_name = 'posts'
     paginate_by = 10
     template_name = 'hub/index.html'
+    ordering = ('-updated_at',)
+
+    def get_queryset(self):
+        return Post.objects.filter(status=Post.STATUS_PUBLISHED).select_related()
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(Main, self).get_context_data(**kwargs)
@@ -60,7 +64,7 @@ class HubPostListView(ListView):
 
     def get_queryset(self):
         return Post.objects.filter(hub_category__category_id=self.kwargs.get('pk', '')).\
-            filter(published=True).select_related()
+            filter(status=Post.STATUS_PUBLISHED).select_related()
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(HubPostListView, self).get_context_data(**kwargs)

@@ -54,7 +54,7 @@ class PostDetailView(DetailView):
 class PostCreateView(CreateView):
     template_name = 'post/post_form.html'
     form_class = PostEditForm
-    success_url = reverse_lazy('hub:main')
+    success_url = reverse_lazy('post:users_posts')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
@@ -63,18 +63,27 @@ class PostCreateView(CreateView):
         context['head_menu_object_list'] = get_hub_cats_dict()
         return context
 
-    def get_success_url(self):
-        return reverse('post:post', kwargs={'pk': self.object.pk})
+    # def get_success_url(self):
+    #     return reverse('post:post', kwargs={'pk': self.object.pk})
 
 
 class PostUserListView(ListView):
     model = Post
-    template_name = 'hub/index.html'
+    template_name = 'post/post_list.html'
     context_object_name = 'posts'
     paginate_by = 10
 
     def get_queryset(self):
-        return Post.objects.filter(user_id=self.request.user)
+        posts = Post.objects.filter(user_id=self.request.user)
+
+        if self.request.GET.get('status') == 'unpublished':
+            posts = posts.filter(status='unpublished')
+        elif self.request.GET.get('status') == 'archive':
+            posts = posts.filter(status='archive')
+        else:
+            posts = posts.filter(status='published')
+
+        return posts
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostUserListView, self).get_context_data(**kwargs)
@@ -87,7 +96,7 @@ class PostUpdateView(UpdateView):
     model = Post
     template_name = 'post/post_form.html'
     form_class = PostEditForm
-    success_url = reverse_lazy('hub:main')
+    success_url = reverse_lazy('post:users_posts')
 
     def get_context_data(self, **kwargs):
         context = super(PostUpdateView, self).get_context_data(**kwargs)
@@ -97,10 +106,34 @@ class PostUpdateView(UpdateView):
 
     def get(self, request, *args, **kwargs):
         post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
-        if post.published is True:
+        if post.STATUS_PUBLISHED is True:
             return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
         else:
             return render(request, self.template_name, {'form': self.form_class(instance=post)})
+
+
+@login_required
+def post_publish(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_PUBLISHED
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required
+def post_archive(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_ARCHIVE
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required
+def post_restore(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_UNPUBLISHED
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
 
 
 @login_required
