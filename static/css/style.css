@@ -193,12 +193,23 @@ main > .side__right {
     margin: 50px 40px;
 }
 
+.post__container_create {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+    font-size: 10px;
+}
 .post__container {
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
     padding: 20px 25px;
     font-size: 18px;
 }
 
 .post__button__read button {
+
     margin-top: 10px;
     padding: 10px;
     border: #79aec8 2px solid;
@@ -240,17 +251,38 @@ main > .side__right {
     padding: 50px;
     margin-top: 170px;
 }
-#signinform {
+#signinform, .form-horizontal {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
+#form-horizontal > .field {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: 20px;
+}
+
+#form-horizontal > .field > label {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 18px;
+    color: #4f4f4f;
+}
+#form-horizontal > .field > input {
+    width: 340px;
+}
+
+#form-horizontal > .field > select {
+    width: 360px;
+}
+
 #signinform > .field {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    /*justify-content: space-between;*/
 }
 
 #signinform > .field > label {
@@ -260,15 +292,15 @@ main > .side__right {
     color: #4f4f4f;
 }
 
-.form-horizontal > .field > label {
+.field > label {
     padding-top: 15px;
     padding-bottom: 10px;
     font-size: 22px;
     color: #4f4f4f;
 }
 
-.form-horizontal > .field > input,
-.form-horizontal > .field > select {
+.field > input,
+.field > select {
     font-size: 19px;
     border: #9bc7de 4px solid;
     outline: none;
