@@ -51,15 +51,14 @@ class Main(ListView):
     ordering = ('-updated_at',)
 
     def get_queryset(self):
-        return Post.objects.filter(status=Post.STATUS_PUBLISHED).select_related()
-
-    def get_queryset(self):
         return ordering(self.request)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(Main, self).get_context_data(**kwargs)
         context['head_menu_object_list'] = get_hub_cats_dict()
         context['title'] = 'Hub'
+        context['msg_type'] = self.request.GET.get('msg_type', '')
+        context['days'] = self.request.GET.get('days', '')
 
         return context
 
@@ -71,7 +70,6 @@ class HubPostListView(ListView):
     template_name = 'hub/index.html'
 
     def get_queryset(self):
-
         return ordering(self.request, pk=self.kwargs.get('pk', ''))
 
     def get_context_data(self, *, object_list=None, **kwargs):
