@@ -1,5 +1,8 @@
+from datetime import datetime, timedelta
+
+import pytz
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 
@@ -7,6 +10,7 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import DetailView, CreateView, ListView, UpdateView
 
 from authapp.models import HubUser
+from backend import settings
 from hub.models import get_hub_cats_dict
 from post.forms import PostEditForm
 from post.models import Post, PostKarma
@@ -74,12 +78,15 @@ class PostUserListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return Post.objects.filter(user_id=self.request.user)
+        return ordering(self.request)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostUserListView, self).get_context_data(**kwargs)
         context['title'] = f'Мои посты'
         context['head_menu_object_list'] = get_hub_cats_dict()
+        context['msg_type'] = self.request.GET.get('msg_type', '')
+        context['days'] = self.request.GET.get('days', '')
+
         return context
 
 
@@ -123,3 +130,27 @@ def karma_update(request, pk, pk2):
             result = perform_karma_update(post, user, -1)
         if result:
             return result
+
+
+def ordering(request):
+
+    days_count = int(request.GET.get('days', 20))
+    now = datetime.now(pytz.timezone(settings.TIME_ZONE)) - timedelta(days=days_count)
+    posts = Post.objects.filter(user_id=request.user).select_related().filter(updated_at__gte=now)
+
+    if request.GET.get('msg_type') == '+date':
+        posts = posts.order_by('-updated_at')
+
+    elif request.GET.get('msg_type') == '-date':
+        posts = posts.order_by('updated_at')
+
+    elif request.GET.get('msg_type') == '+karma':
+        posts = posts.annotate(num_karam=Count('post_id')).order_by('post_id')
+
+    elif request.GET.get('msg_type') == '-karma':
+        posts = posts.annotate(num_karam=Count('post_id')).order_by('-post_id')
+
+    return posts
+
+
+
