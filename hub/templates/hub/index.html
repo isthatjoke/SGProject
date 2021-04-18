@@ -2,6 +2,37 @@
 {% load static %}
 {% block content %}
     <div class="posts">
+
+    <form>
+                <div class="row">
+
+                    <div class="col-3">
+                        <div class="row">
+                            <div class="col-4">
+                                <label>дней</label>
+                            </div>
+                            <div class="col-8">
+                                <input type="number" class="form-control" name="days" value="{{ days|default:20 }}" placeholder="за сколько дней" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <select class="form-control" name="msg_type">
+                            <option value="all">Все</option>
+                            <option {% if msg_type == '+date' %}selected{% endif %} value="+date">по дате - сначала новые</option>
+                            <option {% if msg_type == '-date' %}selected{% endif %} value="-date">по дате - сначала старые</option>
+                            <option {% if msg_type == '+karma' %}selected{% endif %} value="+karma">по карме - сначала больше</option>
+                            <option {% if msg_type == '-karma' %}selected{% endif %} value="-karma">по карме - сначала меньше</option>
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Отфильтровать <i class="fa fa-filter"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
         {% for post in posts %}
             <div class="card" >
 
