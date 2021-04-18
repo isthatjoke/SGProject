@@ -30,7 +30,7 @@ class Post(models.Model):
     # pk - id пользователя
     @staticmethod
     def get_user_posts(pk):
-        return Post.objects.filter(user=pk).order_by('updated_at')
+        return Post.objects.filter(user=pk).order_by('-updated_at')
 
     def __str__(self):
         return f'{self.name} ({self.hub_category.name})'
@@ -38,16 +38,18 @@ class Post(models.Model):
     # Метод возвращает все посты всех пользователей и сортирует по дате
     @staticmethod
     def get_all_posts():
-        return Post.objects.filter(published=True).order_by('updated_at')
+        return Post.objects.filter(published=True).order_by('-updated_at')
 
     # свойство класса для интерактивного подсчета кармы
     @property
     def post_karma(self):
-        karma_objects = self.post_id.all()
-        karma = 0
-        for obj in karma_objects:
-            karma += obj.karma
-        return karma
+
+        return self.post_id.count()
+        # karma_objects = self.post_id.all()
+        # karma = 0
+        # for obj in karma_objects:
+        #     karma += obj.karma
+        # return karma
 
 
 class PostKarma(models.Model):
