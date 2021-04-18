@@ -79,19 +79,18 @@ class PostUserListView(ListView):
 
     def get_queryset(self):
 
-#         posts = Post.objects.filter(user_id=self.request.user)
+        posts = Post.objects.filter(user_id=self.request.user)
 
-#         if self.request.GET.get('status') == 'unpublished':
-#             posts = posts.filter(status='unpublished')
-#         elif self.request.GET.get('status') == 'archive':
-#             posts = posts.filter(status='archive')
-#         else:
-#             posts = posts.filter(status='published')
+        if self.request.GET.get('status') == 'unpublished':
+            posts = posts.filter(status='unpublished')
+        elif self.request.GET.get('status') == 'archive':
+            posts = posts.filter(status='archive')
+        else:
+            posts = posts.filter(status='published')
 
-#         return posts
+        return posts
 
-        return ordering(self.request)
-
+        # return ordering(self.request)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostUserListView, self).get_context_data(**kwargs)
