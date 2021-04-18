@@ -5,7 +5,7 @@ from post.models import Post
 
 
 class PostEditForm(forms.ModelForm):
-    content = forms.CharField(widget=CKEditorUploadingWidget(config_name='default'))
+    content = forms.CharField(label='Содержание', widget=CKEditorUploadingWidget(config_name='default'))
 
     class Meta:
         model = Post

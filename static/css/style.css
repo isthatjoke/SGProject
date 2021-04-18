@@ -18,9 +18,21 @@ body {
 /*body > footer {*/
 /*    align-content: flex-end;*/
 /*}*/
-
+.main-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: #9ec6df;
+}
+.head_sub {
+    display: flex;
+    flex-direction: row;
+    background-color: #9ec6df;
+    justify-content: center;
+}
 .header {
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
     align-items: stretch;
     padding: 10px;
@@ -35,6 +47,7 @@ body {
 .header__section {
     display: flex;
     align-items: center;
+    height: 100px;
 }
 
 .header__item {
