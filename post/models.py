@@ -13,11 +13,13 @@ class Post(models.Model):
     STATUS_PUBLISHED = 'published'
     STATUS_UNPUBLISHED = 'unpublished'
     STATUS_ARCHIVE = 'archive'
+    STATUS_TEMPLATE = 'template'
 
     STATUSES = (
         (STATUS_PUBLISHED, 'опубликован'),
         (STATUS_UNPUBLISHED, 'неопубликован'),
         (STATUS_ARCHIVE, 'в архиве'),
+        (STATUS_TEMPLATE, 'шаблон')
     )
 
     class Meta:

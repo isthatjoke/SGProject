@@ -12,7 +12,7 @@ from django.views.generic import DetailView, CreateView, ListView, UpdateView
 from authapp.models import HubUser
 from backend import settings
 from hub.models import get_hub_cats_dict
-from post.forms import PostEditForm
+from post.forms import PostEditForm, PostCreationForm
 from post.models import Post, PostKarma
 
 
@@ -57,7 +57,7 @@ class PostDetailView(DetailView):
 
 class PostCreateView(CreateView):
     template_name = 'post/post_form.html'
-    form_class = PostEditForm
+    form_class = PostCreationForm
     success_url = reverse_lazy('post:users_posts')
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -85,6 +85,8 @@ class PostUserListView(ListView):
             posts = posts.filter(status='unpublished')
         elif self.request.GET.get('status') == 'archive':
             posts = posts.filter(status='archive')
+        elif self.request.GET.get('status') == 'template':
+            posts = posts.filter(status='template')
         else:
             posts = posts.filter(status='published')
 
@@ -143,6 +145,22 @@ def post_restore(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.status = post.STATUS_UNPUBLISHED
     post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required
+def post_template(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.pk = None
+
+    if post.STATUS_UNPUBLISHED:
+        post.status = post.STATUS_TEMPLATE
+        post.save()
+
+    elif post.STATUS_TEMPLATE:
+        post.status = post.STATUS_UNPUBLISHED
+        post.save()
+
     return HttpResponseRedirect(reverse('post:users_posts'))
 
 
