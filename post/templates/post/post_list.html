@@ -1,37 +1,12 @@
 {% extends 'hub/base.html' %}
 {% load static %}
 {% block content %}
+    {% include 'post/includes/menu.html' %}
     <div class="posts">
 
-    <form>
-                <div class="row">
-
-                    <div class="col-3">
-                        <div class="row">
-                            <div class="col-4">
-                                <label>дней</label>
-                            </div>
-                            <div class="col-8">
-                                <input type="number" class="form-control" name="days" value="{{ days|default:20 }}" placeholder="за сколько дней" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <select class="form-control" name="msg_type">
-                            <option value="all">Все</option>
-                            <option {% if msg_type == '+date' %}selected{% endif %} value="+date">по дате - сначала новые</option>
-                            <option {% if msg_type == '-date' %}selected{% endif %} value="-date">по дате - сначала старые</option>
-                            <option {% if msg_type == '+karma' %}selected{% endif %} value="+karma">по карме - сначала больше</option>
-                            <option {% if msg_type == '-karma' %}selected{% endif %} value="-karma">по карме - сначала меньше</option>
-                        </select>
-                    </div>
-                    <div class="col-2">
-                        <button type="submit" class="btn btn-primary w-100">
-                            Отфильтровать <i class="fa fa-filter"></i>
-                        </button>
-                    </div>
-                </div>
-            </form>
+                                {% if not posts %}
+                                    <h1>Опубликованных постов нет</h1>
+                                {% endif %}
 
         {% for post in posts %}
             <div class="card" >
@@ -54,15 +29,36 @@
                         <a href="{% url 'post:post' post.id %}">
                             <button>Читать далее...</button>
                         </a>
-                        {% if post.status == 'published' and post.user_id == user %}
 
-                        <a href="{% url 'post:post_update' post.id %}">
-                            <button>Редактировать</button>
-                        </a>
+                        {% if post.status == 'unpublished' %}
 
-                        <a href="{% url 'post:post_update' post.id %}">
-                            <button>Удалить</button>
-                        </a>
+                                <a href="{% url 'post:post_update' post.id %}">
+                                    <button>Редактировать</button>
+                                </a>
+
+                                <a href="{% url 'post:post_publish' post.id %}">
+                                    <button>Опубликовать</button>
+                                </a>
+
+                                <a href="{% url 'post:post_archive' post.id %}">
+                                    <button>Удалить</button>
+                                </a>
+
+                        {% elif post.status == 'published' %}
+
+                                <a href="{% url 'post:post_update' post.id %}">
+                                    <button>Редактировать</button>
+                                </a>
+
+                                <a href="{% url 'post:post_archive' post.id %}">
+                                    <button>Удалить</button>
+                                </a>
+
+                        {% elif post.status == 'archive' %}
+
+                                <a href="{% url 'post:post_restore' post.id %}">
+                                    <button>Восстановить и перенести в неопубликованные</button>
+                                </a>
 
                         {% endif %}
 
@@ -102,13 +98,5 @@
                             </li>
                         </ul>
                     </nav>
-
-    {#    <div class="side__right">#}
-    {#        <div class="popular__post">#}
-    {#            <div class="card" style="align-self: stretch; height: 100vh; width: 20vw; padding: 20px">#}
-    {#                Популярное#}
-    {#            </div>#}
-    {#        </div>#}
-    {#    </div>#}
 
 {% endblock %}

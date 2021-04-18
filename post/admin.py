@@ -6,9 +6,9 @@ from post.models import Post, PostKarma
 
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('name', 'hub_category', 'published', 'user_id', 'created_at')
+    list_display = ('name', 'hub_category', 'status', 'user_id', 'created_at')
     list_display_links = ('name',)
-    search_fields = ('hub_category', 'user_id', 'published', 'created_at')
+    search_fields = ('hub_category', 'user_id', 'created_at', 'status')
 
 
 admin.site.register(Post, PostAdmin)

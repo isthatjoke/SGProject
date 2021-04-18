@@ -16,7 +16,7 @@ class PostEditForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
             field.help_text = ''
-            if field_name in ('user_id', 'post_karma',):
+            if field_name in ('user_id', 'post_karma', 'status'):
                 field.widget = forms.HiddenInput()
             if field_name == 'hub_category':
                 field.widget.attrs['required'] = True

@@ -48,6 +48,10 @@ class Main(ListView):
     context_object_name = 'posts'
     paginate_by = 10
     template_name = 'hub/index.html'
+    ordering = ('-updated_at',)
+
+    def get_queryset(self):
+        return Post.objects.filter(status=Post.STATUS_PUBLISHED).select_related()
 
     def get_queryset(self):
         return ordering(self.request)
@@ -67,6 +71,7 @@ class HubPostListView(ListView):
     template_name = 'hub/index.html'
 
     def get_queryset(self):
+
         return ordering(self.request, pk=self.kwargs.get('pk', ''))
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -106,7 +111,7 @@ def ordering(request, pk=None, cat=None):
 
     days_count = int(request.GET.get('days', 20))
     now = datetime.now(pytz.timezone(settings.TIME_ZONE)) - timedelta(days=days_count)
-    posts = Post.objects.filter(published=True).select_related().filter(updated_at__gte=now)
+    posts = Post.objects.filter(status=Post.STATUS_PUBLISHED).select_related().filter(updated_at__gte=now)
 
     if pk is not None:
         posts = posts.filter(hub_category__category_id=pk)
