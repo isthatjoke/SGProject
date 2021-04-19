@@ -64,6 +64,16 @@
                                     <button>Восстановить и перенести в неопубликованные</button>
                                 </a>
 
+                        {% elif post.status == 'template' %}
+
+                                <a href="{% url 'post:post_update' post.id %}">
+                                    <button>Редактировать</button>
+                                </a>
+
+                                <a href="{% url 'post:post_archive' post.id %}">
+                                    <button>Удалить</button>
+                                </a>
+
                         {% endif %}
 
                     </div>
