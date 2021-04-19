@@ -9,6 +9,7 @@
                  alt="preview">
             <div class="post__container">
                     <form id="form-horizontal m-t-30" method="post" enctype="multipart/form-data">
+                        <p style="color: darkorange">Пост {{ form.instance.get_status_display }}</p>
                         {% csrf_token %}
                         {{ form.media }}
                         {{ form.as_p }}

@@ -1,5 +1,8 @@
+from datetime import datetime, timedelta
+
+import pytz
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 
@@ -7,8 +10,9 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import DetailView, CreateView, ListView, UpdateView
 
 from authapp.models import HubUser
+from backend import settings
 from hub.models import get_hub_cats_dict
-from post.forms import PostEditForm
+from post.forms import PostEditForm, PostCreationForm
 from post.models import Post, PostKarma
 
 
@@ -53,8 +57,8 @@ class PostDetailView(DetailView):
 
 class PostCreateView(CreateView):
     template_name = 'post/post_form.html'
-    form_class = PostEditForm
-    success_url = reverse_lazy('hub:main')
+    form_class = PostCreationForm
+    success_url = reverse_lazy('post:users_posts')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
@@ -63,23 +67,40 @@ class PostCreateView(CreateView):
         context['head_menu_object_list'] = get_hub_cats_dict()
         return context
 
-    def get_success_url(self):
-        return reverse('post:post', kwargs={'pk': self.object.pk})
+    # def get_success_url(self):
+    #     return reverse('post:post', kwargs={'pk': self.object.pk})
 
 
 class PostUserListView(ListView):
     model = Post
-    template_name = 'hub/index.html'
+    template_name = 'post/post_list.html'
     context_object_name = 'posts'
     paginate_by = 10
 
     def get_queryset(self):
-        return Post.objects.filter(user_id=self.request.user)
+
+        posts = Post.objects.filter(user_id=self.request.user)
+
+        if self.request.GET.get('status') == 'unpublished':
+            posts = posts.filter(status='unpublished')
+        elif self.request.GET.get('status') == 'archive':
+            posts = posts.filter(status='archive')
+        elif self.request.GET.get('status') == 'template':
+            posts = posts.filter(status='template')
+        else:
+            posts = posts.filter(status='published')
+
+        return posts
+
+        # return ordering(self.request)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostUserListView, self).get_context_data(**kwargs)
         context['title'] = f'Мои посты'
         context['head_menu_object_list'] = get_hub_cats_dict()
+        context['msg_type'] = self.request.GET.get('msg_type', '')
+        context['days'] = self.request.GET.get('days', '')
+
         return context
 
 
@@ -87,7 +108,7 @@ class PostUpdateView(UpdateView):
     model = Post
     template_name = 'post/post_form.html'
     form_class = PostEditForm
-    success_url = reverse_lazy('hub:main')
+    success_url = reverse_lazy('post:users_posts')
 
     def get_context_data(self, **kwargs):
         context = super(PostUpdateView, self).get_context_data(**kwargs)
@@ -97,10 +118,50 @@ class PostUpdateView(UpdateView):
 
     def get(self, request, *args, **kwargs):
         post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
-        if post.published is True:
+        if post.STATUS_PUBLISHED is True:
             return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
         else:
             return render(request, self.template_name, {'form': self.form_class(instance=post)})
+
+
+@login_required
+def post_publish(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_PUBLISHED
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required
+def post_archive(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_ARCHIVE
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required
+def post_restore(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_UNPUBLISHED
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required
+def post_template(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.pk = None
+
+    if post.STATUS_UNPUBLISHED:
+        post.status = post.STATUS_TEMPLATE
+        post.save()
+
+    elif post.STATUS_TEMPLATE:
+        post.status = post.STATUS_UNPUBLISHED
+        post.save()
+
+    return HttpResponseRedirect(reverse('post:users_posts'))
 
 
 @login_required
@@ -123,3 +184,27 @@ def karma_update(request, pk, pk2):
             result = perform_karma_update(post, user, -1)
         if result:
             return result
+
+
+def ordering(request):
+
+    days_count = int(request.GET.get('days', 20))
+    now = datetime.now(pytz.timezone(settings.TIME_ZONE)) - timedelta(days=days_count)
+    posts = Post.objects.filter(user_id=request.user).select_related().filter(updated_at__gte=now)
+
+    if request.GET.get('msg_type') == '+date':
+        posts = posts.order_by('-updated_at')
+
+    elif request.GET.get('msg_type') == '-date':
+        posts = posts.order_by('updated_at')
+
+    elif request.GET.get('msg_type') == '+karma':
+        posts = posts.annotate(num_karam=Count('post_id')).order_by('post_id')
+
+    elif request.GET.get('msg_type') == '-karma':
+        posts = posts.annotate(num_karam=Count('post_id')).order_by('-post_id')
+
+    return posts
+
+
+

@@ -1,0 +1,12 @@
+{% load static %}
+{% block post-menu %}
+
+<div class="row">
+    <div class="col-3"><a href="{% url 'post:users_posts' %}">активные</a></div>
+    <div class="col-3"><a href="{% url 'post:users_posts' %}?status=unpublished">неопубликованные</a></div>
+    <div class="col-3"><a href="{% url 'post:users_posts' %}?status=archive">архив</a></div>
+    <div class="col-3"><a href="{% url 'post:users_posts' %}?status=template">шаблоны</a></div>
+
+</div>
+
+{% endblock %}
