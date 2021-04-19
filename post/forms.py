@@ -7,7 +7,6 @@ from post.models import Post
 class PostCreationForm(forms.ModelForm):
     content = forms.CharField(label='Содержание', widget=CKEditorUploadingWidget(config_name='default'))
 
-
     class Meta:
         model = Post
         exclude = ()
@@ -39,3 +38,15 @@ class PostEditForm(forms.ModelForm):
                 field.widget = forms.HiddenInput()
             if field_name == 'hub_category':
                 field.widget.attrs['required'] = True
+
+
+class CommentForm(forms.Form):
+    parent_comment = forms.IntegerField(
+        widget=forms.HiddenInput,
+        required=False
+    )
+
+    comment_area = forms.CharField(
+        label="",
+        widget=forms.Textarea
+    )

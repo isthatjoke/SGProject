@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'post',
     'ckeditor',
     'ckeditor_uploader',
+    'bootstrap3',
+    'django_bootstrap_icons',
 ]
 
 MIDDLEWARE = [

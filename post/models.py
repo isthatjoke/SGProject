@@ -1,4 +1,8 @@
+import json
+
 from django.db import models
+from django.shortcuts import redirect
+
 from authapp.models import HubUser, HubUserProfile
 from hub.models import HubCategory, Hub
 from ckeditor.fields import RichTextField
@@ -9,7 +13,6 @@ NULLABLE = {'blank': True, 'null': True}
 
 
 class Post(models.Model):
-
     STATUS_PUBLISHED = 'published'
     STATUS_UNPUBLISHED = 'unpublished'
     STATUS_ARCHIVE = 'archive'
@@ -54,11 +57,9 @@ class Post(models.Model):
     def get_all_posts():
         return Post.objects.filter(status=Post.STATUS_PUBLISHED).order_by('-updated_at')
 
-
     # свойство класса для интерактивного подсчета кармы
     @property
     def post_karma(self):
-
         return self.post_id.count()
         # karma_objects = self.post_id.all()
         # karma = 0
@@ -82,3 +83,42 @@ class PostKarma(models.Model):
 
     def __str__(self):
         return f'{self.user_id} - "{self.post_id}": {self.karma}'
+
+
+class Comment(models.Model):
+    class Meta:
+        db_table = "comments"
+
+    path = models.TextField()
+    comment_post_id = models.ForeignKey(Post, related_name='comment_post_id', verbose_name='пост',
+                                        on_delete=models.CASCADE,
+                                        **NULLABLE)
+    author_id = models.ForeignKey(HubUser, related_name='author_id', verbose_name='пользователь',
+                                  on_delete=models.CASCADE,
+                                  **NULLABLE)
+    content = models.TextField(verbose_name='комментарий')
+    created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True)
+
+    def __str__(self):
+        return self.content[0:200]
+
+    def get_offset(self):
+        path = json.loads(self.path)
+        level = len(path) - 1
+        if level > 5:
+            level = 5
+        return level
+
+    def get_col(self):
+        path = json.loads(self.path)
+        level = len(path) - 1
+        if level > 5:
+            level = 5
+        return 12 - level
+
+    def get_absolute_url(self):
+        print(f'self.comment_post_id.pk: {self.comment_post_id.pk}')
+        print(f'self.pk: {self.pk}')
+        print(f'self.__dict__: {self.__dict__}')
+        return f'/post/{self.comment_post_id.pk}/'
+
