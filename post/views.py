@@ -74,8 +74,7 @@ class PostDetailView(DetailView):
         # проблем с иерархией комментариев не должно возникать
         # context['comments'] = Comment.objects.all().order_by('path')
         com = Comment.objects.filter(comment_post_id_id=self.kwargs['pk'])
-        if com:
-            context['comments'] = com
+        context['comments'] = com
         # context['next'] = Comment.get_absolute_url()
         # Будем добавлять форму только в том случае, если пользователь авторизован
         if user.is_authenticated:
