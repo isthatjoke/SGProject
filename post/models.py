@@ -1,5 +1,6 @@
 import json
 
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import redirect
 
@@ -89,7 +90,7 @@ class Comment(models.Model):
     class Meta:
         db_table = "comments"
 
-    path = models.TextField()
+    path = ArrayField(models.IntegerField())
     comment_post_id = models.ForeignKey(Post, related_name='comment_post_id', verbose_name='пост',
                                         on_delete=models.CASCADE,
                                         **NULLABLE)
@@ -103,22 +104,17 @@ class Comment(models.Model):
         return self.content[0:200]
 
     def get_offset(self):
-        path = json.loads(self.path)
-        level = len(path) - 1
+        level = len(self.path) - 1
         if level > 5:
             level = 5
         return level
 
     def get_col(self):
-        path = json.loads(self.path)
-        level = len(path) - 1
+        level = len(self.path) - 1
         if level > 5:
             level = 5
         return 12 - level
 
     def get_absolute_url(self):
-        print(f'self.comment_post_id.pk: {self.comment_post_id.pk}')
-        print(f'self.pk: {self.pk}')
-        print(f'self.__dict__: {self.__dict__}')
         return f'/post/{self.comment_post_id.pk}/'
 
