@@ -217,8 +217,8 @@ class Command(BaseCommand):
 
                                   content=item['content'],
                                   hub_category=hub_category,
-                                  published=True,
-                                  user_id=user_id))
+                                  user_id=user_id,
+                                  status=Post.STATUS_PUBLISHED))
         Post.objects.bulk_create(post_list)
 
         print(f'Перезагрузка БД выполнена')
