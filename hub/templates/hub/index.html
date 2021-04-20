@@ -12,17 +12,17 @@
                                 <label>дней</label>
                             </div>
                             <div class="col-8">
-                                <input type="number" class="form-control" name="days" value="{{ days|default:20 }}" placeholder="за сколько дней" />
+                                <input type="number" class="form-control" name="days" value="{{ request.GET.days|default:20 }}" placeholder="за сколько дней" />
                             </div>
                         </div>
                     </div>
                     <div class="col-3">
                         <select class="form-control" name="msg_type">
                             <option value="all">Все</option>
-                            <option {% if msg_type == '+date' %}selected{% endif %} value="+date">по дате - сначала новые</option>
-                            <option {% if msg_type == '-date' %}selected{% endif %} value="-date">по дате - сначала старые</option>
-                            <option {% if msg_type == '+karma' %}selected{% endif %} value="+karma">по карме - сначала больше</option>
-                            <option {% if msg_type == '-karma' %}selected{% endif %} value="-karma">по карме - сначала меньше</option>
+                            <option {% if request.GET.msg_type == 'date_up' %}selected{% endif %} value="date_up">по дате - сначала новые</option>
+                            <option {% if request.GET.msg_type == 'date_down' %}selected{% endif %} value="date_down">по дате - сначала старые</option>
+                            <option {% if request.GET.msg_type == 'karma_up' %}selected{% endif %} value="karma_up">по карме - сначала больше</option>
+                            <option {% if request.GET.msg_type == 'karma_down' %}selected{% endif %} value="karma_down">по карме - сначала меньше</option>
                         </select>
                     </div>
                     <div class="col-2">
@@ -81,8 +81,17 @@
                         <ul class="pagination">
                             <li class="page-item">
                                 {% if page_obj.has_previous %}
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}"
-                                       aria-label="Previous" style="color: black">
+
+<a class="page-link" href="?
+page={{ page_obj.previous_page_number }}&
+{% if request.GET.days %}
+days={{ request.GET.days }}&
+{% endif %}
+{% if request.GET.msg_type %}
+msg_type={{ request.GET.msg_type }}
+{% endif %}"
+aria-label="Previous" style="color: black">
+
                                         <span aria-hidden="true">&laquo;</span>
                                         <span class="sr-only">Previous</span>
                                     </a>
@@ -93,8 +102,17 @@
                             </a></li>
                             <li class="page-item">
                                 {% if page_obj.has_next %}
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}"
-                                       aria-label="Next"  style="color: black">
+
+<a class="page-link" href="?
+page={{ page_obj.next_page_number }}&
+{% if request.GET.days %}
+days={{ request.GET.days }}&
+{% endif %}
+{% if request.GET.msg_type %}
+msg_type={{ request.GET.msg_type }}
+{% endif %}"
+aria-label="Next"  style="color: black">
+
                                         <span aria-hidden="true">&raquo;</span>
                                         <span class="sr-only">Next</span>
                                     </a>

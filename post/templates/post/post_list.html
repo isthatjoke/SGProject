@@ -70,6 +70,10 @@
                                     <button>Редактировать</button>
                                 </a>
 
+                                <a href="{% url 'post:post_template' post.id %}">
+                                    <button>Сделать пост по шаблону</button>
+                                </a>
+
                                 <a href="{% url 'post:post_archive' post.id %}">
                                     <button>Удалить</button>
                                 </a>

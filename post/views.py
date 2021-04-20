@@ -57,7 +57,6 @@ class PostDetailView(DetailView):
         context = super(PostDetailView, self).get_context_data(**kwargs)
         context['head_menu_object_list'] = get_hub_cats_dict()
         context['title'] = f'Пост - {self.object.name}'
-
         return context
 
     def get(self, request, *args, **kwargs):
@@ -211,7 +210,7 @@ class PostUpdateView(UpdateView):
 
     def get(self, request, *args, **kwargs):
         post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
-        if post.STATUS_PUBLISHED is True:
+        if post.status == post.STATUS_PUBLISHED:
             return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
         else:
             return render(request, self.template_name, {'form': self.form_class(instance=post)})
@@ -246,13 +245,14 @@ def post_template(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.pk = None
 
-    if post.STATUS_UNPUBLISHED:
+    if post.status == post.STATUS_UNPUBLISHED:
         post.status = post.STATUS_TEMPLATE
         post.save()
 
-    elif post.STATUS_TEMPLATE:
+    elif post.status == post.STATUS_TEMPLATE:
         post.status = post.STATUS_UNPUBLISHED
         post.save()
+        return HttpResponseRedirect(reverse('post:post_update', kwargs={'pk': post.id}))
 
     return HttpResponseRedirect(reverse('post:users_posts'))
 
