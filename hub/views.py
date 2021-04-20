@@ -57,8 +57,8 @@ class Main(ListView):
         context = super(Main, self).get_context_data(**kwargs)
         context['head_menu_object_list'] = get_hub_cats_dict()
         context['title'] = 'Hub'
-        context['msg_type'] = self.request.GET.get('msg_type', '')
-        context['days'] = self.request.GET.get('days', '')
+        # context['msg_type'] = self.request.GET.get('msg_type', '')
+        # context['days'] = self.request.GET.get('days', '')
 
         return context
 
@@ -117,16 +117,16 @@ def ordering(request, pk=None, cat=None):
     if cat is not None:
         posts = posts.filter(hub_category=cat)
 
-    if request.GET.get('msg_type') == '+date':
+    if request.GET.get('msg_type') == 'date_up':
         posts = posts.order_by('-updated_at')
 
-    elif request.GET.get('msg_type') == '-date':
+    elif request.GET.get('msg_type') == 'date_down':
         posts = posts.order_by('updated_at')
 
-    elif request.GET.get('msg_type') == '+karma':
+    elif request.GET.get('msg_type') == 'karma_up':
         posts = posts.annotate(num_karam=Count('post_id')).order_by('post_id')
 
-    elif request.GET.get('msg_type') == '-karma':
+    elif request.GET.get('msg_type') == 'karma_down':
         posts = posts.annotate(num_karam=Count('post_id')).order_by('-post_id')
 
     return posts
