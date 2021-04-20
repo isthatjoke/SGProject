@@ -90,6 +90,7 @@ class Comment(models.Model):
     class Meta:
         db_table = "comments"
 
+    published = models.BooleanField(default=True) #True - опубликован, False - удалено
     path = ArrayField(models.IntegerField())
     comment_post_id = models.ForeignKey(Post, related_name='comment_post_id', verbose_name='пост',
                                         on_delete=models.CASCADE,

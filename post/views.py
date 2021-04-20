@@ -113,6 +113,15 @@ class PostDetailView(DetailView):
 
 
 @login_required
+def delete_comment(request, pk2, pk):
+    comment = get_object_or_404(Comment, id=pk)
+    comment.content = f"[----русские хакеры удалили этот коммент---]"
+    comment.published = False
+    comment.save()
+    return redirect(comment.get_absolute_url())
+
+
+@login_required
 @require_http_methods(["POST"])
 def add_comment(request, pk):
     form = CommentForm(request.POST)
