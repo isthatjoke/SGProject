@@ -1,4 +1,9 @@
+import json
+
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.shortcuts import redirect
+
 from authapp.models import HubUser, HubUserProfile
 from hub.models import HubCategory, Hub
 from ckeditor.fields import RichTextField
@@ -9,7 +14,6 @@ NULLABLE = {'blank': True, 'null': True}
 
 
 class Post(models.Model):
-
     STATUS_PUBLISHED = 'published'
     STATUS_UNPUBLISHED = 'unpublished'
     STATUS_ARCHIVE = 'archive'
@@ -54,11 +58,9 @@ class Post(models.Model):
     def get_all_posts():
         return Post.objects.filter(status=Post.STATUS_PUBLISHED).order_by('-updated_at')
 
-
     # свойство класса для интерактивного подсчета кармы
     @property
     def post_karma(self):
-
         return self.post_id.count()
         # karma_objects = self.post_id.all()
         # karma = 0
@@ -82,3 +84,65 @@ class PostKarma(models.Model):
 
     def __str__(self):
         return f'{self.user_id} - "{self.post_id}": {self.karma}'
+
+
+class Comment(models.Model):
+    class Meta:
+        db_table = "comments"
+
+    published = models.BooleanField(default=True)  # True - опубликован, False - удалено
+    path = ArrayField(models.IntegerField())
+    comment_post_id = models.ForeignKey(Post, related_name='comment_post_id', verbose_name='пост',
+                                        on_delete=models.CASCADE,
+                                        **NULLABLE)
+    author_id = models.ForeignKey(HubUser, related_name='author_id', verbose_name='пользователь',
+                                  on_delete=models.CASCADE,
+                                  **NULLABLE)
+    content = models.TextField(verbose_name='комментарий')
+    created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True)
+
+    def __str__(self):
+        return self.content[0:200]
+
+    def get_offset(self):
+        level = len(self.path) - 1
+        if level > 5:
+            level = 5
+        return level
+
+    def get_col(self):
+        level = len(self.path) - 1
+        if level > 5:
+            level = 5
+        return 12 - level
+
+    def get_absolute_url(self):
+        return f'/post/{self.comment_post_id.pk}/'
+
+
+def get_all_comments(user_id):
+    ''':user_id - id пользователя
+        :return - возвращает словарь объектов { пост: [комментарий,...]}
+    '''
+
+    comments_dict = {}
+
+    comments = Comment.objects.filter(author_id=user_id)
+    if comments:
+        for comment in comments:
+            post = Post.objects.get(id=comment.comment_post_id.id)
+            list_comm = []  # список объектов comment конкретного поста
+            for el in comments:
+                if el.comment_post_id.id == post.id:
+                    list_comm.append(el)
+            comments_dict[post] = list_comm
+
+            # для поста собрали список комментов
+
+        # print(f'comments_dict: {comments_dict}')
+
+        return comments_dict
+
+    comments_dict = {}
+    # нет коментов у пользователя
+    return comments_dict

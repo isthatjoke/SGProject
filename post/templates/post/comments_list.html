@@ -1,0 +1,73 @@
+{% extends 'hub/base.html' %}
+{% load bootstrap3 %}
+{% load bootstrap_icons %}
+<script src="{% bootstrap_jquery_url %}"></script>
+
+{% bootstrap_javascript %}
+{% bootstrap_css %}
+{% load static %}
+
+{% block content %}
+    <div class="posts">
+
+        <div class="card">
+    {% if request.user.is_authenticated %}
+            {% endif %}
+
+            <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
+                 alt="preview">
+            <div class="post__container">
+                <div class="post__user">Пользователь: <span>{{ request.user.username }}</span></div>
+                <div class="post__body">
+                    <h2>Комментарии</h2>
+        {% for key, comments in comments_dict.items %}
+
+     <a href="/post/{{ key.id }}" style="color: black;">Пост: {{ key.name }}</a>  <br/>
+
+            {% for comment in comments %}
+
+            <a name="comment-{{ comment.id }}"></a>
+            <div class="row" id="{{ comment.id }}">
+                <div class="col-md-{{ comment.get_col }} col-md-offset-{{ comment.get_offset }}">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <strong>{{ comment.author_id.get_full_name|default:comment.author_id.username }}</strong>&nbsp;&nbsp;
+                            {{ comment.created_at }}
+                            <a href="#comment-{{ comment.id }}">#</a>
+                        </div>
+                        <div class="panel-body">
+                            <div>{{ comment.content|safe }}</div>
+
+                            {% if comment.published %}
+                                {% if form %}
+
+                                <a class="btn btn-default btn-xs pull-right"
+                                                onclick="return show_comments_form({{ comment.id }})">
+                                    {% bootstrap_icon "share-alt" %}&nbsp;&nbsp;Ответить
+                                </a>
+                                {% if comment.author_id.username == request.user.username %}
+                                    &nbsp;&nbsp;<a href="comment/delete/{{ comment.id }}" class="btn btn-default btn-xs pull-right"> Удалить</a>
+
+                                    {% endif%}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        {% endfor %}
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+{% endblock %}
+

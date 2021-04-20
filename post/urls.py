@@ -17,7 +17,11 @@ urlpatterns = [
     path('myposts/template/<int:pk>', views.post_template, name='post_template'),
 
     path('<int:pk>/karma/<int:pk2>/', views.karma_update, name='karma_update'),
+    path('comment/<int:pk>/', views.add_comment, name='add_comment'),
+    path('<int:pk2>/comment/delete/<int:pk>/', views.delete_comment, name='delete_comment'),
+    path('mycomments/', views.CommentUserlist.as_view(), name='comment_list'),
 ]
+
 
 
 
