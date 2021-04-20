@@ -18,7 +18,7 @@ from authapp.models import HubUser
 from backend import settings
 from hub.models import get_hub_cats_dict
 from post.forms import PostEditForm, PostCreationForm, CommentForm
-from post.models import Post, PostKarma, Comment
+from post.models import Post, PostKarma, Comment, get_all_comments
 
 
 def perform_karma_update(post, user, karma):
@@ -72,9 +72,9 @@ class PostDetailView(DetailView):
         # Помещаем в контекст все комментарии, которые относятся к статье
         # попутно сортируя их по пути, ID автоинкрементируемые, поэтому
         # проблем с иерархией комментариев не должно возникать
-        context['comments'] = Comment.objects.all().order_by('path')
+        # context['comments'] = Comment.objects.all().order_by('path')
 
-        # context['comments'] = Comment.objects.filter(comment_post_id_id=self.kwargs['pk'])
+        context['comments'] = Comment.objects.filter(comment_post_id_id=self.kwargs['pk']).order_by('path')
         # context['next'] = Comment.get_absolute_url()
         # Будем добавлять форму только в том случае, если пользователь авторизован
         if user.is_authenticated:
@@ -161,8 +161,19 @@ class PostCreateView(CreateView):
         context['head_menu_object_list'] = get_hub_cats_dict()
         return context
 
-    # def get_success_url(self):
-    #     return reverse('post:post', kwargs={'pk': self.object.pk})
+
+class CommentUserlist(ListView):
+    model = Comment
+    template_name = 'post/comments_list.html'
+    context_object_name = 'comments'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super(CommentUserlist, self).get_context_data(**kwargs)
+        context['title'] = f'Вши комментарии {self.request.user.username}'
+        context['comments_dict'] = get_all_comments(self.request.user.id)  # словарь объектов { пост: [комментарий,...]}
+        context['head_menu_object_list'] = get_hub_cats_dict()
+        return context
 
 
 class PostUserListView(ListView):
