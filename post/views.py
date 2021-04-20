@@ -50,65 +50,94 @@ def perform_karma_update(post, user, karma):
 class PostDetailView(DetailView):
     template_name = 'post/post.html'
     context_object_name = 'post'
-    queryset = Post.objects.all()
+    model = Post
     comment_form = CommentForm
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostDetailView, self).get_context_data(**kwargs)
         context['head_menu_object_list'] = get_hub_cats_dict()
-        context['title'] = f'Пост - {self.object.name}'
+        context['title'] = f'{self.object.name}'
+        if self.request.method == 'GET':
+            context['comments'] = Comment.objects.filter(comment_post_id_id=self.kwargs['pk']).order_by('path')
+            if self.request.user.is_authenticated:
+                context['form'] = self.comment_form
+
+        if self.request.method == 'POST':
+            form = CommentForm(self.request.POST)
+            if form.is_valid():
+                comment = Comment(
+                    path=[],
+                    comment_post_id=self.object.pk,
+                    author_id=self.request.user,
+                    content=form.cleaned_data['comment_area']
+                )
+                comment.save()
+
+                # сформируем path после первого сохранения
+                # и пересохраним комментарий
+
+                try:
+                    comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
+                    comment.path.append(comment.id)
+                    # print('получилось')
+                except ObjectDoesNotExist:
+                    comment.path.append(comment.id)
+                    # print('не получилось')
+
+                comment.save()
+
         return context
 
-    def get(self, request, *args, **kwargs):
-
-        post = get_object_or_404(Post, id=self.kwargs['pk'])
-        context = {}
-        context.update(request)
-        user = auth.get_user(request)
-        context['post'] = post
-        context['head_menu_object_list'] = get_hub_cats_dict()
-        # context['title'] = f'Пост - {self.object.name}'
-        # Помещаем в контекст все комментарии, которые относятся к статье
-        # попутно сортируя их по пути, ID автоинкрементируемые, поэтому
-        # проблем с иерархией комментариев не должно возникать
-        # context['comments'] = Comment.objects.all().order_by('path')
-
-        context['comments'] = Comment.objects.filter(comment_post_id_id=self.kwargs['pk']).order_by('path')
-        # context['next'] = Comment.get_absolute_url()
-        # Будем добавлять форму только в том случае, если пользователь авторизован
-        if user.is_authenticated:
-            context['form'] = self.comment_form
-
-        return render(request, template_name=self.template_name, context=context)
+    # def get(self, request, *args, **kwargs):
+    #
+    #     post = get_object_or_404(Post, id=self.kwargs['pk'])
+    #     context = {}
+    #     context.update(request)
+    #     user = auth.get_user(request)
+    #     context['post'] = post
+    #     context['head_menu_object_list'] = get_hub_cats_dict()
+    #     # context['title'] = f'Пост - {self.object.name}'
+    #     # Помещаем в контекст все комментарии, которые относятся к статье
+    #     # попутно сортируя их по пути, ID автоинкрементируемые, поэтому
+    #     # проблем с иерархией комментариев не должно возникать
+    #     # context['comments'] = Comment.objects.all().order_by('path')
+    #
+    #     context['comments'] = Comment.objects.filter(comment_post_id_id=self.kwargs['pk']).order_by('path')
+    #     # context['next'] = Comment.get_absolute_url()
+    #     # Будем добавлять форму только в том случае, если пользователь авторизован
+    #     if user.is_authenticated:
+    #         context['form'] = self.comment_form
+    #
+    #     return render(request, template_name=self.template_name, context=context)
 
     # Декораторы по которым, только авторизованный пользователь
     # может отправить комментарий и только с помощью POST запроса
-    @method_decorator(login_required)
-    def post(self, request, *args, **kwargs):
-        form = CommentForm(request.POST)
-        post = get_object_or_404(Post, id=self.kwargs['pk'])
-        if form.is_valid():
-            comment = Comment(
-                path=[],
-                comment_post_id=post.pk,
-                author_id=request.user,
-                content=form.cleaned_data['comment_area']
-            )
-            comment.save()
-
-            # сформируем path после первого сохранения
-            # и пересохраним комментарий
-
-            try:
-                comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
-                comment.path.append(comment.id)
-                # print('получилось')
-            except ObjectDoesNotExist:
-                comment.path.append(comment.id)
-                # print('не получилось')
-
-            comment.save()
-        return redirect(post.get_absolute_url())
+    # @method_decorator(login_required)
+    # def post(self, request, *args, **kwargs):
+    #     form = CommentForm(request.POST)
+    #     post = get_object_or_404(Post, id=self.kwargs['pk'])
+    #     if form.is_valid():
+    #         comment = Comment(
+    #             path=[],
+    #             comment_post_id=post.pk,
+    #             author_id=request.user,
+    #             content=form.cleaned_data['comment_area']
+    #         )
+    #         comment.save()
+    #
+    #         # сформируем path после первого сохранения
+    #         # и пересохраним комментарий
+    #
+    #         try:
+    #             comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
+    #             comment.path.append(comment.id)
+    #             # print('получилось')
+    #         except ObjectDoesNotExist:
+    #             comment.path.append(comment.id)
+    #             # print('не получилось')
+    #
+    #         comment.save()
+    #     return redirect(post.get_absolute_url())
 
 
 @login_required
