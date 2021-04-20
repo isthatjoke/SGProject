@@ -61,7 +61,7 @@ class PostDetailView(DetailView):
         return context
 
     def get(self, request, *args, **kwargs):
-        print(f"pk in get = {self.kwargs['pk']}")
+
         post = get_object_or_404(Post, id=self.kwargs['pk'])
         context = {}
         context.update(request)
@@ -103,10 +103,10 @@ class PostDetailView(DetailView):
             try:
                 comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
                 comment.path.append(comment.id)
-                print('получилось')
+                # print('получилось')
             except ObjectDoesNotExist:
                 comment.path.append(comment.id)
-                print('не получилось')
+                # print('не получилось')
 
             comment.save()
         return redirect(post.get_absolute_url())
