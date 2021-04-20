@@ -90,7 +90,7 @@ class Comment(models.Model):
     class Meta:
         db_table = "comments"
 
-    published = models.BooleanField(default=True) #True - опубликован, False - удалено
+    published = models.BooleanField(default=True)  # True - опубликован, False - удалено
     path = ArrayField(models.IntegerField())
     comment_post_id = models.ForeignKey(Post, related_name='comment_post_id', verbose_name='пост',
                                         on_delete=models.CASCADE,
@@ -119,3 +119,30 @@ class Comment(models.Model):
     def get_absolute_url(self):
         return f'/post/{self.comment_post_id.pk}/'
 
+
+def get_all_comments(user_id):
+    ''':user_id - id пользователя
+        :return - возвращает словарь объектов { пост: [комментарий,...]}
+    '''
+
+    comments_dict = {}
+
+    comments = Comment.objects.filter(author_id=user_id)
+    if comments:
+        for comment in comments:
+            post = Post.objects.get(id=comment.comment_post_id.id)
+            list_comm = []  # список объектов comment конкретного поста
+            for el in comments:
+                if el.comment_post_id.id == post.id:
+                    list_comm.append(el)
+            comments_dict[post] = list_comm
+
+            # для поста собрали список комментов
+
+        # print(f'comments_dict: {comments_dict}')
+
+        return comments_dict
+
+    comments_dict = {}
+    # нет коментов у пользователя
+    return comments_dict
