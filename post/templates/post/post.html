@@ -48,7 +48,7 @@
         </div>
     </div>
     <h2>Комментарии</h2>
-        {{ request.user.username }}
+
         {% for comment in comments %}
             <a name="comment-{{ comment.id }}"></a>
             <div class="row" id="{{ comment.id }}">
