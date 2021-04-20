@@ -61,7 +61,7 @@ class PostDetailView(DetailView):
         return context
 
     def get(self, request, *args, **kwargs):
-        print(f"pk in get = {self.kwargs['pk']}")
+
         post = get_object_or_404(Post, id=self.kwargs['pk'])
         context = {}
         context.update(request)
@@ -72,10 +72,9 @@ class PostDetailView(DetailView):
         # Помещаем в контекст все комментарии, которые относятся к статье
         # попутно сортируя их по пути, ID автоинкрементируемые, поэтому
         # проблем с иерархией комментариев не должно возникать
-        # context['comments'] = Comment.objects.all().order_by('path')
-        com = Comment.objects.filter(comment_post_id_id=self.kwargs['pk'])
-        if com:
-            context['comments'] = com
+        context['comments'] = Comment.objects.all().order_by('path')
+
+        # context['comments'] = Comment.objects.filter(comment_post_id_id=self.kwargs['pk'])
         # context['next'] = Comment.get_absolute_url()
         # Будем добавлять форму только в том случае, если пользователь авторизован
         if user.is_authenticated:
@@ -91,7 +90,7 @@ class PostDetailView(DetailView):
         post = get_object_or_404(Post, id=self.kwargs['pk'])
         if form.is_valid():
             comment = Comment(
-                path=json.dumps([]),
+                path=[],
                 comment_post_id=post.pk,
                 author_id=request.user,
                 content=form.cleaned_data['comment_area']
@@ -100,33 +99,37 @@ class PostDetailView(DetailView):
 
             # сформируем path после первого сохранения
             # и пересохраним комментарий
-            data = json.loads(comment.path)
-            try:
-                data.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
-                data.append(comment.id)
-                print('получилось')
-            except ObjectDoesNotExist:
-                data.append(comment.id)
-                print('не получилось')
 
-            comment.path = json.dumps(data)
+            try:
+                comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
+                comment.path.append(comment.id)
+                # print('получилось')
+            except ObjectDoesNotExist:
+                comment.path.append(comment.id)
+                # print('не получилось')
+
             comment.save()
         return redirect(post.get_absolute_url())
 
 
 @login_required
+def delete_comment(request, pk2, pk):
+    comment = get_object_or_404(Comment, id=pk)
+    comment.content = f"[----русские хакеры удалили этот коммент---]"
+    comment.published = False
+    comment.save()
+    return redirect(comment.get_absolute_url())
+
+
+@login_required
 @require_http_methods(["POST"])
 def add_comment(request, pk):
-    print(f'add_comment function!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     form = CommentForm(request.POST)
-    print(f'form: {form}')
     post = get_object_or_404(Post, id=pk)
-    print(f'post: {post}')
-    print(f'post.pk: {post.pk}')
 
     if form.is_valid():
         comment = Comment()
-        comment.path = json.dumps([])
+        comment.path = []
         comment.comment_post_id = post
         comment.author_id = auth.get_user(request)
         comment.content = form.cleaned_data['comment_area']
@@ -135,16 +138,14 @@ def add_comment(request, pk):
         # Django не позволяет увидеть ID комментария по мы не сохраним его,
         # сформируем path после первого сохранения
         # и пересохраним комментарий
-        data = json.loads(comment.path)
         try:
-            data.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
-            data.append(comment.id)
+            comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
+            comment.path.append(comment.id)
         except ObjectDoesNotExist:
-            data.append(comment.id)
+            comment.path.append(comment.id)
 
-        comment.path = json.dumps(data)
         comment.save()
-    print(f'Я ПЕРЕД РЕДИРЕКТОМ add_comment post.get_absolute_url(): {comment.get_absolute_url()}')
+
     return redirect(comment.get_absolute_url())
 
 
