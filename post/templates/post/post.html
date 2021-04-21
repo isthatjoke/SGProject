@@ -15,7 +15,7 @@
             <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
                  alt="preview">
             <div class="post__container">
-                <div class="post__user">Пользователь: <span>{{ post.user_id }}</span></div>
+                <div class="post__user">Пользователь: <span>{{ post.user }}</span></div>
                 <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
                 <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
                 <div class="post__title"><h3>{{ post.name }}</h3></div>
@@ -26,22 +26,24 @@
 
                 </div>
 
-{#                <div class="post__button__read">#}
-{#                    <a href="/post/{{ post.id }}">#}
-{#                        <button>Читать далее...</button>#}
-{#                    </a>#}
-{#                </div>#}
+                {#                <div class="post__button__read">#}
+                {#                    <a href="/post/{{ post.id }}">#}
+                {#                        <button>Читать далее...</button>#}
+                {#                    </a>#}
+                {#                </div>#}
 
                 <div class="post__statistic">
-                    <div class="post__karma"><i class="fa fa-bar-chart" aria-hidden="true"></i><span
-                            class="post__karma__count">{{ post.post_karma }}</span>&nbsp;&nbsp;
+                    <div class="post__karma"><i class="fa fa-bar-chart" aria-hidden="true"></i>
+                        <span class="post__karma__count">{{ post.post_karma }}</span>&nbsp;
+                        <span class="post__karma__msg"></span>&nbsp;
                         {% if request.user.is_authenticated %}
-
-                        <bottom type="button" id="likes_down"><i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;</bottom>
-                        <bottom type="button" id="likes_up"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></bottom>
-                    {% else %}
-                      <span>Для выставления оценки авторизуйтесь.</span>
-                    {% endif %}
+                            <bottom type="button" id="likes_down"><i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
+                            </bottom>
+                            <bottom type="button" id="likes_up"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                            </bottom>
+                        {% else %}
+                            <span>Для выставления оценки авторизуйтесь.</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -49,55 +51,76 @@
     </div>
     <h2>Комментарии</h2>
 
-        {% for comment in comments %}
-            <a name="comment-{{ comment.id }}"></a>
-            <div class="row" id="{{ comment.id }}">
-                <div class="col-md-{{ comment.get_col }} col-md-offset-{{ comment.get_offset }}">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <strong>{{ comment.author_id.get_full_name|default:comment.author_id.username }}</strong>&nbsp;&nbsp;
-                            {{ comment.created_at }}
-                            <a href="#comment-{{ comment.id }}">#</a>
+    {% for comment in comments %}
+        <a name="comment-{{ comment.id }}"></a>
+        <div class="row" id="{{ comment.id }}">
+            <div class="col-md-{{ comment.get_col }} col-md-offset-{{ comment.get_offset }}">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>{{ comment.author_id.get_full_name|default:comment.author.username }}</strong>&nbsp;&nbsp;
+                        {{ comment.created_at }}
+                        <a href="#comment-{{ comment.id }}">#</a>
+                    </div>
+                    <div class="panel-body">
+                        <div>
+                            {{ comment.content|safe }}
+                            <div>
+                                <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                                <span class="comment__karma__count">{{ comment.comment_karma }}</span>&nbsp;
+                                <span class="comment__karma__msg"></span>&nbsp;
+                                {% if request.user.is_authenticated %}
+                                    <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
+                                        <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
+                                    </bottom>
+                                    <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
+                                        <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                    </bottom>
+                                {% else %}
+                                    <span>Для выставления оценки авторизуйтесь.</span>
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="panel-body">
-                            <div>{{ comment.content|safe }}</div>
 
-                            {% if comment.published %}
-                                {% if form %}
+                        {% if comment.published %}
+                            {% if form %}
 
                                 <a class="btn btn-default btn-xs pull-right"
-                                                onclick="return show_comments_form({{ comment.id }})">
+                                   onclick="return show_comments_form({{ comment.id }})">
                                     {% bootstrap_icon "share-alt" %}&nbsp;&nbsp;Ответить
                                 </a>
-                                {% if comment.author_id.username == request.user.username %}
-                                    &nbsp;&nbsp;<a href="comment/delete/{{ comment.id }}" class="btn btn-default btn-xs pull-right"> Удалить</a>
+                                {% if comment.author.username == request.user.username %}
+                                    &nbsp;&nbsp;
+                                    <a href="comment/delete/{{ comment.id }}" class="btn btn-default btn-xs pull-right">
+                                        Удалить</a>
 
-                                    {% endif%}
                                 {% endif %}
                             {% endif %}
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-        {% endfor %}
-        {% if form %}
-            <h3 id="write_comment"><a style="color: black;" onclick="return show_comments_form('write_comment')">Написать комментарий</a></h3>
-            <form id="comment_form" action="{% url 'post:add_comment' post.id %}" method="post">
+        </div>
+    {% endfor %}
+    {% if form %}
+        <h3 id="write_comment"><a style="color: black;" onclick="return show_comments_form('write_comment')">Написать
+            комментарий</a></h3>
+        <form id="comment_form" action="{% url 'post:add_comment' post.id %}" method="post">
             {% csrf_token %}
             {% bootstrap_form form %}
             {% buttons %}
-                <button type="submit" class="btn btn-primary">{% bootstrap_icon "comment" %}&nbsp;&nbsp;Комментировать</button>
+                <button type="submit" class="btn btn-primary">{% bootstrap_icon "comment" %}&nbsp;&nbsp;Комментировать
+                </button>
             {% endbuttons %}
-            </form>
-        {% else %}
-            <div class="panel panel-warning">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Комментарии</h3>
-                </div>
-                <div class="panel-body">
-                    Только авторизованные пользователи могут оставлять комментарии.<br />
-                </div>
+        </form>
+    {% else %}
+        <div class="panel panel-warning">
+            <div class="panel-heading">
+                <h3 class="panel-title">Комментарии</h3>
             </div>
-        {% endif %}
+            <div class="panel-body">
+                Только авторизованные пользователи могут оставлять комментарии.<br/>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
 
