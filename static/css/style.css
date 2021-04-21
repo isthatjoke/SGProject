@@ -282,8 +282,16 @@ main {
     font-size: 15px;
 }
 
+.comment__karma__count {
+    margin-left: 5px;
+    font-size: 15px;
+}
+
 .errorlist > li {
     font-size: 12px;
     margin-left: 30px;
 }
 
+.liked {
+    opacity: 0.5;
+}
