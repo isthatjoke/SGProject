@@ -225,7 +225,7 @@ class CommentUserlist(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(CommentUserlist, self).get_context_data(**kwargs)
-        context['title'] = f'Вши комментарии {self.request.user.username}'
+        context['title'] = f'Ваши комментарии {self.request.user.username}'
         context['comments_dict'] = get_all_comments(self.request.user.id)  # словарь объектов { пост: [комментарий,...]}
         context['head_menu_object_list'] = get_hub_cats_dict()
         return context
