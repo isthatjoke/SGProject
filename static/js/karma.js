@@ -13,12 +13,12 @@ const likeClasses = ['fa-thumbs-o-up', 'fa-thumbs-up'];
 function set_event_listeners_post(element, classNames, sign) {
   let tag = document.getElementById(element);
   tag.addEventListener('mousedown', (event) => {
-    tag.childNodes[0].classList.remove(classNames[0]);
-    tag.childNodes[0].classList.add(classNames[1]);
+    tag.childNodes[1].classList.remove(classNames[0]);
+    tag.childNodes[1].classList.add(classNames[1]);
   });
   tag.addEventListener('mouseup', (event) => {
-    tag.childNodes[0].classList.remove(classNames[1]);
-    tag.childNodes[0].classList.add(classNames[0]);
+    tag.childNodes[1].classList.remove(classNames[1]);
+    tag.childNodes[1].classList.add(classNames[0]);
     ajax_karma(sign);
   });
 }
@@ -88,9 +88,9 @@ function ajax_karma_comments(comment_id, sign) {
     url: "comment/" + comment_id +  "/karma/" + sign + "/",
     success: function (data) {
       if (isNaN(data.result)) {
-        $('.comment__karma__msg').html(data.result);
+        $(`#${comment_id} .comment__karma__msg`).html(data.result);
       } else {
-        $('.comment__karma__count').html(data.result);
+        $(`#${comment_id} .comment__karma__count`).html(data.result);
       }
     }
   });
