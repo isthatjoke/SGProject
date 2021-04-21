@@ -1,6 +1,7 @@
 {% extends 'hub/base.html' %}
 {% load static %}
 {% block content %}
+
     <div class="card">
         <div class="user__login">
             <form id="signinform" action="{% url 'authapp:update' %}" method="post" enctype="multipart/form-data">

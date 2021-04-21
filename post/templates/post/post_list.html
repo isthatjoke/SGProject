@@ -4,8 +4,20 @@
     {% include 'post/includes/menu.html' %}
     <div class="posts">
 
-                                {% if not posts %}
-                                    <h1>Постов нет</h1>
+                                {% if not posts and request.GET.status == 'unpublished'%}
+                                    <h1>Неопубликованных постов нет</h1>
+                                {% endif %}
+
+                                {% if not posts and request.GET.status == 'archive'%}
+                                    <h1>Архивированных постов нет</h1>
+                                {% endif %}
+
+                                {% if not posts and request.GET.status == 'template'%}
+                                    <h1>Шаблонов постов нет</h1>
+                                {% endif %}
+
+                                {% if not posts and not request.GET.status %}
+                                    <h1>Опубликованных постов нет</h1>
                                 {% endif %}
 
         {% for post in posts %}
@@ -91,6 +103,7 @@
             </div>
         {% endfor %}
     </div>
+    {% if posts %}
     <nav aria-label="Page navigation example" class="mt-3">
                         <ul class="pagination">
                             <li class="page-item">
@@ -116,5 +129,6 @@
                             </li>
                         </ul>
                     </nav>
+    {% endif %}
 
 {% endblock %}
