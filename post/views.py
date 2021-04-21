@@ -2,8 +2,9 @@ import json
 from datetime import datetime, timedelta
 
 import pytz
-from django.contrib import auth
+from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, Count
 from django.http import HttpResponseRedirect, JsonResponse
@@ -204,10 +205,15 @@ def add_comment(request, pk):
     return redirect(comment.get_absolute_url())
 
 
-class PostCreateView(CreateView):
+class PostCreateView(CreateView, SuccessMessageMixin):
     template_name = 'post/post_form.html'
     form_class = PostCreationForm
     success_url = reverse_lazy('post:users_posts')
+    success_message = 'пост создан'
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, self.success_message)
+        return super().form_valid(form)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
@@ -269,6 +275,7 @@ class PostUpdateView(UpdateView):
     template_name = 'post/post_form.html'
     form_class = PostEditForm
     success_url = reverse_lazy('post:users_posts')
+    success_message = 'пост отредактирован'
 
     def get_context_data(self, **kwargs):
         context = super(PostUpdateView, self).get_context_data(**kwargs)
@@ -282,6 +289,10 @@ class PostUpdateView(UpdateView):
             return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
         else:
             return render(request, self.template_name, {'form': self.form_class(instance=post)})
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, self.success_message)
+        return super().form_valid(form)
 
 
 @login_required
