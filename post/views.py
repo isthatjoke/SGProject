@@ -40,11 +40,12 @@ def perform_karma_update(post, user, karma):
     elif not already_liked:
         new_object = PostKarma.objects.create(post=post, user=user, karma=karma)
         new_object.save()
-        updated_post = Post.objects.filter(id=post.id).first().post_karma
-        return JsonResponse({'result': str(updated_post)})
+        updated_post_karma = Post.objects.filter(id=post.id).first().post_karma
+        return JsonResponse({'result': str(updated_post_karma)})
     else:
-        resp = 'Вы уже оценили этот пост!'
-        return JsonResponse({'result': resp})
+        already_liked.delete()
+        updated_post_karma = Post.objects.filter(id=post.id).first().post_karma
+        return JsonResponse({'result': str(updated_post_karma)})
 
 
 def perform_comment_karma_update(post, comment, user, karma):
@@ -67,11 +68,12 @@ def perform_comment_karma_update(post, comment, user, karma):
     elif not already_liked:
         new_object = CommentKarma.objects.create(comment=comment, user=user, karma=karma)
         new_object.save()
-        updated_comment = Comment.objects.filter(id=comment.id).first().comment_karma
-        return JsonResponse({'result': str(updated_comment)})
+        updated_comment_karma = Comment.objects.filter(id=comment.id).first().comment_karma
+        return JsonResponse({'result': str(updated_comment_karma)})
     else:
-        resp = 'Вы уже оценили этот комментарий!'
-        return JsonResponse({'result': resp})
+        already_liked.delete()
+        updated_comment_karma = Comment.objects.filter(id=comment.id).first().comment_karma
+        return JsonResponse({'result': str(updated_comment_karma)})
 
 
 class PostDetailView(DetailView):

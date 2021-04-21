@@ -37,10 +37,29 @@
                         <span class="post__karma__count">{{ post.post_karma }}</span>&nbsp;
                         <span class="post__karma__msg"></span>&nbsp;
                         {% if request.user.is_authenticated %}
-                            <bottom type="button" id="likes_down"><i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
-                            </bottom>
-                            <bottom type="button" id="likes_up"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
-                            </bottom>
+                            {% if request.user == post.post_id.first.user %}
+                                {% if post.post_id.first.karma == 1 %}
+                                    <bottom type="button" id="likes_down"><i class="fa fa-thumbs-o-down"
+                                                                             aria-hidden="true"></i>&nbsp;&nbsp;
+                                    </bottom>
+                                    <bottom type="button" id="likes_up"><i class="fa fa-thumbs-o-up liked"
+                                                                           aria-hidden="true"></i>
+                                    </bottom>
+                                {% elif post.post_id.first.karma == -1 %}
+                                    <bottom type="button" id="likes_down"><i class="fa fa-thumbs-o-down liked"
+                                                                             aria-hidden="true"></i>&nbsp;&nbsp;
+                                    </bottom>
+                                    <bottom type="button" id="likes_up"><i class="fa fa-thumbs-o-up"
+                                                                           aria-hidden="true"></i>
+                                    </bottom>
+                                {% endif %}
+                            {% else %}
+                                <bottom type="button" id="likes_down"><i class="fa fa-thumbs-o-down"
+                                                                         aria-hidden="true"></i>&nbsp;&nbsp;
+                                </bottom>
+                                <bottom type="button" id="likes_up"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                </bottom>
+                            {% endif %}
                         {% else %}
                             <span>Для выставления оценки авторизуйтесь.</span>
                         {% endif %}

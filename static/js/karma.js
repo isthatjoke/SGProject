@@ -13,12 +13,12 @@ const likeClasses = ['fa-thumbs-o-up', 'fa-thumbs-up'];
 function set_event_listeners_post(element, classNames, sign) {
   let tag = document.getElementById(element);
   tag.addEventListener('mousedown', (event) => {
-    tag.className = tag.childNodes[0].classList.remove(classNames[0]);
-    tag.className = tag.childNodes[0].classList.add(classNames[1]);
+    tag.childNodes[0].classList.remove(classNames[0]);
+    tag.childNodes[0].classList.add(classNames[1]);
   });
   tag.addEventListener('mouseup', (event) => {
-    tag.className = tag.childNodes[0].classList.remove(classNames[1]);
-    tag.className = tag.childNodes[0].classList.add(classNames[0]);
+    tag.childNodes[0].classList.remove(classNames[1]);
+    tag.childNodes[0].classList.add(classNames[0]);
     ajax_karma(sign);
   });
 }
