@@ -40,8 +40,8 @@
                             {% if request.user == post.post_id.first.user %}
                                 {% if post.post_id.first.karma == 1 %}
                                     <bottom type="button" id="likes_down">
-{#                                    если будете что-то тут редачить, не забудьте поправить порядок #}
-{#                                    childNodes в файле karma.js#}
+                                        {# если будете что-то тут редачить, не забудьте поправить порядок #}
+                                        {# childNodes в файле karma.js #}
                                         <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
                                     </bottom>
                                     <bottom type="button" id="likes_up">
@@ -88,15 +88,34 @@
                             {{ comment.content|safe }}
                             <div>
                                 <i class="fa fa-bar-chart" aria-hidden="true"></i>
-                                <span class="comment__karma__count">{{ comment.comment_karma }}</span>&nbsp;
-                                <span class="comment__karma__msg"></span>&nbsp;
+                                <span id="{{ comment.id }}"
+                                      class="comment__karma__count">{{ comment.comment_karma }}</span>&nbsp;
+                                <span id="{{ comment.id }}" class="comment__karma__msg"></span>&nbsp;
                                 {% if request.user.is_authenticated %}
-                                    <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
-                                        <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
-                                    </bottom>
-                                    <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
-                                        <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
-                                    </bottom>
+                                    {% if request.user == comment.karma.first.user %}
+                                        {% if comment.karma.first.karma == 1 %}
+                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
+                                                <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
+                                            </bottom>
+                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
+                                                <i class="fa fa-thumbs-o-up liked" aria-hidden="true"></i>
+                                            </bottom>
+                                        {% elif comment.karma.first.karma == -1 %}
+                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
+                                                <i class="fa fa-thumbs-o-down liked" aria-hidden="true"></i>&nbsp;&nbsp;
+                                            </bottom>
+                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
+                                                <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                            </bottom>
+                                        {% endif %}
+                                    {% else %}
+                                        <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
+                                            <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
+                                        </bottom>
+                                        <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
+                                            <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                        </bottom>
+                                    {% endif %}
                                 {% else %}
                                     <span>Для выставления оценки авторизуйтесь.</span>
                                 {% endif %}
