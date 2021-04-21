@@ -34,14 +34,14 @@ function set_event_listeners_comment(elementName, classNames, sign) {
   let tag = document.getElementsByName(elementName);
   tag.forEach(function (element) {
     element.addEventListener('mousedown', (event) => {
-      element.className = element.childNodes[1].classList.remove(classNames[0]);
-      element.className = element.childNodes[1].classList.add(classNames[1]);
+      element.childNodes[1].classList.remove(classNames[0]);
+      element.childNodes[1].classList.add(classNames[1]);
     });
   });
   tag.forEach(function (element) {
     element.addEventListener('mouseup', (event) => {
-      element.className = element.childNodes[1].classList.remove(classNames[1]);
-      element.className = element.childNodes[1].classList.add(classNames[0]);
+      element.childNodes[1].classList.remove(classNames[1]);
+      element.childNodes[1].classList.add(classNames[0]);
       let comment_id = Number(element.id);
       ajax_karma_comments(comment_id, sign);
     });
