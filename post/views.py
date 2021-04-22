@@ -6,7 +6,7 @@ from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q, Count
+from django.db.models import Q, Count, F
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
@@ -36,15 +36,20 @@ def perform_karma_update(post, user, karma):
     """
     already_liked = PostKarma.objects.filter(Q(user=user.id) & Q(post=post.id))
     if user.id == post.user.id:
+
         resp = 'Нельзя оценивать свой собственный пост!'
         return JsonResponse({'result': resp})
     elif not already_liked:
         new_object = PostKarma.objects.create(post=post, user=user, karma=karma)
         new_object.save()
+        post.karma_count = F('karma_count') + karma
+        post.save()
         updated_post_karma = Post.objects.filter(id=post.id).first().post_karma
         return JsonResponse({'result': str(updated_post_karma)})
     else:
         already_liked.delete()
+        post.karma_count = F('karma_count') - karma
+        post.save()
         updated_post_karma = Post.objects.filter(id=post.id).first().post_karma
         return JsonResponse({'result': str(updated_post_karma)})
 
@@ -389,16 +394,16 @@ def ordering(request):
     now = datetime.now(pytz.timezone(settings.TIME_ZONE)) - timedelta(days=days_count)
     posts = Post.objects.filter(user=request.user).select_related().filter(updated_at__gte=now)
 
-    if request.GET.get('msg_type') == '+date':
+    if request.GET.get('msg_type') == 'date_up':
         posts = posts.order_by('-updated_at')
 
-    elif request.GET.get('msg_type') == '-date':
+    elif request.GET.get('msg_type') == 'date_down':
         posts = posts.order_by('updated_at')
 
-    elif request.GET.get('msg_type') == '+karma':
-        posts = posts.annotate(num_karam=Count('post')).order_by('post')
+    elif request.GET.get('msg_type') == 'karma_up':
+        posts = posts.order_by('-karma_count')
 
-    elif request.GET.get('msg_type') == '-karma':
-        posts = posts.annotate(num_karam=Count('post')).order_by('-post')
+    elif request.GET.get('msg_type') == 'karma_down':
+        posts = posts.order_by('karma_count')
 
     return posts
