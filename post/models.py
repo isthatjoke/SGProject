@@ -40,6 +40,7 @@ class Post(models.Model):
     # published = models.BooleanField(default=False, verbose_name='опубликовано', )
     user = models.ForeignKey(HubUser, related_name='user_id', verbose_name='пользователь', on_delete=models.CASCADE,
                              **NULLABLE)
+    karma_count = models.IntegerField(default=0, verbose_name='количество кармы')
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True, )
     updated_at = models.DateTimeField(verbose_name='время обновления', auto_now=True, )
     content = RichTextField()
