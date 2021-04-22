@@ -35,6 +35,7 @@ def perform_karma_update(post, user, karma):
     :return:
     """
     already_liked = PostKarma.objects.filter(Q(user=user.id) & Q(post=post.id))
+
     if user.id == post.user.id:
 
         resp = 'Нельзя оценивать свой собственный пост!'
@@ -48,7 +49,10 @@ def perform_karma_update(post, user, karma):
         return JsonResponse({'result': str(updated_post_karma)})
     else:
         already_liked.delete()
-        post.karma_count = F('karma_count') - karma
+        if post.karma_count >= 0:
+            post.karma_count = F('karma_count') - 1
+        else:
+            post.karma_count = F('karma_count') + 1
         post.save()
         updated_post_karma = Post.objects.filter(id=post.id).first().post_karma
         return JsonResponse({'result': str(updated_post_karma)})
