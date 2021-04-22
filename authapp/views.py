@@ -1,4 +1,6 @@
+from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
 from django.shortcuts import render
 from django.urls import reverse_lazy, reverse
@@ -24,11 +26,12 @@ class HubUserRegisterView(CreateView):
     success_url = reverse_lazy('authapp:login')
 
 
-class HubUserUpdateView(UpdateView):
+class HubUserUpdateView(UpdateView, SuccessMessageMixin):
     model = HubUser
     template_name = 'authapp/update.html'
     form_class = HubUserUpdateForm
     success_url = reverse_lazy('authapp:update')
+    success_message = 'профиль обновлен'
 
     def get_object(self, queryset=None):
         return self.request.user
@@ -50,7 +53,7 @@ class HubUserUpdateView(UpdateView):
     def form_valid(self, form):
         context = self.get_context_data()
         hubuserprofile = context['profile_form']
-
+        messages.add_message(self.request, messages.SUCCESS, self.success_message)
         with transaction.atomic():
             self.object = form.save()
             if hubuserprofile.is_valid():

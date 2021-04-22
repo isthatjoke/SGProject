@@ -31,7 +31,7 @@
                 <div class="col-md-{{ comment.get_col }} col-md-offset-{{ comment.get_offset }}">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <strong>{{ comment.author_id.get_full_name|default:comment.author_id.username }}</strong>&nbsp;&nbsp;
+                            <strong>{{ comment.author.get_full_name|default:comment.author.username }}</strong>&nbsp;&nbsp;
                             {{ comment.created_at }}
                             <a href="#comment-{{ comment.id }}">#</a>
                         </div>

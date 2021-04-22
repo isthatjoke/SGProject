@@ -124,10 +124,12 @@ def ordering(request, pk=None, cat=None):
         posts = posts.order_by('updated_at')
 
     elif request.GET.get('msg_type') == 'karma_up':
-        posts = posts.annotate(num_karam=Count('post_id')).order_by('post_id')
+        posts = posts.order_by('-karma_count')
+        # posts = posts.annotate(num_karam=Count('post_id')).order_by('post_id')
 
     elif request.GET.get('msg_type') == 'karma_down':
-        posts = posts.annotate(num_karam=Count('post_id')).order_by('-post_id')
+        posts = posts.order_by('karma_count')
+        # posts = posts.annotate(num_karam=Count('post_id')).order_by('-post_id')
 
     return posts
 

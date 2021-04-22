@@ -21,7 +21,7 @@ class Post(models.Model):
 
     STATUSES = (
         (STATUS_PUBLISHED, 'опубликован'),
-        (STATUS_UNPUBLISHED, 'неопубликован'),
+        (STATUS_UNPUBLISHED, 'не опубликован'),
         (STATUS_ARCHIVE, 'в архиве'),
         (STATUS_TEMPLATE, 'шаблон')
     )
@@ -38,8 +38,9 @@ class Post(models.Model):
                                      verbose_name='подкатегория', on_delete=models.CASCADE, **NULLABLE)
     status = models.CharField(verbose_name='статус', choices=STATUSES, default=STATUS_UNPUBLISHED, max_length=11)
     # published = models.BooleanField(default=False, verbose_name='опубликовано', )
-    user_id = models.ForeignKey(HubUser, related_name='user_id', verbose_name='пользователь', on_delete=models.CASCADE,
-                                **NULLABLE)
+    user = models.ForeignKey(HubUser, related_name='user_id', verbose_name='пользователь', on_delete=models.CASCADE,
+                             **NULLABLE)
+    karma_count = models.IntegerField(default=0, verbose_name='количество кармы')
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True, )
     updated_at = models.DateTimeField(verbose_name='время обновления', auto_now=True, )
     content = RichTextField()
@@ -61,12 +62,11 @@ class Post(models.Model):
     # свойство класса для интерактивного подсчета кармы
     @property
     def post_karma(self):
-        return self.post_id.count()
-        # karma_objects = self.post_id.all()
-        # karma = 0
-        # for obj in karma_objects:
-        #     karma += obj.karma
-        # return karma
+        karma_objects = self.post_id.all()
+        karma = 0
+        for obj in karma_objects:
+            karma += obj.karma
+        return karma
 
 
 class PostKarma(models.Model):
@@ -75,15 +75,15 @@ class PostKarma(models.Model):
         verbose_name_plural = 'Карма постов'
         ordering = ('-created_at',)
 
-    post_id = models.ForeignKey(Post, related_name='post_id', on_delete=models.CASCADE, verbose_name='пост',
-                                **NULLABLE)
-    user_id = models.ForeignKey(HubUser, related_name='post_karma', on_delete=models.CASCADE,
-                                verbose_name='пользователь', **NULLABLE)
+    post = models.ForeignKey(Post, related_name='post_id', on_delete=models.CASCADE, verbose_name='пост',
+                             **NULLABLE)
+    user = models.ForeignKey(HubUser, related_name='post_karma', on_delete=models.CASCADE,
+                             verbose_name='пользователь', **NULLABLE)
     karma = models.SmallIntegerField(verbose_name='карма', **NULLABLE)
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True)
 
     def __str__(self):
-        return f'{self.user_id} - "{self.post_id}": {self.karma}'
+        return f'{self.user} - "{self.post}": {self.karma}'
 
 
 class Comment(models.Model):
@@ -92,12 +92,10 @@ class Comment(models.Model):
 
     published = models.BooleanField(default=True)  # True - опубликован, False - удалено
     path = ArrayField(models.IntegerField())
-    comment_post_id = models.ForeignKey(Post, related_name='comment_post_id', verbose_name='пост',
-                                        on_delete=models.CASCADE,
-                                        **NULLABLE)
-    author_id = models.ForeignKey(HubUser, related_name='author_id', verbose_name='пользователь',
-                                  on_delete=models.CASCADE,
-                                  **NULLABLE)
+    comment_post = models.ForeignKey(Post, related_name='comment_post_id', verbose_name='пост',
+                                     on_delete=models.CASCADE, **NULLABLE)
+    author = models.ForeignKey(HubUser, related_name='author_id', verbose_name='пользователь', on_delete=models.CASCADE,
+                               **NULLABLE)
     content = models.TextField(verbose_name='комментарий')
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True)
 
@@ -117,7 +115,16 @@ class Comment(models.Model):
         return 12 - level
 
     def get_absolute_url(self):
-        return f'/post/{self.comment_post_id.pk}/'
+        return f'/post/{self.comment_post.pk}/'
+
+    # свойство класса для интерактивного подсчета кармы
+    @property
+    def comment_karma(self):
+        karma_objects = self.karma.all()
+        karma = 0
+        for obj in karma_objects:
+            karma += obj.karma
+        return karma
 
 
 def get_all_comments(user_id):
@@ -127,13 +134,13 @@ def get_all_comments(user_id):
 
     comments_dict = {}
 
-    comments = Comment.objects.filter(author_id=user_id)
+    comments = Comment.objects.filter(author=user_id)
     if comments:
         for comment in comments:
-            post = Post.objects.get(id=comment.comment_post_id.id)
+            post = Post.objects.get(id=comment.comment_post.id)
             list_comm = []  # список объектов comment конкретного поста
             for el in comments:
-                if el.comment_post_id.id == post.id:
+                if el.comment_post.id == post.id:
                     list_comm.append(el)
             comments_dict[post] = list_comm
 
@@ -146,3 +153,20 @@ def get_all_comments(user_id):
     comments_dict = {}
     # нет коментов у пользователя
     return comments_dict
+
+
+class CommentKarma(models.Model):
+    class Meta:
+        verbose_name = 'карма комментария'
+        verbose_name_plural = 'Карма комментариев'
+        ordering = ('-created_at',)
+
+    comment = models.ForeignKey(Comment, related_name='karma', on_delete=models.CASCADE, verbose_name='комментарий',
+                                **NULLABLE)
+    user = models.ForeignKey(HubUser, related_name='comment_karma_user', on_delete=models.CASCADE,
+                             verbose_name='пользователь', **NULLABLE)
+    karma = models.SmallIntegerField(verbose_name='карма', **NULLABLE)
+    created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user} - "{self.comment}": {self.karma}'

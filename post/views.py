@@ -2,10 +2,11 @@ import json
 from datetime import datetime, timedelta
 
 import pytz
-from django.contrib import auth
+from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q, Count
+from django.db.models import Q, Count, F
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
@@ -18,7 +19,7 @@ from authapp.models import HubUser
 from backend import settings
 from hub.models import get_hub_cats_dict
 from post.forms import PostEditForm, PostCreationForm, CommentForm
-from post.models import Post, PostKarma, Comment, get_all_comments
+from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma
 
 
 def perform_karma_update(post, user, karma):
@@ -33,18 +34,56 @@ def perform_karma_update(post, user, karma):
     :param karma: оценка, может быть 1 или -1
     :return:
     """
-    already_liked = PostKarma.objects.filter(Q(user_id=user.id) & Q(post_id=post.id))
-    if user.id == post.user_id.id:
+    already_liked = PostKarma.objects.filter(Q(user=user.id) & Q(post=post.id))
+
+    if user.id == post.user.id:
+
         resp = 'Нельзя оценивать свой собственный пост!'
         return JsonResponse({'result': resp})
     elif not already_liked:
-        new_object = PostKarma.objects.create(post_id=post, user_id=user, karma=karma)
+        new_object = PostKarma.objects.create(post=post, user=user, karma=karma)
         new_object.save()
-        post = Post.objects.filter(id=post.id).first().post_karma
-        return JsonResponse({'result': str(post)})
+        post.karma_count = F('karma_count') + karma
+        post.save()
+        updated_post_karma = Post.objects.filter(id=post.id).first().post_karma
+        return JsonResponse({'result': str(updated_post_karma)})
     else:
-        resp = 'Вы уже оценили этот пост!'
+        already_liked.delete()
+        if post.karma_count >= 0:
+            post.karma_count = F('karma_count') - 1
+        else:
+            post.karma_count = F('karma_count') + 1
+        post.save()
+        updated_post_karma = Post.objects.filter(id=post.id).first().post_karma
+        return JsonResponse({'result': str(updated_post_karma)})
+
+
+def perform_comment_karma_update(post, comment, user, karma):
+    """
+    Функция выполняющая несколько проверок, прежде чем поставить карму для поста.
+    Сначала функция проверяет, чтобы юзер не оценивал свой собственный пост.
+    Далее функция проверяет, чтобы юзер оценивал пост в первый раз (повторно оценивать пост нельзя).
+    Если все проверки пройдены, то функция возвращает соответствующий ответ в формате JSON.
+
+    :param post: идентификатор поста, с которым взаимодействуют
+    :param comment идентификатор комментария, с которым взаимодействуют
+    :param user: идентификатор пользователя, который взаимодействует
+    :param karma: оценка, может быть 1 или -1
+    :return:
+    """
+    already_liked = CommentKarma.objects.filter(Q(user=user.id) & Q(comment=comment.id))
+    if user.id == comment.author.id:
+        resp = 'Нельзя оценивать свой собственный комментарий!'
         return JsonResponse({'result': resp})
+    elif not already_liked:
+        new_object = CommentKarma.objects.create(comment=comment, user=user, karma=karma)
+        new_object.save()
+        updated_comment_karma = Comment.objects.filter(id=comment.id).first().comment_karma
+        return JsonResponse({'result': str(updated_comment_karma)})
+    else:
+        already_liked.delete()
+        updated_comment_karma = Comment.objects.filter(id=comment.id).first().comment_karma
+        return JsonResponse({'result': str(updated_comment_karma)})
 
 
 class PostDetailView(DetailView):
@@ -58,7 +97,7 @@ class PostDetailView(DetailView):
         context['head_menu_object_list'] = get_hub_cats_dict()
         context['title'] = f'{self.object.name}'
         if self.request.method == 'GET':
-            context['comments'] = Comment.objects.filter(comment_post_id_id=self.kwargs['pk']).order_by('path')
+            context['comments'] = Comment.objects.filter(comment_post=self.kwargs['pk']).order_by('path')
             if self.request.user.is_authenticated:
                 context['form'] = self.comment_form
 
@@ -67,8 +106,8 @@ class PostDetailView(DetailView):
             if form.is_valid():
                 comment = Comment(
                     path=[],
-                    comment_post_id=self.object.pk,
-                    author_id=self.request.user,
+                    comment_post=self.object.pk,
+                    author=self.request.user,
                     content=form.cleaned_data['comment_area']
                 )
                 comment.save()
@@ -158,8 +197,8 @@ def add_comment(request, pk):
     if form.is_valid():
         comment = Comment()
         comment.path = []
-        comment.comment_post_id = post
-        comment.author_id = auth.get_user(request)
+        comment.comment_post = post
+        comment.author = auth.get_user(request)
         comment.content = form.cleaned_data['comment_area']
         comment.save()
 
@@ -177,14 +216,19 @@ def add_comment(request, pk):
     return redirect(comment.get_absolute_url())
 
 
-class PostCreateView(CreateView):
+class PostCreateView(CreateView, SuccessMessageMixin):
     template_name = 'post/post_form.html'
     form_class = PostCreationForm
     success_url = reverse_lazy('post:users_posts')
+    success_message = 'пост создан'
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, self.success_message)
+        return super().form_valid(form)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
-        context['form']['user_id'].initial = self.request.user
+        context['form']['user'].initial = self.request.user
         context['title'] = f'Создание поста'
         context['head_menu_object_list'] = get_hub_cats_dict()
         return context
@@ -198,7 +242,7 @@ class CommentUserlist(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(CommentUserlist, self).get_context_data(**kwargs)
-        context['title'] = f'Вши комментарии {self.request.user.username}'
+        context['title'] = f'Ваши комментарии {self.request.user.username}'
         context['comments_dict'] = get_all_comments(self.request.user.id)  # словарь объектов { пост: [комментарий,...]}
         context['head_menu_object_list'] = get_hub_cats_dict()
         return context
@@ -212,7 +256,7 @@ class PostUserListView(ListView):
 
     def get_queryset(self):
 
-        posts = Post.objects.filter(user_id=self.request.user)
+        posts = Post.objects.filter(user=self.request.user)
 
         if self.request.GET.get('status') == 'unpublished':
             posts = posts.filter(status='unpublished')
@@ -242,6 +286,7 @@ class PostUpdateView(UpdateView):
     template_name = 'post/post_form.html'
     form_class = PostEditForm
     success_url = reverse_lazy('post:users_posts')
+    success_message = 'пост отредактирован'
 
     def get_context_data(self, **kwargs):
         context = super(PostUpdateView, self).get_context_data(**kwargs)
@@ -255,6 +300,10 @@ class PostUpdateView(UpdateView):
             return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
         else:
             return render(request, self.template_name, {'form': self.form_class(instance=post)})
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, self.success_message)
+        return super().form_valid(form)
 
 
 @login_required
@@ -320,21 +369,45 @@ def karma_update(request, pk, pk2):
             return result
 
 
+@login_required
+def comment_karma_update(request, pk, pk2, pk3):
+    """
+    Функция, обрабатывающая ajax-запрос на изменение кармы комментария.
+
+    :param request:
+    :param pk: id поста в таблице Post
+    :param pk2: id комментария в таблице Comment
+    :param pk3: сигнал (если 1 - значит поставили лайк, если 0 - то поставили дизлайк)
+    :return: возвращает карму прочитанную из БД в виде json
+    """
+    if request.is_ajax():
+        post = get_object_or_404(Post, id=pk)
+        comment = get_object_or_404(Comment, id=pk2)
+        user = get_object_or_404(HubUser, id=request.user.pk)
+        result = None
+        if pk3 == 1:
+            result = perform_comment_karma_update(post, comment, user, 1)
+        elif pk3 == 0:
+            result = perform_comment_karma_update(post, comment, user, -1)
+        if result:
+            return result
+
+
 def ordering(request):
     days_count = int(request.GET.get('days', 20))
     now = datetime.now(pytz.timezone(settings.TIME_ZONE)) - timedelta(days=days_count)
-    posts = Post.objects.filter(user_id=request.user).select_related().filter(updated_at__gte=now)
+    posts = Post.objects.filter(user=request.user).select_related().filter(updated_at__gte=now)
 
-    if request.GET.get('msg_type') == '+date':
+    if request.GET.get('msg_type') == 'date_up':
         posts = posts.order_by('-updated_at')
 
-    elif request.GET.get('msg_type') == '-date':
+    elif request.GET.get('msg_type') == 'date_down':
         posts = posts.order_by('updated_at')
 
-    elif request.GET.get('msg_type') == '+karma':
-        posts = posts.annotate(num_karam=Count('post_id')).order_by('post_id')
+    elif request.GET.get('msg_type') == 'karma_up':
+        posts = posts.order_by('-karma_count')
 
-    elif request.GET.get('msg_type') == '-karma':
-        posts = posts.annotate(num_karam=Count('post_id')).order_by('-post_id')
+    elif request.GET.get('msg_type') == 'karma_down':
+        posts = posts.order_by('karma_count')
 
     return posts
