@@ -5,6 +5,9 @@
         <div class="user__login">
             <form id="signinform" action="{% url 'authapp:login' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
+                    {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}">
+                    {% endif %}
                 {{ form.as_p }}
                 <div class="form-button">
                     <button id="submit" type="submit" class="ybtn ybtn-accent-color">Войти</button>

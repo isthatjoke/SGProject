@@ -108,7 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LOGIN_URL = '/auth/login'
+LOGIN_URL = '/login'
 AUTH_USER_MODEL = 'authapp.HubUser'
 
 # Internationalization

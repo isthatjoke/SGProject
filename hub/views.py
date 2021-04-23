@@ -131,6 +131,12 @@ def ordering(request, pk=None, cat=None):
         posts = posts.order_by('karma_count')
         # posts = posts.annotate(num_karam=Count('post_id')).order_by('-post_id')
 
+    elif request.GET.get('msg_type') == 'comments_up':
+        posts = posts.annotate(num_comment=Count('comment_post_id')).order_by('comment_post_id')
+
+    elif request.GET.get('msg_type') == 'comments_down':
+        posts = posts.annotate(num_comment=Count('comment_post_id')).order_by('-comment_post_id')
+
     return posts
 
 
