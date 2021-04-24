@@ -1,0 +1,6 @@
+Unknown command: '/Users/tzverev/PycharmProjects/SGProject/hub/management/commands/script_banned_check.py'
+Type 'manage.py help' for usage.
+Unknown command: '/Users/tzverev/PycharmProjects/SGProject/hub/management/commands/script_banned_check.py'
+Type 'manage.py help' for usage.
+Unknown command: '/Users/tzverev/PycharmProjects/SGProject/hub/management/commands/script_banned_check.py'
+Type 'manage.py help' for usage.

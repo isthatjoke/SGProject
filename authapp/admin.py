@@ -4,5 +4,10 @@ from django.contrib import admin
 
 from authapp.models import HubUser, HubUserProfile
 
-admin.site.register(HubUser)
+
+class HubUserAdmin(admin.ModelAdmin):
+    list_display = ('username', 'email', 'is_superuser', 'is_staff', 'banned')
+
+
+admin.site.register(HubUser, HubUserAdmin)
 admin.site.register(HubUserProfile)

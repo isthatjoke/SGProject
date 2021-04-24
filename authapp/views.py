@@ -1,23 +1,26 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy, reverse
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, FormView, CreateView, UpdateView
 
 # Create your views here.
 from authapp.forms import HubUserLoginForm, HubUserRegisterForm, HubUserUpdateForm, HubUserProfileUpdateForm
 from authapp.models import HubUser
+from backend.utils import LoginRequiredDispatchMixin
 
 
 class HubUserLoginView(LoginView):
     form_class = HubUserLoginForm
     template_name = 'authapp/login.html'
-
-    def get_success_url(self):
-
-        return reverse('hub:main')
+    success_url = reverse_lazy('hub:main')
+    redirect_field_name = 'next'
 
 
 class HubUserRegisterView(CreateView):
@@ -26,7 +29,7 @@ class HubUserRegisterView(CreateView):
     success_url = reverse_lazy('authapp:login')
 
 
-class HubUserUpdateView(UpdateView, SuccessMessageMixin):
+class HubUserUpdateView(UpdateView, SuccessMessageMixin, LoginRequiredDispatchMixin):
     model = HubUser
     template_name = 'authapp/update.html'
     form_class = HubUserUpdateForm
