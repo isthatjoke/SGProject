@@ -11,8 +11,8 @@ NULLABLE = {'blank': True, 'null': True}
 class HubUser(AbstractUser):
 
     BANNED_FALSE = 'active'
-    BANNED_FOR_TIME = 'banned for time'
-    BANNED_FOREVER = 'banned forever'
+    BANNED_FOR_TIME = 'banned_for_time'
+    BANNED_FOREVER = 'banned_forever'
 
     BANNED_STATUSES = (
         (BANNED_FALSE, 'активный'),
@@ -30,7 +30,7 @@ class HubUser(AbstractUser):
     created_at = models.DateTimeField(verbose_name='зарегистрирован', auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name='обновлен', auto_now=True)
     banned = models.CharField(max_length=15, choices=BANNED_STATUSES, default=BANNED_FALSE, verbose_name='забанен')
-    banned_to = models.DateField(verbose_name='забанен до', **NULLABLE)
+    banned_to = models.DateTimeField(verbose_name='забанен до', **NULLABLE)
     rating = models.PositiveSmallIntegerField(verbose_name='рейтинг пользователя', default=0)
 
 
