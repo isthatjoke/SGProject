@@ -17,6 +17,7 @@ from django.views.generic import DetailView, CreateView, ListView, UpdateView
 
 from authapp.models import HubUser
 from backend import settings
+from backend.utils import LoginRequiredDispatchMixin
 from hub.models import get_hub_cats_dict
 from post.forms import PostEditForm, PostCreationForm, CommentForm
 from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma
@@ -216,7 +217,7 @@ def add_comment(request, pk):
     return redirect(comment.get_absolute_url())
 
 
-class PostCreateView(CreateView, SuccessMessageMixin):
+class PostCreateView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin):
     template_name = 'post/post_form.html'
     form_class = PostCreationForm
     success_url = reverse_lazy('post:users_posts')
@@ -248,7 +249,7 @@ class CommentUserlist(ListView):
         return context
 
 
-class PostUserListView(ListView):
+class PostUserListView(ListView, LoginRequiredDispatchMixin):
     model = Post
     template_name = 'post/post_list.html'
     context_object_name = 'posts'
@@ -281,7 +282,7 @@ class PostUserListView(ListView):
         return context
 
 
-class PostUpdateView(UpdateView):
+class PostUpdateView(UpdateView, LoginRequiredDispatchMixin):
     model = Post
     template_name = 'post/post_form.html'
     form_class = PostEditForm
@@ -296,17 +297,19 @@ class PostUpdateView(UpdateView):
 
     def get(self, request, *args, **kwargs):
         post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
-        if post.status == post.STATUS_PUBLISHED:
-            return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
-        else:
-            return render(request, self.template_name, {'form': self.form_class(instance=post)})
+        if post.user == self.request.user or self.request.user.is_staff:
+            if post.status == post.STATUS_PUBLISHED:
+                return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
+            else:
+                return render(request, self.template_name, {'form': self.form_class(instance=post)})
+        return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
 
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, self.success_message)
         return super().form_valid(form)
 
 
-@login_required
+@login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
 def post_publish(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.status = post.STATUS_PUBLISHED
@@ -314,7 +317,7 @@ def post_publish(request, pk):
     return HttpResponseRedirect(reverse('post:users_posts'))
 
 
-@login_required
+@login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
 def post_archive(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.status = post.STATUS_ARCHIVE
@@ -322,7 +325,7 @@ def post_archive(request, pk):
     return HttpResponseRedirect(reverse('post:users_posts'))
 
 
-@login_required
+@login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
 def post_restore(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.status = post.STATUS_UNPUBLISHED
@@ -330,7 +333,7 @@ def post_restore(request, pk):
     return HttpResponseRedirect(reverse('post:users_posts'))
 
 
-@login_required
+@login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
 def post_template(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.pk = None

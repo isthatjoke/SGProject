@@ -17,3 +17,5 @@ requests==2.25.1
 soupsieve==2.2.1
 sqlparse==0.4.1
 urllib3==1.26.4
+
+python-crontab~=2.5.1
