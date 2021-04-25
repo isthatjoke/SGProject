@@ -1,0 +1,12 @@
+{% load static %}
+{% block post_status_template %}
+
+{#                                <a href="{% url 'post:post_update' post.id %}">#}
+{#                                    <button>Редактировать</button>#}
+{#                                </a>#}
+
+                                <a href="{% url 'post:post_archive' post.id %}">
+                                    <button>Удалить</button>
+                                </a>
+
+{% endblock %}

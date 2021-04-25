@@ -1,0 +1,52 @@
+{% load static %}
+{% block post-menu %}
+
+<div class="row">
+
+    {% if not request.GET.status %}
+    <div class="col-3"><a href="{% url 'post:users_posts' %}" style="color: black">опубликованные</a></div>
+    {% else %}
+    <div class="col-3"><a href="{% url 'post:users_posts' %}">опубликованные</a></div>
+    {% endif %}
+
+    {% if request.GET.status == 'unpublished'%}
+    <div class="col-3"><a href="{% url 'post:users_posts' %}?status=unpublished" style="color: black">неопубликованные</a></div>
+    {% else %}
+    <div class="col-3"><a href="{% url 'post:users_posts' %}?status=unpublished">неопубликованные</a></div>
+    {% endif %}
+
+    {% if request.GET.status == 'archive'%}
+    <div class="col-3"><a href="{% url 'post:users_posts' %}?status=archive" style="color: black">архив</a></div>
+    {% else %}
+    <div class="col-3"><a href="{% url 'post:users_posts' %}?status=archive">архив</a></div>
+    {% endif %}
+
+    {% if request.GET.status == 'template'%}
+    <div class="col-3"><a href="{% url 'post:users_posts' %}?status=template" style="color: black">шаблоны</a></div>
+    {% else %}
+    <div class="col-3"><a href="{% url 'post:users_posts' %}?status=template">шаблоны</a></div>
+    {% endif %}
+
+        {% if not user.is_staff %}
+
+    {% if request.GET.status == 'moderate'%}
+    <div class="col-3"><a href="{% url 'post:users_posts' %}?status=moderate" style="color: black">на модерации</a></div>
+    {% else %}
+    <div class="col-3"><a href="{% url 'post:users_posts' %}?status=moderate">на модерации</a></div>
+    {% endif %}
+
+        {% else %}
+
+    {% if request.GET.status == 'moderate'%}
+    <div class="col-3"><a href="{% url 'post:post_to_moderate' %}?status=moderate" style="color: black">требуют модерации ({{ on_moderate }})</a></div>
+    {% else %}
+    <div class="col-3"><a href="{% url 'post:post_to_moderate' %}?status=moderate">требуют модерации ({{ on_moderate }})</a></div>
+    {% endif %}
+
+        {% endif %}
+
+
+
+</div>
+
+{% endblock %}

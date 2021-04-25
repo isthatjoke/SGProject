@@ -1,0 +1,15 @@
+{% extends 'hub/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="card">
+        <div class="user__login">
+            <form id="signinform" action="{% url 'authapp:register' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-button">
+                    <button id="submit" type="submit" class="ybtn ybtn-reg ybtn-accent-color">Зарегистрироваться</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

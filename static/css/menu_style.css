@@ -1,0 +1,40 @@
+/* скрываем выпадающие списки по умолчанию
+ * и задаем абсолютное позиционирование */
+
+nav ul ul {
+    display: none;
+    position: absolute;
+    top: 100%;
+}
+
+nav ul, li {
+    display: flex;
+    padding: 5px 15px;
+    font-size: 20px;
+    margin-left: 5px;
+}
+
+.topmenu > li {
+  display: inline-block;
+  margin-right: 20px;
+  position: relative;
+}
+
+.topmenu > li:last-child {
+  margin-right: 0;
+}
+
+.topmenu li a:hover {
+ color: black;
+}
+
+.one .submenu {
+  display: none;
+  background: #9ec6df;
+}
+.one ul li:hover .submenu {
+  display: block;
+  width: 300px;
+}
+
+

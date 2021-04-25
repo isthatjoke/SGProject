@@ -1,0 +1,8 @@
+{% load static %}
+{% block post_status_template %}
+
+                                <a href="{% url 'post:post_archive' post.id %}">
+                                    <button>Удалить</button>
+                                </a>
+
+{% endblock %}

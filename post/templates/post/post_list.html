@@ -1,0 +1,91 @@
+{% extends 'hub/base.html' %}
+{% load static %}
+{% block content %}
+    {% include 'post/includes/menu.html' %}
+    <div class="posts">
+
+                                {% include 'post/includes/post_empty_status.html' %}
+
+        {% for post in posts %}
+            <div class="card" >
+
+                <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
+                     alt="preview">
+                <div class="post__container">
+                    {% include 'post/includes/post_moderate_status.html' %}
+                    <div class="post__user">Пользователь: <span>{{ post.user }}</span></div>
+                    <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
+                    <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
+                    <div class="post__title"><h3>{{ post.name }}</h3></div>
+                    <div class="post__body">
+                        <p>
+                            {{ post.content|safe|truncatewords:50 }}
+                        </p>
+
+                    </div>
+
+                    <div class="post__button__read">
+                        <a href="{% url 'post:post' post.id %}">
+                            <button>Читать далее...</button>
+                        </a>
+
+                        {% if post.status == 'unpublished' %}
+                                {% include 'post/includes/post_status_unpublished.html' %}
+                        {% elif post.status == 'published' %}
+                                {% include 'post/includes/post_status_published.html' %}
+                        {% elif post.status == 'archive' %}
+                                {% include 'post/includes/post_status_archive.html' %}
+                        {% elif post.status == 'template' %}
+                                {% include 'post/includes/post_status_template.html' %}
+                        {% elif post.status == 'moderate_false' %}
+                                {% include 'post/includes/post_status_moderate_false.html' %}
+                        {% elif post.status == 'need_review' %}
+                                {% include 'post/includes/post_status_need_review.html' %}
+                        {% endif %}
+
+                        {% if post.status == 'on_moderate' and user.is_staff%}
+                                {% include 'post/includes/post_on_moderate.html' %}
+                        {% endif %}
+
+
+
+                    </div>
+
+                    <div class="post__statistic">
+                        <div class="post__karma"><i class="fa fa-bar-chart" aria-hidden="true"></i><span
+                                class="post__karma__count">{{ post.post_karma }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% if posts %}
+    <nav aria-label="Page navigation example" class="mt-3">
+                        <ul class="pagination">
+                            <li class="page-item">
+                                {% if page_obj.has_previous %}
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}"
+                                       aria-label="Previous" style="color: black">
+                                        <span aria-hidden="true">&laquo;</span>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                {% endif %}
+                            </li>
+                            <li class="page-item"><a class="page-link" href="#"  style="color: black">Страница {{ page_obj.number }}
+                                из {{ page_obj.paginator.num_pages }}
+                            </a></li>
+                            <li class="page-item">
+                                {% if page_obj.has_next %}
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}"
+                                       aria-label="Next"  style="color: black">
+                                        <span aria-hidden="true">&raquo;</span>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </nav>
+    {% endif %}
+
+{% endblock %}
