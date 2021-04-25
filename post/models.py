@@ -75,6 +75,7 @@ class Post(models.Model):
             karma += obj.karma
         return karma
 
+    # подсчет постов на модерации
     @staticmethod
     def on_moderate_count():
         return Post.objects.filter(status=Post.STATUS_ON_MODERATE).count()

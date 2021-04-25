@@ -6,7 +6,7 @@
                                     <button>Редактировать</button>
                                 </a>
 
-                            {% if user.rating >= 7 %}
+                            {% if user.rating >= 7 or user.is_staff %}
                                 <a href="{% url 'post:post_publish' post.id %}">
                                     <button>Опубликовать</button>
                                 </a>

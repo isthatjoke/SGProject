@@ -269,7 +269,7 @@ class PostUserListView(ListView, LoginRequiredDispatchMixin):
             posts = posts.filter(status='template')
 
         elif self.request.GET.get('status') == 'moderate':
-            posts = posts.filter(Q(status='on_moderate') | Q(status='need_review'))
+            posts = posts.filter(Q(status='on_moderate') | Q(status='need_review') | Q(status='moderate_false'))
 
         else:
             posts = posts.filter(status='published')
@@ -284,7 +284,6 @@ class PostUserListView(ListView, LoginRequiredDispatchMixin):
         context['head_menu_object_list'] = get_hub_cats_dict()
         context['msg_type'] = self.request.GET.get('msg_type', '')
         context['days'] = self.request.GET.get('days', '')
-        context['on_moderate'] = Post.on_moderate_count()
 
         return context
 
@@ -304,7 +303,6 @@ class PostModerateListView(ListView, LoginRequiredDispatchMixin):
         context['head_menu_object_list'] = get_hub_cats_dict()
         context['msg_type'] = self.request.GET.get('msg_type', '')
         context['days'] = self.request.GET.get('days', '')
-        context['on_moderate'] = Post.on_moderate_count()
 
         return context
 
