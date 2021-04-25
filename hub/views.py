@@ -29,18 +29,18 @@ class BaseClassContextMixin(ContextMixin):
         return context
 
 
-def main(request):
-    head_menu_object_list = get_hub_cats_dict()
-    all_posts = Post.get_all_posts()
-    title = 'Hub'
-
-    content = {
-        'head_menu_object_list': head_menu_object_list,
-        'posts': all_posts,
-        'title': title,
-    }
-
-    return render(request, 'hub/index.html', context=content)
+# def main(request):
+#     head_menu_object_list = get_hub_cats_dict()
+#     all_posts = Post.get_all_posts()
+#     title = 'Hub'
+#
+#     content = {
+#         'head_menu_object_list': head_menu_object_list,
+#         'posts': all_posts,
+#         'title': title,
+#     }
+#
+#     return render(request, 'hub/index.html', context=content)
 
 
 class Main(ListView):
@@ -55,7 +55,6 @@ class Main(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(Main, self).get_context_data(**kwargs)
-        context['head_menu_object_list'] = get_hub_cats_dict()
         context['title'] = 'Hub'
         # context['msg_type'] = self.request.GET.get('msg_type', '')
         # context['days'] = self.request.GET.get('days', '')
@@ -75,10 +74,9 @@ class HubPostListView(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(HubPostListView, self).get_context_data(**kwargs)
         category = Hub.objects.get(pk=self.kwargs.get('pk', ''))
-        context['head_menu_object_list'] = get_hub_cats_dict()
         context['title'] = category.name
-        context['msg_type'] = self.request.GET.get('msg_type', '')
-        context['days'] = self.request.GET.get('days', '')
+        # context['msg_type'] = self.request.GET.get('msg_type', '')
+        # context['days'] = self.request.GET.get('days', '')
 
         return context
 
@@ -96,11 +94,10 @@ class HubCategoryPostListView(ListView):
         context = super(HubCategoryPostListView, self).get_context_data(**kwargs)
         category = Hub.objects.get(pk=self.kwargs.get('pk', ''))
         hub_category = HubCategory.objects.get(pk=self.kwargs.get('cat', ''))
-        context['head_menu_object_list'] = get_hub_cats_dict()
         context['title'] = category.name
         context['hub_category'] = hub_category.name
-        context['msg_type'] = self.request.GET.get('msg_type', '')
-        context['days'] = self.request.GET.get('days', '')
+        # context['msg_type'] = self.request.GET.get('msg_type', '')
+        # context['days'] = self.request.GET.get('days', '')
 
         return context
 

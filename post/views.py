@@ -95,7 +95,6 @@ class PostDetailView(DetailView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostDetailView, self).get_context_data(**kwargs)
-        context['head_menu_object_list'] = get_hub_cats_dict()
         context['title'] = f'{self.object.name}'
         if self.request.method == 'GET':
             context['comments'] = Comment.objects.filter(comment_post=self.kwargs['pk']).order_by('path')
@@ -231,7 +230,6 @@ class PostCreateView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin
         context = super(PostCreateView, self).get_context_data(**kwargs)
         context['form']['user'].initial = self.request.user
         context['title'] = f'Создание поста'
-        context['head_menu_object_list'] = get_hub_cats_dict()
         return context
 
 
@@ -245,7 +243,6 @@ class CommentUserlist(ListView):
         context = super(CommentUserlist, self).get_context_data(**kwargs)
         context['title'] = f'Ваши комментарии {self.request.user.username}'
         context['comments_dict'] = get_all_comments(self.request.user.id)  # словарь объектов { пост: [комментарий,...]}
-        context['head_menu_object_list'] = get_hub_cats_dict()
         return context
 
 
@@ -281,9 +278,6 @@ class PostUserListView(ListView, LoginRequiredDispatchMixin):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostUserListView, self).get_context_data(**kwargs)
         context['title'] = f'Мои посты'
-        context['head_menu_object_list'] = get_hub_cats_dict()
-        context['msg_type'] = self.request.GET.get('msg_type', '')
-        context['days'] = self.request.GET.get('days', '')
 
         return context
 
@@ -300,9 +294,6 @@ class PostModerateListView(ListView, LoginRequiredDispatchMixin):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostModerateListView, self).get_context_data(**kwargs)
         context['title'] = f'Модерация постов'
-        context['head_menu_object_list'] = get_hub_cats_dict()
-        context['msg_type'] = self.request.GET.get('msg_type', '')
-        context['days'] = self.request.GET.get('days', '')
 
         return context
 
@@ -317,7 +308,6 @@ class PostUpdateView(UpdateView, LoginRequiredDispatchMixin):
     def get_context_data(self, **kwargs):
         context = super(PostUpdateView, self).get_context_data(**kwargs)
         context['title'] = f'Редактирование поста {self.object.name}'
-        context['head_menu_object_list'] = get_hub_cats_dict()
         return context
 
     def get(self, request, *args, **kwargs):
@@ -344,7 +334,6 @@ class PostModerateView(UpdateView, LoginRequiredDispatchMixin):
     def get_context_data(self, **kwargs):
         context = super(PostModerateView, self).get_context_data(**kwargs)
         context['title'] = f'Модерирование поста {self.object.name}'
-        context['head_menu_object_list'] = get_hub_cats_dict()
 
         return context
 
