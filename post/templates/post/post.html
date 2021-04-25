@@ -32,9 +32,11 @@
                 {#                        <button>Читать далее...</button>#}
                 {#                    </a>#}
                 {#                </div>#}
+            {% if post.status == 'need_review' or post.status == 'moderate_false' %}
                 _______________
                 <p>Причина</p>
                 {{ post.moderate_desc|upper }}
+            {% endif %}
 
                 <div class="post__statistic">
                     <div class="post__karma"><i class="fa fa-bar-chart" aria-hidden="true"></i>
