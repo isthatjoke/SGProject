@@ -1,0 +1,8 @@
+{% load static %}
+{% block post_status_template %}
+
+                                <a href="{% url 'post:post_restore' post.id %}">
+                                    <button>Восстановить и перенести в неопубликованные</button>
+                                </a>
+
+{% endblock %}

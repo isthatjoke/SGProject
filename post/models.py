@@ -18,12 +18,18 @@ class Post(models.Model):
     STATUS_UNPUBLISHED = 'unpublished'
     STATUS_ARCHIVE = 'archive'
     STATUS_TEMPLATE = 'template'
+    STATUS_ON_MODERATE = 'on_moderate'
+    STATUS_NEED_REVIEW = 'need_review'
+    STATUS_MODERATE_FALSE = 'moderate_false'
 
     STATUSES = (
         (STATUS_PUBLISHED, 'опубликован'),
         (STATUS_UNPUBLISHED, 'не опубликован'),
         (STATUS_ARCHIVE, 'в архиве'),
-        (STATUS_TEMPLATE, 'шаблон')
+        (STATUS_TEMPLATE, 'шаблон'),
+        (STATUS_ON_MODERATE, 'на модерации'),
+        (STATUS_NEED_REVIEW, 'необходимы исправления'),
+        (STATUS_MODERATE_FALSE, 'модерация не пройдена'),
     )
 
     class Meta:
@@ -32,12 +38,13 @@ class Post(models.Model):
         ordering = ('-created_at',)
 
     name = models.CharField(max_length=200, verbose_name='название', )
-    # short_desc = models.CharField(max_length=200, verbose_name='краткое описание', )
-    # post_text = models.TextField(verbose_name='пост', blank=False, null=True)
     hub_category = models.ForeignKey(HubCategory, related_name='hub_category',
                                      verbose_name='подкатегория', on_delete=models.CASCADE, **NULLABLE)
-    status = models.CharField(verbose_name='статус', choices=STATUSES, default=STATUS_UNPUBLISHED, max_length=11)
-    # published = models.BooleanField(default=False, verbose_name='опубликовано', )
+    status = models.CharField(verbose_name='статус', choices=STATUSES, default=STATUS_UNPUBLISHED, max_length=20)
+    # need_moderate = models.BooleanField(default=False, verbose_name='нужна модерация')
+    moderate_desc = models.CharField(max_length=200, verbose_name='причина непройденной модерации', **NULLABLE)
+    moderated = models.BooleanField(default=False, verbose_name='модерация проводилась', )
+    moderated_at = models.DateTimeField(verbose_name='время модерации', **NULLABLE)
     user = models.ForeignKey(HubUser, related_name='user_id', verbose_name='пользователь', on_delete=models.CASCADE,
                              **NULLABLE)
     karma_count = models.IntegerField(default=0, verbose_name='количество кармы')
@@ -67,6 +74,10 @@ class Post(models.Model):
         for obj in karma_objects:
             karma += obj.karma
         return karma
+
+    @staticmethod
+    def on_moderate_count():
+        return Post.objects.filter(status=Post.STATUS_ON_MODERATE).count()
 
 
 class PostKarma(models.Model):

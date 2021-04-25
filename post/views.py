@@ -19,7 +19,7 @@ from authapp.models import HubUser
 from backend import settings
 from backend.utils import LoginRequiredDispatchMixin
 from hub.models import get_hub_cats_dict
-from post.forms import PostEditForm, PostCreationForm, CommentForm
+from post.forms import PostEditForm, PostCreationForm, CommentForm, PostModeratorEditForm
 from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma
 
 
@@ -261,10 +261,16 @@ class PostUserListView(ListView, LoginRequiredDispatchMixin):
 
         if self.request.GET.get('status') == 'unpublished':
             posts = posts.filter(status='unpublished')
+
         elif self.request.GET.get('status') == 'archive':
             posts = posts.filter(status='archive')
+
         elif self.request.GET.get('status') == 'template':
             posts = posts.filter(status='template')
+
+        elif self.request.GET.get('status') == 'moderate':
+            posts = posts.filter(Q(status='on_moderate') | Q(status='need_review'))
+
         else:
             posts = posts.filter(status='published')
 
@@ -278,6 +284,27 @@ class PostUserListView(ListView, LoginRequiredDispatchMixin):
         context['head_menu_object_list'] = get_hub_cats_dict()
         context['msg_type'] = self.request.GET.get('msg_type', '')
         context['days'] = self.request.GET.get('days', '')
+        context['on_moderate'] = Post.on_moderate_count()
+
+        return context
+
+
+class PostModerateListView(ListView, LoginRequiredDispatchMixin):
+    model = Post
+    template_name = 'post/post_list.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Post.objects.filter(status='on_moderate')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(PostModerateListView, self).get_context_data(**kwargs)
+        context['title'] = f'Модерация постов'
+        context['head_menu_object_list'] = get_hub_cats_dict()
+        context['msg_type'] = self.request.GET.get('msg_type', '')
+        context['days'] = self.request.GET.get('days', '')
+        context['on_moderate'] = Post.on_moderate_count()
 
         return context
 
@@ -309,6 +336,30 @@ class PostUpdateView(UpdateView, LoginRequiredDispatchMixin):
         return super().form_valid(form)
 
 
+class PostModerateView(UpdateView, LoginRequiredDispatchMixin):
+    model = Post
+    template_name = 'post/post_form.html'
+    form_class = PostModeratorEditForm
+    success_url = reverse_lazy('post:users_posts')
+    success_message = 'пост проверен'
+
+    def get_context_data(self, **kwargs):
+        context = super(PostModerateView, self).get_context_data(**kwargs)
+        context['title'] = f'Модерирование поста {self.object.name}'
+        context['head_menu_object_list'] = get_hub_cats_dict()
+
+        return context
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, self.success_message)
+
+        if form.instance.status == 'unpublished':
+            form.instance.moderated = True
+            form.instance.moderated_at = datetime.now(pytz.timezone(settings.TIME_ZONE))
+            form.instance.save()
+        return super().form_valid(form)
+
+
 @login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
 def post_publish(request, pk):
     post = get_object_or_404(Post, pk=pk)
@@ -329,6 +380,41 @@ def post_archive(request, pk):
 def post_restore(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.status = post.STATUS_UNPUBLISHED
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
+def post_moderate(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_ON_MODERATE
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
+def post_need_review(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_NEED_REVIEW
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
+def post_moderate_done(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_UNPUBLISHED
+    post.moderated = True
+    post.moderated_at = datetime.now(pytz.timezone(settings.TIME_ZONE))
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
+def post_moderate_false(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_MODERATE_FALSE
+    post.moderated_at = datetime.now(pytz.timezone(settings.TIME_ZONE))
     post.save()
     return HttpResponseRedirect(reverse('post:users_posts'))
 
