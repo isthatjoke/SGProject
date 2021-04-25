@@ -15,6 +15,7 @@
             <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
                  alt="preview">
             <div class="post__container">
+            {% include 'post/includes/post_moderate_status.html' %}
                 <div class="post__user">Пользователь: <span>{{ post.user }}</span></div>
                 <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
                 <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
@@ -31,6 +32,9 @@
                 {#                        <button>Читать далее...</button>#}
                 {#                    </a>#}
                 {#                </div>#}
+                _______________
+                <p>Причина</p>
+                {{ post.moderate_desc|upper }}
 
                 <div class="post__statistic">
                     <div class="post__karma"><i class="fa fa-bar-chart" aria-hidden="true"></i>

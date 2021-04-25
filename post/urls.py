@@ -14,7 +14,15 @@ urlpatterns = [
     path('myposts/publish/<int:pk>/', views.post_publish, name='post_publish'),
     path('myposts/archive/<int:pk>/', views.post_archive, name='post_archive'),
     path('myposts/unpublished/<int:pk>/', views.post_restore, name='post_restore'),
-    path('myposts/template/<int:pk>', views.post_template, name='post_template'),
+    path('myposts/template/<int:pk>/', views.post_template, name='post_template'),
+    path('myposts/moderate/<int:pk>/', views.post_moderate, name='post_moderate'),
+
+    path('moderate/', views.PostModerateListView.as_view(), name='post_to_moderate'),
+    path('moderate/<int:pk>', views.PostModerateView.as_view(), name='post_moderating'),
+    # path('moderate/<int:pk>/', views.post_moderate_done, name='post_moderate_done'),
+    # path('moderate/<int:pk>/', views.post_need_review, name='post_need_review'),
+    # path('moderate/<int:pk>/', views.post_moderate_false, name='post_moderate_false'),
+
 
     path('<int:pk>/karma/<int:pk2>/', views.karma_update, name='karma_update'),
     path('comment/<int:pk>/', views.add_comment, name='add_comment'),

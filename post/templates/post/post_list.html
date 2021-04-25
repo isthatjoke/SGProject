@@ -4,21 +4,7 @@
     {% include 'post/includes/menu.html' %}
     <div class="posts">
 
-                                {% if not posts and request.GET.status == 'unpublished'%}
-                                    <h1>Неопубликованных постов нет</h1>
-                                {% endif %}
-
-                                {% if not posts and request.GET.status == 'archive'%}
-                                    <h1>Архивированных постов нет</h1>
-                                {% endif %}
-
-                                {% if not posts and request.GET.status == 'template'%}
-                                    <h1>Шаблонов постов нет</h1>
-                                {% endif %}
-
-                                {% if not posts and not request.GET.status %}
-                                    <h1>Опубликованных постов нет</h1>
-                                {% endif %}
+                                {% include 'post/includes/post_empty_status.html' %}
 
         {% for post in posts %}
             <div class="card" >
@@ -26,6 +12,7 @@
                 <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
                      alt="preview">
                 <div class="post__container">
+                    {% include 'post/includes/post_moderate_status.html' %}
                     <div class="post__user">Пользователь: <span>{{ post.user }}</span></div>
                     <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
                     <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
@@ -43,54 +30,24 @@
                         </a>
 
                         {% if post.status == 'unpublished' %}
-
-                                <a href="{% url 'post:post_update' post.id %}">
-                                    <button>Редактировать</button>
-                                </a>
-
-                                <a href="{% url 'post:post_publish' post.id %}">
-                                    <button>Опубликовать</button>
-                                </a>
-
-                                <a href="{% url 'post:post_archive' post.id %}">
-                                    <button>Удалить</button>
-                                </a>
-
-                                <a href="{% url 'post:post_template' post.id %}">
-                                    <button>Сделать шаблон</button>
-                                </a>
-
+                                {% include 'post/includes/post_status_unpublished.html' %}
                         {% elif post.status == 'published' %}
-
-                                <a href="{% url 'post:post_update' post.id %}">
-                                    <button>Редактировать</button>
-                                </a>
-
-                                <a href="{% url 'post:post_archive' post.id %}">
-                                    <button>Удалить</button>
-                                </a>
-
+                                {% include 'post/includes/post_status_published.html' %}
                         {% elif post.status == 'archive' %}
-
-                                <a href="{% url 'post:post_restore' post.id %}">
-                                    <button>Восстановить и перенести в неопубликованные</button>
-                                </a>
-
+                                {% include 'post/includes/post_status_archive.html' %}
                         {% elif post.status == 'template' %}
-
-                                <a href="{% url 'post:post_update' post.id %}">
-                                    <button>Редактировать</button>
-                                </a>
-
-                                <a href="{% url 'post:post_template' post.id %}">
-                                    <button>Сделать пост по шаблону</button>
-                                </a>
-
-                                <a href="{% url 'post:post_archive' post.id %}">
-                                    <button>Удалить</button>
-                                </a>
-
+                                {% include 'post/includes/post_status_template.html' %}
+                        {% elif post.status == 'moderate_false' %}
+                                {% include 'post/includes/post_status_moderate_false.html' %}
+                        {% elif post.status == 'need_review' %}
+                                {% include 'post/includes/post_status_need_review.html' %}
                         {% endif %}
+
+                        {% if post.status == 'on_moderate' and user.is_staff%}
+                                {% include 'post/includes/post_on_moderate.html' %}
+                        {% endif %}
+
+
 
                     </div>
 
