@@ -10,6 +10,9 @@
             <div class="post__container">
                     <form id="form-horizontal m-t-30" method="post" enctype="multipart/form-data">
                         <p style="color: darkorange">Пост {{ form.instance.get_status_display }}</p>
+                        {% if user.is_staff and form.instance.user is not None %}
+                        <p style="color: darkorange">автор <a href="#" style="color: black">{{ form.instance.user }}</a></p>
+                        {% endif %}
                         {% csrf_token %}
                         {{ form.media }}
                         {{ form.as_p }}
