@@ -1,15 +1,26 @@
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
 
-from post.models import Post
+from post.models import Post, get_all_tags
+from django.contrib.postgres.forms import SimpleArrayField
 
 
 class PostCreationForm(forms.ModelForm):
     content = forms.CharField(label='Содержание', widget=CKEditorUploadingWidget(config_name='default'))
+    # tags = SimpleArrayField(forms.IntegerField)
+    tags_str = forms.CharField(
+        label='Тэги поста:',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(
+            attrs={'size': 67, 'placeholder': 'Тэги введите через запятую', }
+        )
+    )
 
     class Meta:
         model = Post
-        exclude = ()
+        exclude = ("tags",)
+        fields = ['name', 'hub_category', 'tags_str', 'status', 'user', 'karma_count', 'content']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,10 +35,19 @@ class PostCreationForm(forms.ModelForm):
 
 class PostEditForm(forms.ModelForm):
     content = forms.CharField(label='Содержание', widget=CKEditorUploadingWidget(config_name='default'))
+    tags_str = forms.CharField(
+        label='Тэги поста:',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(
+            attrs={'size': 67, 'placeholder': 'Тэги введите через запятую', }
+        )
+    )
 
     class Meta:
         model = Post
-        exclude = ()
+        exclude = ('tags',)
+        fields = ['name', 'hub_category', 'tags_str', 'status', 'user', 'karma_count', 'content']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

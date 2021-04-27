@@ -29,6 +29,9 @@
                     <div class="post__user">Пользователь: <span>{{ post.user }}</span></div>
                     <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
                     <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
+                        {% if post.tags %}
+                            <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.get_all_tags }}</div>
+                        {% endif %}
                     <div class="post__title"><h3>{{ post.name }}</h3></div>
                     <div class="post__body">
                         <p>
