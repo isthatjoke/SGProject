@@ -85,6 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'sgproject',
         'USER': 'postgres',
+        'PASSWORD': 'AndryAndry'
     }
     # 'default': {
     #     'ENGINE': 'django.db.backends.sqlite3',

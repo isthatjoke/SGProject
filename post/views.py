@@ -20,7 +20,7 @@ from backend import settings
 from backend.utils import LoginRequiredDispatchMixin
 from hub.models import get_hub_cats_dict
 from post.forms import PostEditForm, PostCreationForm, CommentForm, PostModeratorEditForm
-from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma
+from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma, Tags, get_all_tags
 
 
 def perform_karma_update(post, user, karma):
@@ -96,6 +96,7 @@ class PostDetailView(DetailView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostDetailView, self).get_context_data(**kwargs)
         context['title'] = f'{self.object.name}'
+        context['tags'] = get_all_tags(self.object.pk)
         if self.request.method == 'GET':
             context['comments'] = Comment.objects.filter(comment_post=self.kwargs['pk']).order_by('path')
             if self.request.user.is_authenticated:
@@ -222,8 +223,34 @@ class PostCreateView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin
     success_url = reverse_lazy('post:users_posts')
     success_message = 'пост создан'
 
+
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, self.success_message)
+        tags = form.cleaned_data['tags_str']  # строка с тегами из формы
+
+        tmp_tags = str(tags).split(',') # распарсил теги
+        for key, el in enumerate(tmp_tags):
+            tmp_tags[key] = el.strip() # убрал пробелы
+
+        new_tags = [] # массив куда складываются id тэгов для записи в поле тэг поста
+
+        if form.is_valid():
+            f = form.save()
+        for tmp_tag in tmp_tags:
+            # проевряем есть тэг в таблице тэгов
+            tag_exists = tmp_tag is not None and Tags.objects.filter(tag=tmp_tag).exists()
+
+            if not tag_exists:
+                # создаем новый тэг в таблицу тэгов
+                tag_id = Tags.objects.create(tag=tmp_tag)
+                # добавляем тэг в массив для поста
+                form.instance.tags.create(tag=tag_id.tag)
+
+            else:
+                form.instance.tags.add(Tags.objects.filter(tag=tmp_tag).first().tag)
+
+        f.save()
+
         return super().form_valid(form)
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -306,8 +333,11 @@ class PostUpdateView(UpdateView, LoginRequiredDispatchMixin):
     success_message = 'пост отредактирован'
 
     def get_context_data(self, **kwargs):
+        post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
         context = super(PostUpdateView, self).get_context_data(**kwargs)
         context['title'] = f'Редактирование поста {self.object.name}'
+        context['form']['tags_str'].initial = post.get_all_tags()
+
         return context
 
     def get(self, request, *args, **kwargs):
@@ -316,11 +346,40 @@ class PostUpdateView(UpdateView, LoginRequiredDispatchMixin):
             if post.status == post.STATUS_PUBLISHED:
                 return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
             else:
-                return render(request, self.template_name, {'form': self.form_class(instance=post)})
+                form = self.form_class(instance=post)
+                form.fields['tags_str'].initial = get_all_tags(post.id)
+                return render(request, self.template_name, {'form': form})
         return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
 
     def form_valid(self, form):
+        print(f'ya v form_valid')
         messages.add_message(self.request, messages.SUCCESS, self.success_message)
+        tags = form.cleaned_data['tags_str']  # строка с тегами из формы
+
+        tmp_tags = str(tags).split(',')  # распарсил теги
+        for key, el in enumerate(tmp_tags):
+            tmp_tags[key] = el.strip()  # убрал пробелы
+
+        new_tags = []  # массив куда складываются id тэгов для записи в поле тэг поста
+
+        if form.is_valid():
+            post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
+            post.tags.clear()
+            f = form.save()
+        for tmp_tag in tmp_tags:
+            # проевряем есть тэг в таблице тэгов
+            tag_exists = tmp_tag is not None and Tags.objects.filter(tag=tmp_tag).exists()
+
+            if not tag_exists:
+                # создаем новый тэг в таблицу тэгов
+                tag_id = Tags.objects.create(tag=tmp_tag)
+                # добавляем тэг в массив для поста
+                form.instance.tags.create(tag=tag_id.tag)
+
+            else:
+                form.instance.tags.add(Tags.objects.filter(tag=tmp_tag).first().id)
+
+        f.save()
         return super().form_valid(form)
 
 
