@@ -23,12 +23,18 @@ from django.views.decorators.cache import never_cache
 
 urlpatterns = [
     path('', include('hub.urls', namespace='hub')),
-    path('admin/', admin.site.urls),
+
     path('', include('authapp.urls', namespace='authapp')),
+
+    path('admin/', include('adminapp.urls', namespace='adminapp')),
+    path('subadmin/', admin.site.urls),
+
     path('post/', include('post.urls', namespace='post')),
+
     # path('ckeditor/', include('ckeditor_uploader.urls')),
     path('ckeditor/upload/', login_required(views.upload), name="ckeditor_upload"),
     path('ckeditor/browse/', never_cache(login_required(views.browse)), name="ckeditor_browse"),
+
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

@@ -19,8 +19,8 @@ from authapp.models import HubUser
 from backend import settings
 from backend.utils import LoginRequiredDispatchMixin
 from hub.models import get_hub_cats_dict
-from post.forms import PostEditForm, PostCreationForm, CommentForm
-from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma
+from post.forms import PostEditForm, PostCreationForm, CommentForm, PostModeratorEditForm
+from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma, Tags, get_all_tags
 
 
 def perform_karma_update(post, user, karma):
@@ -95,8 +95,8 @@ class PostDetailView(DetailView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostDetailView, self).get_context_data(**kwargs)
-        context['head_menu_object_list'] = get_hub_cats_dict()
         context['title'] = f'{self.object.name}'
+        context['tags'] = get_all_tags(self.object.pk)
         if self.request.method == 'GET':
             context['comments'] = Comment.objects.filter(comment_post=self.kwargs['pk']).order_by('path')
             if self.request.user.is_authenticated:
@@ -223,15 +223,40 @@ class PostCreateView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin
     success_url = reverse_lazy('post:users_posts')
     success_message = 'пост создан'
 
+
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, self.success_message)
+        tags = form.cleaned_data['tags_str']  # строка с тегами из формы
+
+        tmp_tags = str(tags).split(',') # распарсил теги
+        for key, el in enumerate(tmp_tags):
+            tmp_tags[key] = el.strip() # убрал пробелы
+
+        new_tags = [] # массив куда складываются id тэгов для записи в поле тэг поста
+
+        if form.is_valid():
+            f = form.save()
+        for tmp_tag in tmp_tags:
+            # проевряем есть тэг в таблице тэгов
+            tag_exists = tmp_tag is not None and Tags.objects.filter(tag=tmp_tag).exists()
+
+            if not tag_exists:
+                # создаем новый тэг в таблицу тэгов
+                tag_id = Tags.objects.create(tag=tmp_tag)
+                # добавляем тэг в массив для поста
+                form.instance.tags.create(tag=tag_id.tag)
+
+            else:
+                form.instance.tags.add(Tags.objects.filter(tag=tmp_tag).first().tag)
+
+        f.save()
+
         return super().form_valid(form)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
         context['form']['user'].initial = self.request.user
         context['title'] = f'Создание поста'
-        context['head_menu_object_list'] = get_hub_cats_dict()
         return context
 
 
@@ -245,7 +270,6 @@ class CommentUserlist(ListView):
         context = super(CommentUserlist, self).get_context_data(**kwargs)
         context['title'] = f'Ваши комментарии {self.request.user.username}'
         context['comments_dict'] = get_all_comments(self.request.user.id)  # словарь объектов { пост: [комментарий,...]}
-        context['head_menu_object_list'] = get_hub_cats_dict()
         return context
 
 
@@ -261,10 +285,16 @@ class PostUserListView(ListView, LoginRequiredDispatchMixin):
 
         if self.request.GET.get('status') == 'unpublished':
             posts = posts.filter(status='unpublished')
+
         elif self.request.GET.get('status') == 'archive':
             posts = posts.filter(status='archive')
+
         elif self.request.GET.get('status') == 'template':
             posts = posts.filter(status='template')
+
+        elif self.request.GET.get('status') == 'moderate':
+            posts = posts.filter(Q(status='on_moderate') | Q(status='need_review') | Q(status='moderate_false'))
+
         else:
             posts = posts.filter(status='published')
 
@@ -275,9 +305,22 @@ class PostUserListView(ListView, LoginRequiredDispatchMixin):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostUserListView, self).get_context_data(**kwargs)
         context['title'] = f'Мои посты'
-        context['head_menu_object_list'] = get_hub_cats_dict()
-        context['msg_type'] = self.request.GET.get('msg_type', '')
-        context['days'] = self.request.GET.get('days', '')
+
+        return context
+
+
+class PostModerateListView(ListView, LoginRequiredDispatchMixin):
+    model = Post
+    template_name = 'post/post_list.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Post.objects.filter(status='on_moderate')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(PostModerateListView, self).get_context_data(**kwargs)
+        context['title'] = f'Модерация постов'
 
         return context
 
@@ -290,9 +333,11 @@ class PostUpdateView(UpdateView, LoginRequiredDispatchMixin):
     success_message = 'пост отредактирован'
 
     def get_context_data(self, **kwargs):
+        post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
         context = super(PostUpdateView, self).get_context_data(**kwargs)
         context['title'] = f'Редактирование поста {self.object.name}'
-        context['head_menu_object_list'] = get_hub_cats_dict()
+        context['form']['tags_str'].initial = post.get_all_tags()
+
         return context
 
     def get(self, request, *args, **kwargs):
@@ -301,11 +346,63 @@ class PostUpdateView(UpdateView, LoginRequiredDispatchMixin):
             if post.status == post.STATUS_PUBLISHED:
                 return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
             else:
-                return render(request, self.template_name, {'form': self.form_class(instance=post)})
+                form = self.form_class(instance=post)
+                form.fields['tags_str'].initial = get_all_tags(post.id)
+                return render(request, self.template_name, {'form': form})
         return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
 
     def form_valid(self, form):
+        print(f'ya v form_valid')
         messages.add_message(self.request, messages.SUCCESS, self.success_message)
+        tags = form.cleaned_data['tags_str']  # строка с тегами из формы
+
+        tmp_tags = str(tags).split(',')  # распарсил теги
+        for key, el in enumerate(tmp_tags):
+            tmp_tags[key] = el.strip()  # убрал пробелы
+
+        new_tags = []  # массив куда складываются id тэгов для записи в поле тэг поста
+
+        if form.is_valid():
+            post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
+            post.tags.clear()
+            f = form.save()
+        for tmp_tag in tmp_tags:
+            # проевряем есть тэг в таблице тэгов
+            tag_exists = tmp_tag is not None and Tags.objects.filter(tag=tmp_tag).exists()
+
+            if not tag_exists:
+                # создаем новый тэг в таблицу тэгов
+                tag_id = Tags.objects.create(tag=tmp_tag)
+                # добавляем тэг в массив для поста
+                form.instance.tags.create(tag=tag_id.tag)
+
+            else:
+                form.instance.tags.add(Tags.objects.filter(tag=tmp_tag).first().id)
+
+        f.save()
+        return super().form_valid(form)
+
+
+class PostModerateView(UpdateView, LoginRequiredDispatchMixin):
+    model = Post
+    template_name = 'post/post_form.html'
+    form_class = PostModeratorEditForm
+    success_url = reverse_lazy('post:users_posts')
+    success_message = 'пост проверен'
+
+    def get_context_data(self, **kwargs):
+        context = super(PostModerateView, self).get_context_data(**kwargs)
+        context['title'] = f'Модерирование поста {self.object.name}'
+
+        return context
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, self.success_message)
+
+        if form.instance.status == 'unpublished':
+            form.instance.moderated = True
+            form.instance.moderated_at = datetime.now(pytz.timezone(settings.TIME_ZONE))
+            form.instance.save()
         return super().form_valid(form)
 
 
@@ -329,6 +426,41 @@ def post_archive(request, pk):
 def post_restore(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.status = post.STATUS_UNPUBLISHED
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
+def post_moderate(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_ON_MODERATE
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
+def post_need_review(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_NEED_REVIEW
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
+def post_moderate_done(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_UNPUBLISHED
+    post.moderated = True
+    post.moderated_at = datetime.now(pytz.timezone(settings.TIME_ZONE))
+    post.save()
+    return HttpResponseRedirect(reverse('post:users_posts'))
+
+
+@login_required  # TODO проверить, может ли другой пользователь в строке браузера изменить чужой пост
+def post_moderate_false(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.status = post.STATUS_MODERATE_FALSE
+    post.moderated_at = datetime.now(pytz.timezone(settings.TIME_ZONE))
     post.save()
     return HttpResponseRedirect(reverse('post:users_posts'))
 

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'bootstrap3',
     'django_bootstrap_icons',
+    'adminapp',
 ]
 
 MIDDLEWARE = [
@@ -65,6 +66,8 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'post.context_processors.get_moderate_count',
+                'post.context_processors.get_menu',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -82,6 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'sgproject',
         'USER': 'postgres',
+        'PASSWORD': 'AndryAndry'
     }
     # 'default': {
     #     'ENGINE': 'django.db.backends.sqlite3',
