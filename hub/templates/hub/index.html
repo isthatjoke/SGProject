@@ -14,7 +14,7 @@
                             </div>
                             <div class="col-8">
                                 <input type="number" class="form-control" name="days" value="{{ request.GET.days|default:20 }}" placeholder="за сколько дней" />
-
+                                <input type="text" class="form-control" name="tags" value="{{ request.GET.tags }}" placeholder="тэги" />
                                 <select class="form-control" name="msg_type">
                                     <option value="all">Все</option>
                                     <option {% if request.GET.msg_type == 'date_up' %}selected{% endif %} value="date_up">по дате - сначала новые</option>
@@ -29,6 +29,7 @@
                                     Отфильтровать <i class="fa fa-filter"></i>
                                 </button>
                             </div>
+
                         </div>
                     </div>
 
@@ -45,6 +46,9 @@
                     <div class="post__user">Пользователь: <span>{{ post.user }}</span></div>
                     <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
                     <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
+                        {% if post.tags %}
+                            <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.get_all_tags }}</div>
+                        {% endif %}
                     <div class="post__title"><h3>{{ post.name }}</h3></div>
                     <div class="post__body">
                         <p>
@@ -90,6 +94,9 @@ page={{ page_obj.previous_page_number }}&
 {% if request.GET.days %}
 days={{ request.GET.days }}&
 {% endif %}
+{% if request.GET.tags %}
+tags={{ request.GET.tags }}&
+{% endif %}
 {% if request.GET.msg_type %}
 msg_type={{ request.GET.msg_type }}
 {% endif %}"
@@ -110,6 +117,9 @@ aria-label="Previous" style="color: black">
 page={{ page_obj.next_page_number }}&
 {% if request.GET.days %}
 days={{ request.GET.days }}&
+{% endif %}
+{% if request.GET.tags %}
+tags={{ request.GET.tags }}&
 {% endif %}
 {% if request.GET.msg_type %}
 msg_type={{ request.GET.msg_type }}
