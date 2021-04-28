@@ -13,6 +13,10 @@ from ckeditor.fields import RichTextField
 NULLABLE = {'blank': True, 'null': True}
 
 
+class Tags(models.Model):
+    tag = models.CharField(max_length=200, verbose_name='тэг поста')
+
+
 class Post(models.Model):
     STATUS_PUBLISHED = 'published'
     STATUS_UNPUBLISHED = 'unpublished'
@@ -51,6 +55,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True, )
     updated_at = models.DateTimeField(verbose_name='время обновления', auto_now=True, )
     content = RichTextField()
+    tags = models.ManyToManyField(Tags, verbose_name='тэги поста')
 
     # Метод возвращает посты конкретного пользователя
     # pk - id пользователя
@@ -65,6 +70,11 @@ class Post(models.Model):
     @staticmethod
     def get_all_posts():
         return Post.objects.filter(status=Post.STATUS_PUBLISHED).order_by('-updated_at')
+      
+    # подсчет постов на модерации
+    @staticmethod
+    def on_moderate_count():
+        return Post.objects.filter(status=Post.STATUS_ON_MODERATE).count()
 
     # свойство класса для интерактивного подсчета кармы
     @property
@@ -75,10 +85,27 @@ class Post(models.Model):
             karma += obj.karma
         return karma
 
-    # подсчет постов на модерации
-    @staticmethod
-    def on_moderate_count():
-        return Post.objects.filter(status=Post.STATUS_ON_MODERATE).count()
+    def clean_tags(self):
+        Post.objects.get(id=self.id).clean()
+
+    def get_all_tags(self):
+        res = ''
+        all_tags = Post.objects.get(id=self.id).tags.all()
+        if all_tags:
+            for tag in all_tags:
+                res = res + str(tag.tag) + ', '
+            res = res[:-2]
+            return res
+        return f'[Тэги не заданы]'
+
+
+def get_all_tags(pk):
+    res = ''
+    all_tags = Post.objects.get(id=pk).tags.all()
+    for tag in all_tags:
+        res = res + str(tag.tag) + ', '
+    res = res[:-2]
+    return res
 
 
 class PostKarma(models.Model):

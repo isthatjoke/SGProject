@@ -8,6 +8,11 @@
                 </div>
                 <div class="header__section">
 
+                    {% if user.banned == 'banned_for_time' %}
+                <p style="color: red; margin-right: 15px;">Вы забанены до {{ user.banned_to }}</p>
+                        {% elif user.banned == 'banned_forever' %}
+                <p style="color: red; margin-right: 15px;">Вы забанены навсегда</p>
+                    {% endif %}
 
                     {% if user.is_authenticated %}
                         <span>Привет, {{ user.username }}</span>
@@ -19,7 +24,7 @@
                         <div class="header__item" title="Мои коментарии"><a href="{% url 'post:comment_list' %}"><i class="fa fa-comments-o" aria-hidden="true"></i></a></div>
                         <div class="header__item" title="Создать пост"><a href="{% url 'post:post_create' %}"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>
                         <div class="header__item" title="Профиль"><a href="{% url 'authapp:update' %}"><i class="fa fa-user" aria-hidden="true"></i></a></div>
-                        {% if user %}
+                        {% if user.is_staff %}
                             <div class="header__item" title="Админка"><a href="{% url 'adminapp:users_list' %}"><i class="fa fa-address-book" aria-hidden="true"></i></a></div>
                         {% endif %}
                         <div class="header__item" title="Выход"><a href="{% url 'authapp:logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i></a></div>

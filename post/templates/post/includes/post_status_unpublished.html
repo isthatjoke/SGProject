@@ -6,6 +6,7 @@
                                     <button>Редактировать</button>
                                 </a>
 
+                        {% if user.banned == 'active' %}
                             {% if user.rating >= 7 or user.is_staff %}
                                 <a href="{% url 'post:post_publish' post.id %}">
                                     <button>Опубликовать</button>
@@ -19,6 +20,7 @@
                                     <button>Оправить на модерацию</button>
                                 </a>
                             {% endif %}
+                        {% endif %}
 
                                 <a href="{% url 'post:post_archive' post.id %}">
                                     <button>Удалить</button>
