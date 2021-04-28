@@ -5,9 +5,11 @@
                                     <button>Редактировать</button>
                                 </a>
 
+                                {% if user.banned == 'active' %}
                                 <a href="{% url 'post:post_moderate' post.id %}">
                                     <button>Оправить на модерацию</button>
                                 </a>
+                                {% endif %}
 
                                 <a href="{% url 'post:post_archive' post.id %}">
                                     <button>Удалить</button>
