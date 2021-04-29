@@ -112,7 +112,7 @@ def ordering(request, pk=None, cat=None):
     if cat is not None:
         posts = posts.filter(hub_category=cat)
 
-    if request.GET.get('tags') is not None or request.GET.get('tags') != '':
+    if request.GET.get('tags') != '':
         tag = request.GET.get('tags', None)
         if tag is not None:
             posts = posts.filter(tags__tag__iexact=tag)
