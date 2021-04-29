@@ -114,7 +114,8 @@ def ordering(request, pk=None, cat=None):
 
     if request.GET.get('tags') is not None or request.GET.get('tags') != '':
         tag = request.GET.get('tags')
-        posts = posts.filter(tags__tag__iexact=tag)
+        if tag.isalpha():
+            posts = posts.filter(tags__tag__iexact=tag)
 
     if request.GET.get('msg_type') == 'date_up':
         posts = posts.order_by('-updated_at')
