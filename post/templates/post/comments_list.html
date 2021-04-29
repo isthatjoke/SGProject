@@ -8,14 +8,14 @@
 {% load static %}
 
 {% block content %}
-    <div class="posts">
+    <div class="card mt-3 mb-5" >
 
-        <div class="card">
+        <div class="card-body">
     {% if request.user.is_authenticated %}
             {% endif %}
 
             <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
-                 alt="preview">
+                 class="card-img-top" alt="...">
             <div class="post__container">
                 <div class="post__user">Пользователь: <span>{{ request.user.username }}</span></div>
                 <div class="post__body">

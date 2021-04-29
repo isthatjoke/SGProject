@@ -1,47 +1,27 @@
 {% extends 'hub/base.html' %}
 {% load static %}
 {% block content %}
+    <form class="d-flex">
+        <input class="form-control me-2" type="text" placeholder="Поиск по тэгам" aria-label="Search" name="tags" value="{{ request.GET.tags }}">
+        <input class="form-control me-2" type="number" placeholder="За последние 20 дней " aria-label="Search" name="days" value="{{ request.GET.days }}">
+        <select class="form-select" aria-label="Default select example" name="msg_type">
+              <option selected>Все</option>
+              <option {% if request.GET.msg_type == 'date_up' %}selected{% endif %} value="date_up">по дате - сначала новые</option>
+              <option {% if request.GET.msg_type == 'date_down' %}selected{% endif %} value="date_down">по дате - сначала старые</option>
+              <option {% if request.GET.msg_type == 'karma_up' %}selected{% endif %} value="karma_up">по карме - сначала больше</option>
+              <option {% if request.GET.msg_type == 'karma_down' %}selected{% endif %} value="karma_down">по карме - сначала меньше</option>
+              <option {% if request.GET.msg_type == 'comments_up' %}selected{% endif %} value="comments_up">горячие посты - горячее <i class="fa fa-sort-down"></i></option>
+              <option {% if request.GET.msg_type == 'comments_down' %}selected{% endif %} value="comments_down">горячие посты - холоднее <i class="fa fa-sort-up"></i></option>
+        </select>
+        <button class="btn btn-outline-success" type="submit">Отфильтровать</button>
+      </form>
 
-    <div class="posts">
-
-    <form>
-                <div class="row">
-
-                    <div class="col-3">
-                        <div class="row">
-                            <div class="col-4">
-                                <label>дней</label>
-                            </div>
-                            <div class="col-8">
-                                <input type="number" class="form-control" name="days" value="{{ request.GET.days|default:20 }}" placeholder="за сколько дней" />
-                                <input type="text" class="form-control" name="tags" value="{{ request.GET.tags }}" placeholder="тэги" />
-                                <select class="form-control" name="msg_type">
-                                    <option value="all">Все</option>
-                                    <option {% if request.GET.msg_type == 'date_up' %}selected{% endif %} value="date_up">по дате - сначала новые</option>
-                                    <option {% if request.GET.msg_type == 'date_down' %}selected{% endif %} value="date_down">по дате - сначала старые</option>
-                                    <option {% if request.GET.msg_type == 'karma_up' %}selected{% endif %} value="karma_up">по карме - сначала больше</option>
-                                    <option {% if request.GET.msg_type == 'karma_down' %}selected{% endif %} value="karma_down">по карме - сначала меньше</option>
-                                    <option {% if request.GET.msg_type == 'comments_up' %}selected{% endif %} value="comments_up">горячие посты - горячее <i class="fa fa-sort-down"></i></option>
-                                    <option {% if request.GET.msg_type == 'comments_down' %}selected{% endif %} value="comments_down">горячие посты - холоднее <i class="fa fa-sort-up"></i></option>
-                                </select>
-
-                                <button type="submit" class="btn btn-primary w-100">
-                                    Отфильтровать <i class="fa fa-filter"></i>
-                                </button>
-                            </div>
-
-                        </div>
-                    </div>
-
-
-                </div>
-            </form>
 
         {% for post in posts %}
-            <div class="card" >
+            <div class="card mt-3">
+            <div class="card-body">
+            <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044" class="card-img-top" alt="...">
 
-                <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
-                     alt="preview">
                 <div class="post__container">
                     <div class="post__user">Пользователь: <span>{{ post.user }}</span></div>
                     <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
@@ -82,8 +62,9 @@
                     </div>
                 </div>
             </div>
-        {% endfor %}
+
     </div>
+    {% endfor %}
     <nav aria-label="Page navigation example" class="mt-3">
                         <ul class="pagination">
                             <li class="page-item">
