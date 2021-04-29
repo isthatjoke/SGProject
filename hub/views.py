@@ -112,10 +112,9 @@ def ordering(request, pk=None, cat=None):
     if cat is not None:
         posts = posts.filter(hub_category=cat)
 
-    # if request.GET.get('tags') is not None or request.GET.get('tags') != '':
-    #     tag = request.GET.get('tags')
-    #     if tag.isalpha():
-    #         posts = posts.filter(tags__tag__iexact=tag)
+    if request.GET.get('tags') is not None or request.GET.get('tags') != '':
+        tag = request.GET.get('tags').strip()
+        posts = posts.filter(tags__tag__iexact=tag)
 
     if request.GET.get('msg_type') == 'date_up':
         posts = posts.order_by('-updated_at')
