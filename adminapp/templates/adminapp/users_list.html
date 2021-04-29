@@ -2,8 +2,11 @@
 {% load static %}
 {% block content %}
 
-        <table id="datatable" class="table table-striped dt-responsive nowrap table-vertical"
-                           width="100%" cellspacing="0">
+    <div class="row">
+
+        <div class="col">
+
+            <table id="datatable" class="table table-hover">
                         <thead>
                         <tr>
                             <th>Никнейм</th>
@@ -27,9 +30,9 @@
 
                                 <td>
                                     {% if user.banned_to %}
-                                        <button><a href="#" id="link-{{ forloop.counter }}" class="link" style="color: black;">разбанить</a></button>
+                                        <a href="#" id="link-{{ forloop.counter }}" class="btn btn-success link">разбанить</a>
                                     {% else %}
-                                        <button><a href="#" id="link-{{ forloop.counter }}" class="link" style="color: black;">забанить</a></button>
+                                        <a href="#" id="link-{{ forloop.counter }}" class="btn btn-danger link">забанить</a>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -40,15 +43,16 @@
 
                                     <div class="form-button">
                             <button id="submit" type="submit"
-                                    class="btn btn-primary w-md waves-effect waves-light">подтвердить
+                                    class="btn btn-success">подтвердить
                             </button>
                         </div>
                                 </form>
                                 </td>
                             <td>
-                                <button id="submit-{{ forloop.counter }}" type="submit" style="display: none;"
-                                    class="btn btn-primary w-md waves-effect waves-light"><a href="{% url 'adminapp:user_ban' user.id %}" style="color: black">подтвердить</a>
-                            </button>
+
+                                <a href="{% url 'adminapp:user_ban' user.id %}" style="display: none;"
+                                   id="submit-{{ forloop.counter }}" class="btn btn-success">подтвердить</a>
+
                             </td>
                             </tr>
                         {% endfor %}
@@ -82,5 +86,11 @@
                         </ul>
                     </nav>
     {% endif %}
+
+        </div>
+
+    </div>
+
+
 
 {% endblock %}

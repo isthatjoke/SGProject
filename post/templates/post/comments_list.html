@@ -21,8 +21,11 @@
                 <div class="post__body">
                     <h2>Комментарии</h2>
         {% for key, comments in comments_dict.items %}
+        <div class="card mb-5 mt-3">
+            <div class="card-body mt-3">
 
-     <a href="/post/{{ key.id }}" style="color: black;">Пост: {{ key.name }}</a>  <br/>
+
+             <a href="/post/{{ key.id }}" style="color: black;">Пост: {{ key.name }}</a>  <br/>
 
             {% for comment in comments %}
 
@@ -38,33 +41,32 @@
                         <div class="panel-body">
                             <div>{{ comment.content|safe }}</div>
 
-                            {% if comment.published %}
-                                {% if form %}
-
-                                <a class="btn btn-default btn-xs pull-right"
+                                {% if comment.published %}
+                                    {% if form %}
+                                        <a class="btn btn-default btn-xs pull-right"
                                                 onclick="return show_comments_form({{ comment.id }})">
-                                    {% bootstrap_icon "share-alt" %}&nbsp;&nbsp;Ответить
-                                </a>
-                                {% if comment.author_id.username == request.user.username %}
-                                    &nbsp;&nbsp;<a href="comment/delete/{{ comment.id }}" class="btn btn-default btn-xs pull-right"> Удалить</a>
-
-                                    {% endif%}
+                                                {% bootstrap_icon "share-alt" %}&nbsp;&nbsp;Ответить
+                                        </a>
+                                            {% if comment.author_id.username == request.user.username %}
+                                    &nbsp;&nbsp;            <a href="comment/delete/{{ comment.id }}" class="btn btn-default btn-xs pull-right"> Удалить</a>
+                                            {% endif%}
+                                    {% endif %}
                                 {% endif %}
-                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
+
         {% endfor %}
-        {% endfor %}
-
-                </div>
-
-
             </div>
         </div>
-    </div>
 
+        {% endfor %}
+
+        </div>
+    </div>
+</div>
+</div>
 
 
 

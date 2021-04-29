@@ -22,21 +22,27 @@
         <div class="row">
             <div class="col-2"></div>
             <div class="col-8">
-                <div class="message">
-         {% if messages %}
-             <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {% for message in messages %}
-          {{ message }}
-        {% endfor %}
-            <button type="button" data-dismiss="alert" aria-label="Close">
-                <span class="close" aria-hidden="true">&times;</span>
-            </button>
-             </div>
-        {% endif %}
-    </div>
+
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ message }}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
 
         {% block content %}
         {% endblock %}
+            <div class="row">
+                <div class="col mb-5">
+                    {% if posts %}
+                    {% include 'hub/includes/pagination.html' %}
+                    {% endif %}
+                </div>
+            </div>
+
             </div>
             <div class="col-2"></div>
         </div>
