@@ -102,8 +102,11 @@ class HubCategoryPostListView(ListView):
 
 
 def ordering(request, pk=None, cat=None):
-    days_count = int(request.GET.get('days', 20))
-    now = datetime.now(pytz.timezone(settings.TIME_ZONE)) - timedelta(days=days_count)
+    if request.GET.get('days') == '':
+        days_count = 20
+    else:
+        days_count = request.GET.get('days', 20)
+    now = datetime.now(pytz.timezone(settings.TIME_ZONE)) - timedelta(days=int(days_count))
     posts = Post.objects.filter(status=Post.STATUS_PUBLISHED).filter(updated_at__gte=now).select_related().order_by('-updated_at')
 
     if pk is not None:
