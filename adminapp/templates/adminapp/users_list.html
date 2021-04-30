@@ -29,10 +29,11 @@
                             {% endif %}
 
                                 <td>
-                                    {% if user.banned_to %}
-                                        <a href="#" id="link-{{ forloop.counter }}" class="btn btn-success link">разбанить</a>
+                                    {% if user.banned_to or user.banned == 'banned_forever' %}
+                                        <button id="link-{{ forloop.counter }}" class="btn btn-success link">разбанить</button>
                                     {% else %}
-                                        <a href="#" id="link-{{ forloop.counter }}" class="btn btn-danger link">забанить</a>
+
+                                        <button type="button" id="link-{{ forloop.counter }}" class="btn btn-danger link">забанить</button>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -43,7 +44,7 @@
 
                                     <div class="form-button">
                             <button id="submit" type="submit"
-                                    class="btn btn-success">подтвердить
+                                    class="btn btn-success ban-submit">навсегда
                             </button>
                         </div>
                                 </form>
