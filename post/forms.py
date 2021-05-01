@@ -1,6 +1,7 @@
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
 
+from hub.models import HubCategory
 from post.models import Post, get_all_tags
 from django.contrib.postgres.forms import SimpleArrayField
 
@@ -76,29 +77,34 @@ class PostModeratorEditForm(forms.ModelForm):
 
     content = forms.CharField(label='Содержание', widget=CKEditorUploadingWidget(config_name='default'))
     status = forms.ChoiceField(choices=STATUSES, label='Статус', initial=STATUS_ON_MODERATE)
+    category = forms.CharField(max_length=50, label='Подкатегория')
     tags_str = forms.CharField(
         label='Тэги поста:',
         max_length=200,
         required=False,
         widget=forms.TextInput(
-            attrs={'size': 67, 'placeholder': 'Тэги введите через запятую', }
+            attrs={'size': 67}
         )
     )
 
     class Meta:
         model = Post
         exclude = ('tags', 'moderated', 'moderated_at', )
-        fields = ('name', 'hub_category', 'tags_str', 'status', 'user', 'moderate_desc', 'karma_count', 'content')
+        fields = ('name', 'category', 'tags_str', 'status', 'user', 'moderate_desc', 'karma_count', 'content')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
             field.help_text = ''
-            if field_name in ('post_karma', 'karma_count', 'user'):
+            if field_name in ('post_karma', 'karma_count', 'user', 'hub_category'):
                 field.widget = forms.HiddenInput()
-            # if field_name in ('user',):
-            #     field.widget.attrs['readonly'] = True
+            if field_name in ('tags_str', 'content', 'category', 'name'):
+                field.widget.attrs['readonly'] = True
+
+        instance = getattr(self, 'instance', None)
+        if instance:
+            self.fields['category'].initial = instance.hub_category.name
 
 
 class CommentForm(forms.Form):

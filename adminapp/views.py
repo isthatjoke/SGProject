@@ -48,9 +48,12 @@ def user_ban(request, pk):
         user.banned_to = now
         user.banned = user.BANNED_FOR_TIME
         user.save()
-    elif user.banned == user.BANNED_FOR_TIME:
+    elif user.banned in (user.BANNED_FOR_TIME, user.BANNED_FOREVER):
         user.banned = user.BANNED_FALSE
         user.banned_to = None
+        user.save()
+    else:
+        user.banned = user.BANNED_FOREVER
         user.save()
 
     return HttpResponseRedirect(reverse('adminapp:users_list'))

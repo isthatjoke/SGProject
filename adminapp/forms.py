@@ -1,8 +1,9 @@
 from django import forms
+from django.core import validators
 
 
 class BanTimeForm(forms.Form):
-    ban_time = forms.CharField(required=False, label='', max_length=20,
-                               widget=forms.NumberInput(attrs={'placeholder': 'на сколько дней', 'type': 'number'}))
+    ban_time = forms.IntegerField(required=False, label='', min_value=1,
+                                  widget=forms.NumberInput(attrs={'placeholder': 'кол-во дней', 'type': 'number'}))
 
 

@@ -8,13 +8,13 @@
 {% load static %}
 
 {% block content %}
-    <div class="posts">
+    <div class="card mt-3">
 
-        <div class="card">
+        <div class="card-body">
 
             <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
-                 alt="preview">
-            <div class="post__container">
+                 class="card-img-top" alt="...">
+
             {% include 'post/includes/post_moderate_status.html' %}
                 <div class="post__user">Пользователь: <span>{{ post.user }}</span></div>
                 <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
@@ -79,7 +79,7 @@
                     {% endif %}
                     </div>
                 </div>
-            </div>
+
         </div>
     </div>
 
@@ -179,5 +179,6 @@
     {% endif %}
     {% endif %}
     {% endif %}
+
 {% endblock %}
 
