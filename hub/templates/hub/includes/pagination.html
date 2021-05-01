@@ -14,7 +14,10 @@ days={{ request.GET.days }}&
 tags={{ request.GET.tags }}&
 {% endif %}
 {% if request.GET.msg_type %}
-msg_type={{ request.GET.msg_type }}
+msg_type={{ request.GET.msg_type }}&
+{% endif %}
+{% if request.GET.search %}
+search={{ request.GET.search }}
 {% endif %}"
 aria-label="Previous" style="color: black">
 
@@ -38,7 +41,10 @@ days={{ request.GET.days }}&
 tags={{ request.GET.tags }}&
 {% endif %}
 {% if request.GET.msg_type %}
-msg_type={{ request.GET.msg_type }}
+msg_type={{ request.GET.msg_type }}&
+{% endif %}
+{% if request.GET.search %}
+search={{ request.GET.search }}
 {% endif %}"
 aria-label="Next"  style="color: black">
 
