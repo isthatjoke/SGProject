@@ -149,7 +149,7 @@ CKEDITOR_REQUIRE_STAFF = False
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'full',
-        'height': 300,
-        'width': 600,
+        'height': '25em',
+        'width': '100%',
     },
 }
