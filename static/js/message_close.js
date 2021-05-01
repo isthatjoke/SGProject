@@ -1,11 +1,11 @@
 window.onload = function () {
-    let message = $('.message');
+    let message = $('.alert');
     let ban_time = $('#id_ban_time');
 
     $('.link').click(function () {
         let target = event.target;
         let link_num = parseInt(target.id.replace('link-', ''));
-        if (target.text == 'забанить') {
+        if (target.textContent == 'забанить') {
             let form_id = 'form-' + link_num;
             $('#' + form_id).prop('style', 'display:inline');
         } else {
@@ -13,11 +13,20 @@ window.onload = function () {
             $('#' + button_id).prop('style', 'display:inline');
         }});
 
-    $('.close').click(function () {
+    // ban_time.change(function () {
+    //     alert(ban_time.val());
+    // });
+    ban_time.bind('keyup mouseup', function () {
+        if(ban_time.val() !== '') {
+            $('.ban-submit').prop('textContent', 'подтвердить');
+        } else {
+            $('.ban-submit').prop('textContent', 'навсегда');
+        }
+        // alert(ban_time.val())
+    });
+
+    $('.btn-close').click(function () {
         message.prop('style', 'display:none');
 
-        // window.alert(form_id);
-        // window.alert($(this).attr('id'));
-        // message.prop('style', 'display:none');
     });
 };
