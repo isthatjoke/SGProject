@@ -2,6 +2,7 @@
 {% load static %}
 {% block content %}
     <form class="d-flex">
+        <input class="form-control me-2" type="text" placeholder="Поиск по слову" aria-label="Search" name="search" value="{{ request.GET.search }}">
         <input class="form-control me-2" type="text" placeholder="Поиск по тэгам" aria-label="Search" name="tags" value="{{ request.GET.tags }}">
         <input class="form-control me-2" type="number" placeholder="За последние 20 дней " aria-label="Search" name="days" value="{{ request.GET.days }}">
         <select class="form-select" aria-label="Default select example" name="msg_type">

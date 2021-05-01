@@ -3,11 +3,12 @@ from datetime import datetime, timedelta
 import pytz
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.postgres.search import SearchVector, SearchRank, SearchQuery, TrigramSimilarity
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from django.views.generic.base import View, ContextMixin
-from django.db.models import Count
+from django.db.models import Count, F, Q, Value
 
 from hub.models import Hub, HubCategory, get_hub_cats_dict
 from post.models import Post
@@ -114,6 +115,18 @@ def ordering(request, pk=None, cat=None):
 
     if cat is not None:
         posts = posts.filter(hub_category=cat)
+
+    if request.GET.get('search'):
+        vector = SearchVector('content', 'name')
+        query = request.GET.get('search')
+        # query = SearchQuery(request.GET.get('search'))
+        # posts = posts.annotate(rank=SearchRank(vector, query, normalization=Value(2).bitor(4)),).order_by('-rank')
+        # posts = posts.annotate(search=vector).filter(search=query) # может существовать
+        # vector_trgm = TrigramSimilarity('name', query) + TrigramSimilarity(
+        #     'content', query)
+        # posts = posts.annotate(search=vector).order_by('name').filter(search=query) or posts.annotate(
+        #     similarity=vector_trgm).filter(similarity__gt=0.2).order_by('name')
+        posts = posts.filter(Q(name__icontains=query) | Q(content__icontains=query))
 
     if request.GET.get('tags') != '':
         tag = request.GET.get('tags', None)
