@@ -1,6 +1,6 @@
 import json
-
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.shortcuts import redirect
 
@@ -40,8 +40,9 @@ class Post(models.Model):
         verbose_name = 'пост'
         verbose_name_plural = 'Посты'
         ordering = ('-created_at',)
+        indexes = [GinIndex(fields=('name', 'content'))]
 
-    name = models.CharField(max_length=200, verbose_name='название', )
+    name = models.CharField(max_length=200, verbose_name='название')
     hub_category = models.ForeignKey(HubCategory, related_name='hub_category',
                                      verbose_name='подкатегория', on_delete=models.CASCADE, **NULLABLE)
     status = models.CharField(verbose_name='статус', choices=STATUSES, default=STATUS_UNPUBLISHED, max_length=20)
@@ -87,7 +88,6 @@ class Post(models.Model):
 
     def clean_tags(self):
         Post.objects.get(id=self.id).clean()
-
 
     def get_all_tags(self):
         res = ''

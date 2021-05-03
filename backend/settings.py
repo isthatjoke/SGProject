@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'hub',
     'authapp',
     'post',
@@ -150,7 +151,7 @@ CKEDITOR_REQUIRE_STAFF = False
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'full',
-        'height': 300,
-        'width': 600,
+        'height': '25em',
+        'width': '100%',
     },
 }
