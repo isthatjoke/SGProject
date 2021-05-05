@@ -140,8 +140,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-DOMAIN_NAME = 'http://isthatjoke.xyz'
-SERVER_NAME = 'http://isthatjoke.xyz'
+DOMAIN_NAME = 'http://www.isthatjoke.xyz'
+SERVER_NAME = 'http://www.isthatjoke.xyz'
 
 CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
 CKEDITOR_UPLOAD_PATH = "uploads/"
