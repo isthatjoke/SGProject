@@ -22,7 +22,7 @@ from backend.utils import LoginRequiredDispatchMixin
 from hub.models import get_hub_cats_dict
 from post.forms import PostEditForm, PostCreationForm, CommentForm, PostModeratorEditForm
 from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma, Tags, get_all_tags
-from post.tables import PostsTable
+from post.tables import PostsTable, ModeratorPostsTable
 
 
 def perform_karma_update(post, user, karma):
@@ -319,10 +319,11 @@ class PostUserListView(SingleTableView, LoginRequiredDispatchMixin):
         return context
 
 
-class PostModerateListView(ListView, LoginRequiredDispatchMixin):
+class PostModerateListView(SingleTableView, LoginRequiredDispatchMixin):
     model = Post
+    table_class = ModeratorPostsTable
     template_name = 'post/post_list.html'
-    context_object_name = 'posts'
+    context_table_name = 'posts'
     paginate_by = 10
 
     def get_queryset(self):
