@@ -1,0 +1,71 @@
+
+    {% for comment in comments %}
+        <a name="comment-{{ comment.id }}"></a>
+        <div class="row" id="{{ comment.id }}">
+            <div class="col-md-{{ comment.get_offset }}"></div>
+            <div class="col-md-{{ comment.get_col }} row-comment">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>{{ comment.author_id.get_full_name|default:comment.author.username }}</strong>&nbsp;&nbsp;
+                        {{ comment.created_at }}
+                        <a href="#comment-{{ comment.id }}">#</a>
+                    </div>
+                    <div class="panel-body">
+                        <div>
+                            {{ comment.content|safe }}
+                            <div>
+                                <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                                <span id="{{ comment.id }}"
+                                      class="comment__karma__count">{{ comment.comment_karma }}</span>&nbsp;
+                                <span id="{{ comment.id }}" class="comment__karma__msg"></span>&nbsp;
+                                {% if request.user.is_authenticated %}
+                                    {% if request.user == comment.karma.first.user %}
+                                        {% if comment.karma.first.karma == 1 %}
+                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
+                                                <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
+                                            </bottom>
+                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
+                                                <i class="fa fa-thumbs-o-up liked" aria-hidden="true"></i>
+                                            </bottom>
+                                        {% elif comment.karma.first.karma == -1 %}
+                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
+                                                <i class="fa fa-thumbs-o-down liked" aria-hidden="true"></i>&nbsp;&nbsp;
+                                            </bottom>
+                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
+                                                <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                            </bottom>
+                                        {% endif %}
+                                    {% else %}
+                                        <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
+                                            <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
+                                        </bottom>
+                                        <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
+                                            <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                        </bottom>
+                                    {% endif %}
+                                {% else %}
+                                    <span>Для выставления оценки авторизуйтесь.</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if comment.published %}
+                                {% if form %}
+
+                                        <a class="btn btn-default btn-xs pull-right"
+                                           onclick="return show_comments_form({{ comment.id }})">
+                                             &nbsp;&nbsp;Ответить
+                                        </a>
+                                        {% if comment.author.username == request.user.username %}
+                                            &nbsp;&nbsp;
+                                            <a href="comment/delete/{{ comment.id }}" class="btn btn-default btn-xs pull-right">
+                                                Удалить</a>
+
+                                        {% endif %}
+                                {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
