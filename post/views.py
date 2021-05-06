@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, Count, F
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
+from django.template import RequestContext
 from django.template.loader import render_to_string
 
 from django.urls import reverse_lazy, reverse
@@ -110,7 +111,6 @@ class PostDetailView(DetailView):
 
         return context
 
-
     # def get(self, request, *args, **kwargs):
     #
     #     post = get_object_or_404(Post, id=self.kwargs['pk'])
@@ -171,7 +171,9 @@ def delete_comment(request, pk2, pk):
     comment.save()
     return redirect(comment.get_absolute_url())
 
+
 def ajax_comment_update(request, pk):
+    comment_form = CommentForm
     print(f'я в методе ajax_comment_update, pk={pk}')
     print(f'self.request: {request}')
     print(f'request.is_ajax: {request.is_ajax()}')
@@ -181,11 +183,15 @@ def ajax_comment_update(request, pk):
         comments = Comment.objects.filter(comment_post=pk).order_by('path')
         content = {
             'comments': comments,
+            'request': request,
+            'form': comment_form,
         }
+        # result = render_to_string('post/includes/comment_post.html', content, context_instance=RequestContext(request))
 
-        result = render_to_string('post/includes/comment_post.html', content)
+        result = render_to_string('post/includes/comment_post.html', content, request=request)
 
         return JsonResponse({'result': result})
+
 
 # @login_required
 # @require_http_methods(["POST"])

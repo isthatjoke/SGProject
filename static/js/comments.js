@@ -6,28 +6,27 @@ window.onload = function () {
 
 
     $('#add_comment_but').click(function(){
-        let formData = new FormData();
-        let csrftoken = $("[name=csrfmiddlewaretoken]").value;
-        formData.append('post_id', add_comment_but.value);
-        formData.append('csrfmiddlewaretoken', csrftoken);
-        formData.append('textarea',  id_comment_area.value);
-
-        console.log('ajax function');
+//        let formData = new FormData();
+//        let csrftoken = $("[name=csrfmiddlewaretoken]").value;
+//        formData.append('post_id', add_comment_but.value);
+//        formData.append('csrfmiddlewaretoken', csrftoken);
+//        formData.append('textarea',  id_comment_area.value);
+//
+//        console.log('ajax function');
         let target_href = event.target;
         if (target_href) {
-            console.log('target_href.value: ' + target_href.value);
-            console.log("------>/post/"+ parseInt(target_href.value));
+
 
             $.ajax({
                 data: $('#comment_form').serialize(), // get the form data
                 type: $('#comment_form').attr('method'), // GET or POST
                 url: $('#comment_form').attr('action'),
-//                url: "/post/" + parseInt(target_href.value) + "/comment/update/",
-//                dataType: 'json',
-//                data: formData,
+
                 success: function (data) {
                     console.log('ajax get data');
                     $('.comment-reload').html(data.result);
+                    let item = document.getElementsByClassName('row-comment');
+                    style_update(item);
                     console.log('ajax done');
                 },
             });
@@ -53,7 +52,9 @@ function show_comments_form(parent_comment_id)
 
 let item = document.getElementsByClassName('row-comment');
 
-var flag = true;
+
+function style_update(item) {
+    var flag = true;
 for (var key in item) {
 
     if (isNaN(key) == false) {
@@ -73,4 +74,8 @@ for (var key in item) {
 
   console.log(key);
 }
+
+}
+
+style_update(item);
 

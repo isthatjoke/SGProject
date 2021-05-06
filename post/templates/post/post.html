@@ -156,10 +156,8 @@
             </div>
         </div>
         {% endfor %}
+<div>
     <div>
-
-       <p>ksjfdglakjsfxh glkjsdfh glkjsdrhf glkjshr glkjshr glkjgr</p>
-
     {% if post.status == 'published' %}
     {% if form %}
         <h3 id="write_comment"><a style="color: black;" onclick="return show_comments_form('write_comment')">Написать
@@ -172,6 +170,8 @@
                 <button type="submit" class="btn btn-primary" value="{{ post.id }}" id="add_comment_but">{% bootstrap_icon "comment" %}&nbsp;&nbsp;Комментировать
                 </button>
             {% endbuttons %}
+
+
 
     {% else %}
         <div class="panel panel-warning">
@@ -186,6 +186,6 @@
     {% endif %}
     {% endif %}
 
-
+</div>
 {% endblock %}
 
