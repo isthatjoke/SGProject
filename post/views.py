@@ -14,6 +14,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, CreateView, ListView, UpdateView
+from django_tables2 import SingleTableView
 
 from authapp.models import HubUser
 from backend import settings
@@ -21,6 +22,7 @@ from backend.utils import LoginRequiredDispatchMixin
 from hub.models import get_hub_cats_dict
 from post.forms import PostEditForm, PostCreationForm, CommentForm, PostModeratorEditForm
 from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma, Tags, get_all_tags
+from post.tables import PostsTable
 
 
 def perform_karma_update(post, user, karma):
@@ -280,10 +282,11 @@ class CommentUserlist(ListView):
         return context
 
 
-class PostUserListView(ListView, LoginRequiredDispatchMixin):
+class PostUserListView(SingleTableView, LoginRequiredDispatchMixin):
     model = Post
+    table_class = PostsTable
     template_name = 'post/post_list.html'
-    context_object_name = 'posts'
+    context_table_name = 'posts'
     paginate_by = 10
 
     def get_queryset(self):

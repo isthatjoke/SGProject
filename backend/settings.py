@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'bootstrap3',
     'django_bootstrap_icons',
     'adminapp',
+    'django_tables2',
 ]
 
 MIDDLEWARE = [
@@ -157,4 +158,5 @@ CKEDITOR_CONFIGS = {
 }
 
 
+DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap.html"
 
