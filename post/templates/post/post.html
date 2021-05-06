@@ -83,9 +83,9 @@
                 {% elif post.status == 'need_review' %}
                     {% include 'post/includes/post_status_need_review.html' %}
                 {% endif %}
-                {% if post.status == 'on_moderate' and user.is_staff %}
-                    {% include 'post/includes/post_on_moderate.html' %}
-                {% endif %}
+            {% endif %}
+            {% if post.status == 'on_moderate' and user.is_staff %}
+                {% include 'post/includes/post_on_moderate.html' %}
             {% endif %}
         </div>
     </div>
