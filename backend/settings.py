@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'zl&%@w5tpy6e*4@@lg1=#p0%9ta%h#sj)^a0$)yyz*^nf$odi+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'bootstrap3',
     'django_bootstrap_icons',
     'adminapp',
+    'django_tables2',
 ]
 
 MIDDLEWARE = [
@@ -85,7 +86,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'sgproject',
-        'USER': 'root',
+        'USER': 'postgres',
     }
     # 'default': {
     #     'ENGINE': 'django.db.backends.sqlite3',
@@ -133,15 +134,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATICFILES_DIRS = (
-#     os.path.join(BASE_DIR, 'static'),
-# )
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-DOMAIN_NAME = 'isthatjoke.xyz'
-SERVER_NAME = 'isthatjoke.xyz'
 
 CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
 CKEDITOR_UPLOAD_PATH = "uploads/"
@@ -157,4 +156,5 @@ CKEDITOR_CONFIGS = {
 }
 
 
+DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap.html"
 
