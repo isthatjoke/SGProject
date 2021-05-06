@@ -12,9 +12,6 @@ window.onload = function () {
             $('#' + button_id).prop('style', 'display:inline');
         }});
 
-    // ban_time.change(function () {
-    //     alert(ban_time.val());
-    // });
     $('.ban_time').bind('keyup mouseup', function () {
         let ban_target = event.target;
         let ban_num = parseInt(ban_target.id.replace('id_ban_time-', ''));
