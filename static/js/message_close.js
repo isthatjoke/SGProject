@@ -1,8 +1,8 @@
 window.onload = function () {
     let message = $('.alert');
 
-    $('.link').click(function () {
-        let target = event.target;
+    $('.link').click(function (e) {
+        let target = e.target;
         let link_num = parseInt(target.id.replace('link-', ''));
         if (target.textContent == 'забанить') {
             let form_id = 'form-' + link_num;
@@ -24,8 +24,20 @@ window.onload = function () {
         // alert(ban_time.val())
     });
 
-    $('.btn-close').click(function () {
+    $('.alert-close').click(function () {
         message.prop('style', 'display:none');
 
+    });
+
+    $('.notif-close').click(function (e) {
+        let target = e.target;
+        let par = $(this).parent();
+        $.ajax({
+            url: target.id,
+        });
+        par.prop('style', 'display:none');
+        let count = $('.notif-count');
+        let make_count = parseInt(count[0].textContent) - 1;
+        count.prop('textContent', make_count);
     });
 };
