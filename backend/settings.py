@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django_bootstrap_icons',
     'adminapp',
     'django_tables2',
+    'notifications',
 ]
 
 MIDDLEWARE = [
