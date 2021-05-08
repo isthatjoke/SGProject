@@ -4,6 +4,27 @@
 //    // добавляем ajax-обработчик для обновления количества товара
 ////    var csrftoken = $("input[name=csrfmiddlewaretoken]").value;
 
+function ajax_comment_del(comment_id){
+            console.log('delete comment id: '+ comment_id);
+            comment_id = Number.parseInt(comment_id);
+            console.log('Тип comment_id: ' + typeof(comment_id));
+            $.ajax({
+                data: comment_id, // get the form data
+                type: 'GET', // GET or POST
+                url: 'comment/del/' + comment_id + "/",
+                dataType: "json",
+                }).done(
+                function (data) {
+                    console.log('ajax get data');
+                    $('.comment-reload').html(data.result);
+                    $('.footer-update').removeClass('fixed-bottom');
+                    let item = document.getElementsByClassName('row-comment');
+                    style_update(item);
+                    console.log('ajax done');
+
+                });
+}
+
 function ajax_comment(){
 console.log('ajax_comment');
 //    $('#add_comment_but').click(function(){

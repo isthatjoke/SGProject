@@ -146,18 +146,22 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            {% if comment.published %}
-                                {% if form %}
-                                    <a class="btn btn-default btn-xs pull-right"
-                                       onclick="return show_comments_form({{ comment.id }})">
-                                        {% bootstrap_icon "share-alt" %}&nbsp;&nbsp;Ответить
-                                    </a>
-                                    {% if comment.author.username == request.user.username %}
-                                        &nbsp;&nbsp;
-                                        <a href="comment/delete/{{ comment.id }}"
-                                           class="btn btn-default btn-xs pull-right">
-                                            Удалить</a>
-                                    {% endif %}
+
+                        </div>
+
+                        {% if comment.published %}
+                            {% if form %}
+
+                                <a class="btn btn-default btn-xs pull-right"
+                                   onclick="return show_comments_form({{ comment.id }})">
+                                    {% bootstrap_icon "share-alt" %}&nbsp;&nbsp;Ответить
+                                </a>
+                                {% if comment.author.username == request.user.username %}
+                                    &nbsp;&nbsp;
+<!--                                    <a href="comment/delete/{{ comment.id }}" class="btn btn-default btn-xs pull-right">-->
+<!--                                        Удалить</a>-->
+                                    <a onClick="ajax_comment_del('{{ comment.id }}')" class="btn btn-default btn-xs pull-right">Удалить</a>
+
                                 {% endif %}
                             {% endif %}
                         </div>

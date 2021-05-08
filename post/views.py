@@ -175,17 +175,35 @@ def delete_comment(request, pk2, pk):
     comment.save()
     return redirect(comment.get_absolute_url())
 
+def ajax_comment_delete(request, pk, comment_id):
+    '''
+    :param request:
+    :param pk: Это id поста к которому относится коммент
+    :param comment_id: Это id комментария
+    :return:
+    '''
+    print(f'view ajax_comment_delete, пост = {pk}, comment.id = {comment_id}')
+    comment = get_object_or_404(Comment, id=comment_id)
+    comment.content = f"[----русские хакеры удалили этот коммент---]"
+    comment.published = False
+    comment.save()
+    comment_form = CommentForm
+    comments = Comment.objects.filter(comment_post=pk).order_by('path')
+    post = get_object_or_404(Post, id=pk)
+
+    content = {
+        'comments': comments,
+        'request': request,
+        'form': comment_form,
+        'post': post,
+    }
+
+    result = render_to_string('post/includes/comment_post.html', content, request=request)
+    return JsonResponse({'result': result})
 
 def ajax_comment_update(request, pk):
 
-    # headers = {'X-REQUESTED-WITH': 'XMLHttpRequest'}
-    # requests.post(url=request.build_absolute_uri(), headers=headers)
     comment_form = CommentForm
-    print(f'я в методе ajax_comment_update, pk={pk}')
-    print(f'self.request: {request}')
-    print(f'request.is_ajax: {request.is_ajax()}')
-    # if request.is_ajax():
-    print(f'я в обработчике ajax')
     if add_comment(request, pk):
         comments = Comment.objects.filter(comment_post=pk).order_by('path')
         post = get_object_or_404(Post, id=pk)
@@ -196,7 +214,6 @@ def ajax_comment_update(request, pk):
             'form': comment_form,
             'post': post,
         }
-        # result = render_to_string('post/includes/comment_post.html', content, context_instance=RequestContext(request))
 
         result = render_to_string('post/includes/comment_post.html', content, request=request)
         return JsonResponse({'result': result})
