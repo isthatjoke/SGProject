@@ -1,9 +1,8 @@
 window.onload = function () {
     let message = $('.alert');
-    let ban_time = $('#id_ban_time');
 
-    $('.link').click(function () {
-        let target = event.target;
+    $('.link').click(function (e) {
+        let target = e.target;
         let link_num = parseInt(target.id.replace('link-', ''));
         if (target.textContent == 'забанить') {
             let form_id = 'form-' + link_num;
@@ -13,20 +12,32 @@ window.onload = function () {
             $('#' + button_id).prop('style', 'display:inline');
         }});
 
-    // ban_time.change(function () {
-    //     alert(ban_time.val());
-    // });
-    ban_time.bind('keyup mouseup', function () {
-        if(ban_time.val() !== '') {
-            $('.ban-submit').prop('textContent', 'подтвердить');
+    $('.ban_time').bind('keyup mouseup', function () {
+        let ban_target = event.target;
+        let ban_num = parseInt(ban_target.id.replace('id_ban_time-', ''));
+        let ban_button_id = 'ban_submit-' + ban_num;
+        if(ban_target.value !== '') {
+            $('#' + ban_button_id).prop('textContent', 'подтвердить');
         } else {
-            $('.ban-submit').prop('textContent', 'навсегда');
+            $('#' + ban_button_id).prop('textContent', 'навсегда');
         }
         // alert(ban_time.val())
     });
 
-    $('.btn-close').click(function () {
+    $('.alert-close').click(function () {
         message.prop('style', 'display:none');
 
+    });
+
+    $('.notif-close').click(function (e) {
+        let target = e.target;
+        let par = $(this).parent();
+        $.ajax({
+            url: target.id,
+        });
+        par.prop('style', 'display:none');
+        let count = $('.notif-count');
+        let make_count = parseInt(count[0].textContent) - 1;
+        count.prop('textContent', make_count);
     });
 };
