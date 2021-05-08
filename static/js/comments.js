@@ -1,39 +1,54 @@
 'use strict';
 
-window.onload = function () {
-    // добавляем ajax-обработчик для обновления количества товара
-//    var csrftoken = $("input[name=csrfmiddlewaretoken]").value;
+//window.onload = function () {
+//    // добавляем ajax-обработчик для обновления количества товара
+////    var csrftoken = $("input[name=csrfmiddlewaretoken]").value;
 
+function ajax_comment(){
+console.log('ajax_comment');
+//    $('#add_comment_but').click(function(){
+        event.preventDefault();
 
-    $('#add_comment_but').click(function(){
-//        let formData = new FormData();
-//        let csrftoken = $("[name=csrfmiddlewaretoken]").value;
-//        formData.append('post_id', add_comment_but.value);
-//        formData.append('csrfmiddlewaretoken', csrftoken);
-//        formData.append('textarea',  id_comment_area.value);
-//
-//        console.log('ajax function');
         let target_href = event.target;
         if (target_href) {
-
 
             $.ajax({
                 data: $('#comment_form').serialize(), // get the form data
                 type: $('#comment_form').attr('method'), // GET or POST
                 url: $('#comment_form').attr('action'),
-
-                success: function (data) {
+                dataType: "json",
+//                contentType: 'application/json; charset=utf-8',
+                }).done(
+                function (data) {
                     console.log('ajax get data');
                     $('.comment-reload').html(data.result);
+                    $('.footer-update').removeClass('fixed-bottom');
                     let item = document.getElementsByClassName('row-comment');
                     style_update(item);
+//                    $('.footer-update').addClass('fixed-bottom');
                     console.log('ajax done');
-                },
-            });
+
+                });
+
+//            $.ajax({
+//                data: $('#comment_form').serialize(), // get the form data
+//                type: $('#comment_form').attr('method'), // GET or POST
+//                url: $('#comment_form').attr('action'),
+//                dataType: "json",
+//
+//                success: function (data) {
+//                    console.log('ajax get data');
+//                    $('.comment-reload').html(data.result);
+//                    let item = document.getElementsByClassName('row-comment');
+//                    style_update(item);
+//                    console.log('ajax done');
+//                },
+//                crossDomain: false
+//            });
 
         }
-//                event.preventDefault();
-    });
+
+//    });
 }
 
 

@@ -5,9 +5,10 @@ import pytz
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.messages.views import SuccessMessageMixin
+import requests
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, Count, F
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpRequest
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -173,6 +174,9 @@ def delete_comment(request, pk2, pk):
 
 
 def ajax_comment_update(request, pk):
+
+    # headers = {'X-REQUESTED-WITH': 'XMLHttpRequest'}
+    # requests.post(url=request.build_absolute_uri(), headers=headers)
     comment_form = CommentForm
     print(f'я в методе ajax_comment_update, pk={pk}')
     print(f'self.request: {request}')
@@ -181,15 +185,17 @@ def ajax_comment_update(request, pk):
     print(f'я в обработчике ajax')
     if add_comment(request, pk):
         comments = Comment.objects.filter(comment_post=pk).order_by('path')
+        post = get_object_or_404(Post, id=pk)
+
         content = {
             'comments': comments,
             'request': request,
             'form': comment_form,
+            'post': post,
         }
         # result = render_to_string('post/includes/comment_post.html', content, context_instance=RequestContext(request))
 
         result = render_to_string('post/includes/comment_post.html', content, request=request)
-
         return JsonResponse({'result': result})
 
 
