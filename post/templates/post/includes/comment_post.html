@@ -67,8 +67,9 @@
                                         </a>
                                         {% if comment.author.username == request.user.username %}
                                             &nbsp;&nbsp;
-                                            <a href="comment/delete/{{ comment.id }}" class="btn btn-default btn-xs pull-right">
-                                                Удалить</a>
+<!--                                            <a href="comment/delete/{{ comment.id }}" class="btn btn-default btn-xs pull-right">-->
+<!--                                                Удалить</a>-->
+                        <a onClick="ajax_comment_del('{{ comment.id }}')" class="btn btn-default btn-xs pull-right">Удалить</a>
 
                                         {% endif %}
                                 {% endif %}
