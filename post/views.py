@@ -5,10 +5,13 @@ import pytz
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.messages.views import SuccessMessageMixin
+import requests
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, Count, F
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpRequest
 from django.shortcuts import get_object_or_404, render, redirect
+from django.template import RequestContext
+from django.template.loader import render_to_string
 
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
@@ -110,30 +113,6 @@ class PostDetailView(DetailView):
             if self.request.user.is_authenticated:
                 context['form'] = self.comment_form
 
-        if self.request.method == 'POST':
-            form = CommentForm(self.request.POST)
-            if form.is_valid():
-                comment = Comment(
-                    path=[],
-                    comment_post=self.object.pk,
-                    author=self.request.user,
-                    content=form.cleaned_data['comment_area']
-                )
-                comment.save()
-
-                # сформируем path после первого сохранения
-                # и пересохраним комментарий
-
-                try:
-                    comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
-                    comment.path.append(comment.id)
-                    # print('получилось')
-                except ObjectDoesNotExist:
-                    comment.path.append(comment.id)
-                    # print('не получилось')
-
-                comment.save()
-
         return context
 
     # def get(self, request, *args, **kwargs):
@@ -197,32 +176,84 @@ def delete_comment(request, pk2, pk):
     return redirect(comment.get_absolute_url())
 
 
-@login_required
-@require_http_methods(["POST"])
-def add_comment(request, pk):
-    form = CommentForm(request.POST)
-    post = get_object_or_404(Post, id=pk)
+def ajax_comment_update(request, pk):
 
+    # headers = {'X-REQUESTED-WITH': 'XMLHttpRequest'}
+    # requests.post(url=request.build_absolute_uri(), headers=headers)
+    comment_form = CommentForm
+    print(f'я в методе ajax_comment_update, pk={pk}')
+    print(f'self.request: {request}')
+    print(f'request.is_ajax: {request.is_ajax()}')
+    # if request.is_ajax():
+    print(f'я в обработчике ajax')
+    if add_comment(request, pk):
+        comments = Comment.objects.filter(comment_post=pk).order_by('path')
+        post = get_object_or_404(Post, id=pk)
+
+        content = {
+            'comments': comments,
+            'request': request,
+            'form': comment_form,
+            'post': post,
+        }
+        # result = render_to_string('post/includes/comment_post.html', content, context_instance=RequestContext(request))
+
+        result = render_to_string('post/includes/comment_post.html', content, request=request)
+        return JsonResponse({'result': result})
+
+
+# @login_required
+# @require_http_methods(["POST"])
+def add_comment(request, pk):
+    post = get_object_or_404(Post, id=pk)
+    form = CommentForm(request.POST)
     if form.is_valid():
-        comment = Comment()
-        comment.path = []
-        comment.comment_post = post
-        comment.author = auth.get_user(request)
-        comment.content = form.cleaned_data['comment_area']
+        comment = Comment(
+            path=[],
+            # comment_post=object.pk,
+            comment_post=post,
+            author=request.user,
+            content=form.cleaned_data['comment_area']
+        )
         comment.save()
 
-        # Django не позволяет увидеть ID комментария по мы не сохраним его,
         # сформируем path после первого сохранения
         # и пересохраним комментарий
+
         try:
             comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
             comment.path.append(comment.id)
+            # print('получилось')
         except ObjectDoesNotExist:
             comment.path.append(comment.id)
+            # print('не получилось')
 
         comment.save()
+        return True
 
-    return redirect(comment.get_absolute_url())
+    # form = CommentForm(request.POST)
+    # post = get_object_or_404(Post, id=pk)
+    #
+    # if form.is_valid():
+    #     comment = Comment()
+    #     comment.path = []
+    #     comment.comment_post = post
+    #     comment.author = auth.get_user(request)
+    #     comment.content = form.cleaned_data['comment_area']
+    #     comment.save()
+    #
+    #     # Django не позволяет увидеть ID комментария по мы не сохраним его,
+    #     # сформируем path после первого сохранения
+    #     # и пересохраним комментарий
+    #     try:
+    #         comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
+    #         comment.path.append(comment.id)
+    #     except ObjectDoesNotExist:
+    #         comment.path.append(comment.id)
+    #
+    #     comment.save()
+    #
+    # return True
 
 
 class PostCreateView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin):
@@ -235,11 +266,11 @@ class PostCreateView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin
         messages.add_message(self.request, messages.SUCCESS, self.success_message)
         tags = form.cleaned_data['tags_str']  # строка с тегами из формы
         if tags:
-            tmp_tags = str(tags).split(',') # распарсил теги
+            tmp_tags = str(tags).split(',')  # распарсил теги
             for key, el in enumerate(tmp_tags):
-                tmp_tags[key] = el.strip() # убрал пробелы
+                tmp_tags[key] = el.strip()  # убрал пробелы
 
-            new_tags = [] # массив куда складываются id тэгов для записи в поле тэг поста
+            new_tags = []  # массив куда складываются id тэгов для записи в поле тэг поста
 
             if form.is_valid():
                 f = form.save()
