@@ -11,6 +11,8 @@ from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, FormView, CreateView, UpdateView
 
 # Create your views here.
+from notifications.signals import notify
+
 from authapp.forms import HubUserLoginForm, HubUserRegisterForm, HubUserUpdateForm, HubUserProfileUpdateForm
 from authapp.models import HubUser
 from backend.utils import LoginRequiredDispatchMixin
@@ -61,6 +63,7 @@ class HubUserUpdateView(UpdateView, SuccessMessageMixin, LoginRequiredDispatchMi
             self.object = form.save()
             if hubuserprofile.is_valid():
                 hubuserprofile.save()
+        notify.send(self.object, recipient=self.object, verb='you reached level 10')
         return super(HubUserUpdateView, self).form_valid(form)
 
 

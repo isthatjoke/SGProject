@@ -9,42 +9,32 @@
 
 {% block content %}
     <div class="card mt-3">
-
         <div class="card-body">
-
             <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
                  class="card-img-top" alt="...">
-
             {% include 'post/includes/post_moderate_status.html' %}
-                <div class="post__user">Пользователь: <span>{{ post.user }}</span></div>
-                <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
-                <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
-                    {% if post.tags %}
-                        <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.get_all_tags }}</div>
-                    {% endif %}
-                <div class="post__title"><h3>{{ post.name }}</h3></div>
-                <div class="post__body">
-                    <p>
-                        {{ post.content|safe }}
-                    </p>
+            <div class="post__user">Пользователь: <span>{{ post.user }}</span></div>
+            <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
+            <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
+            {% if post.tags %}
+                <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.get_all_tags }}</div>
+            {% endif %}
+            <div class="post__title"><h3>{{ post.name }}</h3></div>
+            <div class="post__body">
+                <p>
+                    {{ post.content|safe }}
+                </p>
 
-                </div>
-
-                {#                <div class="post__button__read">#}
-                {#                    <a href="/post/{{ post.id }}">#}
-                {#                        <button>Читать далее...</button>#}
-                {#                    </a>#}
-                {#                </div>#}
+            </div>
             {% if post.status == 'need_review' or post.status == 'moderate_false' %}
                 _______________
                 <p>Причина</p>
                 {{ post.moderate_desc|upper }}
             {% endif %}
-
-                <div class="post__statistic">
-                    <div class="post__karma"><i class="fa fa-bar-chart" aria-hidden="true"></i>
-                        <span class="post__karma__count">{{ post.post_karma }}</span>&nbsp;
-                        <span class="post__karma__msg"></span>&nbsp;
+            <div class="post__statistic">
+                <div class="post__karma"><i class="fa fa-bar-chart" aria-hidden="true"></i>
+                    <span class="post__karma__count">{{ post.post_karma }}</span>&nbsp;
+                    <span class="post__karma__msg"></span>&nbsp;
                     {% if post.status == 'published' %}
                         {% if request.user.is_authenticated %}
                             {% if request.user == post.post_id.first.user %}
@@ -77,11 +67,29 @@
                             <span>Для выставления оценки авторизуйтесь.</span>
                         {% endif %}
                     {% endif %}
-                    </div>
                 </div>
-
+            </div>
+            {% if request.user == post.user %}
+                {% if post.status == 'unpublished' %}
+                    {% include 'post/includes/post_status_unpublished.html' %}
+                {% elif post.status == 'published' %}
+                    {% include 'post/includes/post_status_published.html' %}
+                {% elif post.status == 'archive' %}
+                    {% include 'post/includes/post_status_archive.html' %}
+                {% elif post.status == 'template' %}
+                    {% include 'post/includes/post_status_template.html' %}
+                {% elif post.status == 'moderate_false' %}
+                    {% include 'post/includes/post_status_moderate_false.html' %}
+                {% elif post.status == 'need_review' %}
+                    {% include 'post/includes/post_status_need_review.html' %}
+                {% endif %}
+            {% endif %}
+            {% if post.status == 'on_moderate' and user.is_staff %}
+                {% include 'post/includes/post_on_moderate.html' %}
+            {% endif %}
         </div>
     </div>
+
 
 {% if user.banned == 'active' or not request.user.is_authenticated %}
     <h2>Комментарии</h2>
@@ -100,40 +108,45 @@
                     <div class="panel-body">
                         <div>
                             {{ comment.content|safe }}
+
                             <div>
-                                <i class="fa fa-bar-chart" aria-hidden="true"></i>
-                                <span id="{{ comment.id }}"
-                                      class="comment__karma__count">{{ comment.comment_karma }}</span>&nbsp;
-                                <span id="{{ comment.id }}" class="comment__karma__msg"></span>&nbsp;
-                                {% if request.user.is_authenticated %}
-                                    {% if request.user == comment.karma.first.user %}
-                                        {% if comment.karma.first.karma == 1 %}
+                                {{ comment.content|safe }}
+                                <div>
+                                    <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                                    <span id="{{ comment.id }}"
+                                          class="comment__karma__count">{{ comment.comment_karma }}</span>&nbsp;
+                                    <span id="{{ comment.id }}" class="comment__karma__msg"></span>&nbsp;
+                                    {% if request.user.is_authenticated %}
+                                        {% if request.user == comment.karma.first.user %}
+                                            {% if comment.karma.first.karma == 1 %}
+                                                <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
+                                                    <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
+                                                </bottom>
+                                                <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
+                                                    <i class="fa fa-thumbs-o-up liked" aria-hidden="true"></i>
+                                                </bottom>
+                                            {% elif comment.karma.first.karma == -1 %}
+                                                <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
+                                                    <i class="fa fa-thumbs-o-down liked" aria-hidden="true"></i>&nbsp;&nbsp;
+                                                </bottom>
+                                                <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
+                                                    <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                                </bottom>
+                                            {% endif %}
+                                        {% else %}
                                             <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
                                                 <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
-                                            </bottom>
-                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
-                                                <i class="fa fa-thumbs-o-up liked" aria-hidden="true"></i>
-                                            </bottom>
-                                        {% elif comment.karma.first.karma == -1 %}
-                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
-                                                <i class="fa fa-thumbs-o-down liked" aria-hidden="true"></i>&nbsp;&nbsp;
                                             </bottom>
                                             <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
                                                 <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
                                             </bottom>
                                         {% endif %}
                                     {% else %}
-                                        <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
-                                            <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
-                                        </bottom>
-                                        <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
-                                            <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
-                                        </bottom>
+                                        <span>Для выставления оценки авторизуйтесь.</span>
                                     {% endif %}
-                                {% else %}
-                                    <span>Для выставления оценки авторизуйтесь.</span>
-                                {% endif %}
+                                </div>
                             </div>
+
                         </div>
 
                         {% if comment.published %}
@@ -151,10 +164,11 @@
 
                                 {% endif %}
                             {% endif %}
-                        {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
         {% endfor %}
 

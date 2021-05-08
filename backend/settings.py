@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'bootstrap3',
     'django_bootstrap_icons',
     'adminapp',
+    'django_tables2',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -86,7 +88,6 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'sgproject',
         'USER': 'postgres',
-        'PASSWORD': 'AndryAndry'
     }
     # 'default': {
     #     'ENGINE': 'django.db.backends.sqlite3',
@@ -142,7 +143,6 @@ STATICFILES_DIRS = (
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
 CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
 CKEDITOR_UPLOAD_PATH = "uploads/"
 
@@ -156,4 +156,6 @@ CKEDITOR_CONFIGS = {
     },
 }
 
+
+DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap.html"
 
