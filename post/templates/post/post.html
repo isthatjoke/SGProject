@@ -83,25 +83,32 @@
                 {% elif post.status == 'need_review' %}
                     {% include 'post/includes/post_status_need_review.html' %}
                 {% endif %}
-                {% if post.status == 'on_moderate' and user.is_staff %}
-                    {% include 'post/includes/post_on_moderate.html' %}
-                {% endif %}
+            {% endif %}
+            {% if post.status == 'on_moderate' and user.is_staff %}
+                {% include 'post/includes/post_on_moderate.html' %}
             {% endif %}
         </div>
     </div>
-    {% if user.banned == 'active' %}
-        <h2>Комментарии</h2>
+
+
+{% if user.banned == 'active' or not request.user.is_authenticated %}
+    <h2>Комментарии</h2>
+<div class="comment-reload">
         {% for comment in comments %}
-            <a name="comment-{{ comment.id }}"></a>
-            <div class="row" id="{{ comment.id }}">
-                <div class="col-md-{{ comment.get_col }} col-md-offset-{{ comment.get_offset }}">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <strong>{{ comment.author_id.get_full_name|default:comment.author.username }}</strong>&nbsp;&nbsp;
-                            {{ comment.created_at }}
-                            <a href="#comment-{{ comment.id }}">#</a>
-                        </div>
-                        <div class="panel-body">
+        <a name="comment-{{ comment.id }}"></a>
+        <div class="row" id="{{ comment.id }}">
+            <div class="col-md-{{ comment.get_offset }}"></div>
+            <div class="col-md-{{ comment.get_col }} row-comment">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>{{ comment.author_id.get_full_name|default:comment.author.username }}</strong>&nbsp;&nbsp;
+                        {{ comment.created_at }}
+                        <a href="#comment-{{ comment.id }}">#</a>
+                    </div>
+                    <div class="panel-body">
+                        <div>
+                            {{ comment.content|safe }}
+
                             <div>
                                 {{ comment.content|safe }}
                                 <div>
@@ -139,48 +146,61 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            {% if comment.published %}
-                                {% if form %}
-                                    <a class="btn btn-default btn-xs pull-right"
-                                       onclick="return show_comments_form({{ comment.id }})">
-                                        {% bootstrap_icon "share-alt" %}&nbsp;&nbsp;Ответить
-                                    </a>
-                                    {% if comment.author.username == request.user.username %}
-                                        &nbsp;&nbsp;
-                                        <a href="comment/delete/{{ comment.id }}"
-                                           class="btn btn-default btn-xs pull-right">
-                                            Удалить</a>
-                                    {% endif %}
+
+                        </div>
+
+                        {% if comment.published %}
+                            {% if form %}
+
+                                <a class="btn btn-default btn-xs pull-right"
+                                   onclick="return show_comments_form({{ comment.id }})">
+                                    {% bootstrap_icon "share-alt" %}&nbsp;&nbsp;Ответить
+                                </a>
+                                {% if comment.author.username == request.user.username %}
+                                    &nbsp;&nbsp;
+<!--                                    <a href="comment/delete/{{ comment.id }}" class="btn btn-default btn-xs pull-right">-->
+<!--                                        Удалить</a>-->
+                                    <a onClick="ajax_comment_del('{{ comment.id }}')" class="btn btn-default btn-xs pull-right">Удалить</a>
+
                                 {% endif %}
                             {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
+
+        </div>
         {% endfor %}
+
+    <div>
         {% if post.status == 'published' %}
-            {% if form %}
-                <h3 id="write_comment"><a style="color: black;" onclick="return show_comments_form('write_comment')">Написать
-                    комментарий</a></h3>
-                <form id="comment_form" action="{% url 'post:add_comment' post.id %}" method="post">
-                    {% csrf_token %}
-                    {% bootstrap_form form %}
-                    {% buttons %}
-                        <button type="submit" class="btn btn-primary">{% bootstrap_icon "comment" %}&nbsp;&nbsp;Комментировать
-                        </button>
-                    {% endbuttons %}
-                </form>
-            {% else %}
-                <div class="panel panel-warning">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Комментарии</h3>
+                {% if form %}
+                    <h3 id="write_comment btn btn-primary"><a style="color: black;" onclick="return show_comments_form('write_comment')">Написать
+                        комментарий</a></h3>
+                    <form id="comment_form" method="post" action="comment/update/">
+<!--                    <form id="comment_form" method="post">-->
+                        {% csrf_token %}
+                        {% bootstrap_form form %}
+                        {% buttons %}
+                            <button type="submit" class="btn btn-primary" value="{{ post.id }}" id="add_comment_but">{% bootstrap_icon "comment" %}&nbsp;&nbsp;
+                            <a onClick="ajax_comment()">Комментировать</a>
+                            </button>
+                        {% endbuttons %}
+                        </form>
+                {% else %}
+                    <div class="panel panel-warning">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Комментарии</h3>
+                        </div>
+                        <div class="panel-body">
+                            Только авторизованные пользователи могут оставлять комментарии.<br/>
+                        </div>
                     </div>
-                    <div class="panel-body">
-                        Только авторизованные пользователи могут оставлять комментарии.<br/>
-                    </div>
-                </div>
-            {% endif %}
+                {% endif %}
         {% endif %}
+    </div>
     {% endif %}
+
+
 {% endblock %}
 

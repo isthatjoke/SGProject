@@ -5,16 +5,20 @@ import pytz
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.messages.views import SuccessMessageMixin
+import requests
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, Count, F
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpRequest
 from django.shortcuts import get_object_or_404, render, redirect
+from django.template import RequestContext
+from django.template.loader import render_to_string
 
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, CreateView, ListView, UpdateView
 from django_tables2 import SingleTableView
+from notifications.signals import notify
 
 from authapp.models import HubUser
 from backend import settings
@@ -22,7 +26,7 @@ from backend.utils import LoginRequiredDispatchMixin
 from hub.models import get_hub_cats_dict
 from post.forms import PostEditForm, PostCreationForm, CommentForm, PostModeratorEditForm
 from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma, Tags, get_all_tags
-from post.tables import PostsTable
+from post.tables import PostsTable, ModeratorPostsTable
 
 
 def perform_karma_update(post, user, karma):
@@ -109,30 +113,6 @@ class PostDetailView(DetailView):
             if self.request.user.is_authenticated:
                 context['form'] = self.comment_form
 
-        if self.request.method == 'POST':
-            form = CommentForm(self.request.POST)
-            if form.is_valid():
-                comment = Comment(
-                    path=[],
-                    comment_post=self.object.pk,
-                    author=self.request.user,
-                    content=form.cleaned_data['comment_area']
-                )
-                comment.save()
-
-                # сформируем path после первого сохранения
-                # и пересохраним комментарий
-
-                try:
-                    comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
-                    comment.path.append(comment.id)
-                    # print('получилось')
-                except ObjectDoesNotExist:
-                    comment.path.append(comment.id)
-                    # print('не получилось')
-
-                comment.save()
-
         return context
 
     # def get(self, request, *args, **kwargs):
@@ -195,33 +175,102 @@ def delete_comment(request, pk2, pk):
     comment.save()
     return redirect(comment.get_absolute_url())
 
-
-@login_required
-@require_http_methods(["POST"])
-def add_comment(request, pk):
-    form = CommentForm(request.POST)
+def ajax_comment_delete(request, pk, comment_id):
+    '''
+    :param request:
+    :param pk: Это id поста к которому относится коммент
+    :param comment_id: Это id комментария
+    :return:
+    '''
+    print(f'view ajax_comment_delete, пост = {pk}, comment.id = {comment_id}')
+    comment = get_object_or_404(Comment, id=comment_id)
+    comment.content = f"[----русские хакеры удалили этот коммент---]"
+    comment.published = False
+    comment.save()
+    comment_form = CommentForm
+    comments = Comment.objects.filter(comment_post=pk).order_by('path')
     post = get_object_or_404(Post, id=pk)
 
+    content = {
+        'comments': comments,
+        'request': request,
+        'form': comment_form,
+        'post': post,
+    }
+
+    result = render_to_string('post/includes/comment_post.html', content, request=request)
+    return JsonResponse({'result': result})
+
+def ajax_comment_update(request, pk):
+
+    comment_form = CommentForm
+    if add_comment(request, pk):
+        comments = Comment.objects.filter(comment_post=pk).order_by('path')
+        post = get_object_or_404(Post, id=pk)
+
+        content = {
+            'comments': comments,
+            'request': request,
+            'form': comment_form,
+            'post': post,
+        }
+
+        result = render_to_string('post/includes/comment_post.html', content, request=request)
+        return JsonResponse({'result': result})
+
+
+# @login_required
+# @require_http_methods(["POST"])
+def add_comment(request, pk):
+    post = get_object_or_404(Post, id=pk)
+    form = CommentForm(request.POST)
     if form.is_valid():
-        comment = Comment()
-        comment.path = []
-        comment.comment_post = post
-        comment.author = auth.get_user(request)
-        comment.content = form.cleaned_data['comment_area']
+        comment = Comment(
+            path=[],
+            # comment_post=object.pk,
+            comment_post=post,
+            author=request.user,
+            content=form.cleaned_data['comment_area']
+        )
         comment.save()
 
-        # Django не позволяет увидеть ID комментария по мы не сохраним его,
         # сформируем path после первого сохранения
         # и пересохраним комментарий
+
         try:
             comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
             comment.path.append(comment.id)
+            # print('получилось')
         except ObjectDoesNotExist:
             comment.path.append(comment.id)
+            # print('не получилось')
 
         comment.save()
+        return True
 
-    return redirect(comment.get_absolute_url())
+    # form = CommentForm(request.POST)
+    # post = get_object_or_404(Post, id=pk)
+    #
+    # if form.is_valid():
+    #     comment = Comment()
+    #     comment.path = []
+    #     comment.comment_post = post
+    #     comment.author = auth.get_user(request)
+    #     comment.content = form.cleaned_data['comment_area']
+    #     comment.save()
+    #
+    #     # Django не позволяет увидеть ID комментария по мы не сохраним его,
+    #     # сформируем path после первого сохранения
+    #     # и пересохраним комментарий
+    #     try:
+    #         comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
+    #         comment.path.append(comment.id)
+    #     except ObjectDoesNotExist:
+    #         comment.path.append(comment.id)
+    #
+    #     comment.save()
+    #
+    # return True
 
 
 class PostCreateView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin):
@@ -234,11 +283,11 @@ class PostCreateView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin
         messages.add_message(self.request, messages.SUCCESS, self.success_message)
         tags = form.cleaned_data['tags_str']  # строка с тегами из формы
         if tags:
-            tmp_tags = str(tags).split(',') # распарсил теги
+            tmp_tags = str(tags).split(',')  # распарсил теги
             for key, el in enumerate(tmp_tags):
-                tmp_tags[key] = el.strip() # убрал пробелы
+                tmp_tags[key] = el.strip()  # убрал пробелы
 
-            new_tags = [] # массив куда складываются id тэгов для записи в поле тэг поста
+            new_tags = []  # массив куда складываются id тэгов для записи в поле тэг поста
 
             if form.is_valid():
                 f = form.save()
@@ -319,10 +368,11 @@ class PostUserListView(SingleTableView, LoginRequiredDispatchMixin):
         return context
 
 
-class PostModerateListView(ListView, LoginRequiredDispatchMixin):
+class PostModerateListView(SingleTableView, LoginRequiredDispatchMixin):
     model = Post
+    table_class = ModeratorPostsTable
     template_name = 'post/post_list.html'
-    context_object_name = 'posts'
+    context_table_name = 'posts'
     paginate_by = 10
 
     def get_queryset(self):
@@ -405,10 +455,17 @@ class PostModerateView(UpdateView, LoginRequiredDispatchMixin):
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, self.success_message)
 
+        if form.instance.status == 'need_review':
+            notify.send(self.object, recipient=form.instance.user, verb='необходимы правки', description='moderate')
+
+        if form.instance.status == 'moderate_false':
+            notify.send(self.object, recipient=form.instance.user, verb='пост не прошел модерацию', description='moderate')
+
         if form.instance.status == 'unpublished':
             form.instance.moderated = True
             form.instance.moderated_at = datetime.now(pytz.timezone(settings.TIME_ZONE))
             form.instance.save()
+            notify.send(self.object, recipient=form.instance.user, verb='пост прошел модерацию', description='moderate')
 
         return super().form_valid(form)
 

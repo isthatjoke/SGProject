@@ -30,7 +30,7 @@
             {% for comment in comments %}
 
             <a name="comment-{{ comment.id }}"></a>
-            <div class="row" id="{{ comment.id }}">
+            <div class="row row-comment" id="{{ comment.id }}">
                 <div class="col-md-{{ comment.get_col }} col-md-offset-{{ comment.get_offset }}">
                     <div class="panel panel-default">
                         <div class="panel-heading">
