@@ -8,7 +8,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 import requests
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, Count, F
-from django.http import HttpResponseRedirect, JsonResponse, HttpRequest
+from django.http import HttpResponseRedirect, JsonResponse, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -175,6 +175,7 @@ def delete_comment(request, pk2, pk):
     comment.save()
     return redirect(comment.get_absolute_url())
 
+
 def ajax_comment_delete(request, pk, comment_id):
     '''
     :param request:
@@ -199,11 +200,16 @@ def ajax_comment_delete(request, pk, comment_id):
     }
 
     result = render_to_string('post/includes/comment_post.html', content, request=request)
-    return JsonResponse({'result': result})
+    if request.is_ajax():
+        # print(f'ajax data on view ajax_comment_update')
+        return JsonResponse({'result': result})
+    # print(f'not ajax data on view ajax_comment_update')
+    return redirect(f'/post/{pk}/')
+
 
 def ajax_comment_update(request, pk):
-
     comment_form = CommentForm
+
     if add_comment(request, pk):
         comments = Comment.objects.filter(comment_post=pk).order_by('path')
         post = get_object_or_404(Post, id=pk)
@@ -214,9 +220,12 @@ def ajax_comment_update(request, pk):
             'form': comment_form,
             'post': post,
         }
-
         result = render_to_string('post/includes/comment_post.html', content, request=request)
-        return JsonResponse({'result': result})
+        if request.is_ajax():
+            # print(f'ajax data on view ajax_comment_update')
+            return JsonResponse({'result': result})
+        # print(f'not ajax data on view ajax_comment_update')
+        return redirect(f'/post/{pk}/')
 
 
 # @login_required
@@ -459,7 +468,8 @@ class PostModerateView(UpdateView, LoginRequiredDispatchMixin):
             notify.send(self.object, recipient=form.instance.user, verb='необходимы правки', description='moderate')
 
         if form.instance.status == 'moderate_false':
-            notify.send(self.object, recipient=form.instance.user, verb='пост не прошел модерацию', description='moderate')
+            notify.send(self.object, recipient=form.instance.user, verb='пост не прошел модерацию',
+                        description='moderate')
 
         if form.instance.status == 'unpublished':
             form.instance.moderated = True
