@@ -367,8 +367,8 @@ class PostUserListView(SingleTableView, LoginRequiredDispatchMixin):
 
         posts = Post.objects.filter(user=self.request.user)
 
-        if self.request.GET.get('status') == 'unpublished':
-            posts = posts.filter(status='unpublished')
+        if self.request.GET.get('status') == 'published':
+            posts = posts.filter(status='published')
 
         elif self.request.GET.get('status') == 'archive':
             posts = posts.filter(status='archive')
@@ -380,7 +380,7 @@ class PostUserListView(SingleTableView, LoginRequiredDispatchMixin):
             posts = posts.filter(Q(status='on_moderate') | Q(status='need_review') | Q(status='moderate_false'))
 
         else:
-            posts = posts.filter(status='published')
+            posts = posts.filter(status='unpublished')
 
         return posts
 

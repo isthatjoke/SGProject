@@ -63,13 +63,13 @@ class PostEditForm(forms.ModelForm):
 
 class PostModeratorEditForm(forms.ModelForm):
 
-    STATUS_UNPUBLISHED = 'unpublished'
+    STATUS_PUBLISHED = 'published'
     STATUS_ON_MODERATE = 'on_moderate'
     STATUS_NEED_REVIEW = 'need_review'
     STATUS_MODERATE_FALSE = 'moderate_false'
 
     STATUSES = (
-        (STATUS_UNPUBLISHED, 'модерация подтверждена'),
+        (STATUS_PUBLISHED, 'модерация подтверждена'),
         (STATUS_ON_MODERATE, 'на модерации'),
         (STATUS_NEED_REVIEW, 'необходимы исправления'),
         (STATUS_MODERATE_FALSE, 'модерация не пройдена'),
