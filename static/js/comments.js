@@ -47,6 +47,19 @@ console.log('ajax_comment');
                     let item = document.getElementsByClassName('row-comment');
                     style_update(item);
 //                    $('.footer-update').addClass('fixed-bottom');
+//Обновляем подключение событий для кармы:
+                    // нажатие пальца вниз
+                    set_event_listeners_post('likes_down', dislikeClasses, 0)
+
+                    // нажатие пальца вверх
+                    set_event_listeners_post('likes_up', likeClasses, 1)
+
+                    // теперь всё то же самое для комментов!
+                    // нажатие пальца вниз
+                    set_event_listeners_comment('comment_likes_down', dislikeClasses, 0);
+
+                    // нажатие пальца вверх
+                    set_event_listeners_comment('comment_likes_up', likeClasses, 1)
                     console.log('ajax done');
 
                 });
