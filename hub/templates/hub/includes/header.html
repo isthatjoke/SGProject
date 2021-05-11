@@ -50,6 +50,10 @@
 
                     {% if notification.description == 'moderate' %}
                 <a href="{% url 'post:post' notification.actor_object_id %}" style="text-decoration: none;">{{ notification.verb }}</a>
+                    {% elif notification.description == 'post_karma' %}
+                <a href="{% url 'post:post' notification.target_object_id %}" style="text-decoration: none;">{{ notification.verb }}</a>
+                    {% elif notification.description == 'komment' %}
+                <a href="{% url 'post:post' notification.target_object_id %}" style="text-decoration: none;">{{ notification.verb }}</a>
                     {% else %}
                 <a href="#" style="text-decoration: none;">{{ notification.verb }}</a>
                     {% endif %}

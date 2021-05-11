@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import ListView
+from notifications.signals import notify
 
 from adminapp.forms import BanTimeForm
 from authapp.models import HubUser
@@ -48,13 +49,16 @@ def user_ban(request, pk):
         user.banned_to = now
         user.banned = user.BANNED_FOR_TIME
         user.save()
+        notify.send(request.user, recipient=user, verb=f'Вы были забанены до {now}', description='ban')
     elif user.banned in (user.BANNED_FOR_TIME, user.BANNED_FOREVER):
         user.banned = user.BANNED_FALSE
         user.banned_to = None
         user.save()
+        notify.send(request.user, recipient=user, verb=f'Вы были разбанены', description='ban')
     else:
         user.banned = user.BANNED_FOREVER
         user.save()
+        notify.send(request.user, recipient=user, verb=f'Вы были забанены перманентно', description='ban')
 
     return HttpResponseRedirect(reverse('adminapp:users_list'))
 
