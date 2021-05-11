@@ -58,6 +58,7 @@ def perform_karma_update(post, user, karma):
             post.karma_count = F('karma_count') + karma
             post.save()
             updated_post_karma = Post.objects.filter(id=post.id).first().post_karma
+            notify.send(user, recipient=post.user, verb=f'{user} оценил Ваш пост', description='post_karma', target=post)
             return JsonResponse({'result': str(updated_post_karma)})
         else:
             already_liked.delete()
@@ -67,6 +68,8 @@ def perform_karma_update(post, user, karma):
                 post.karma_count = F('karma_count') + 1
             post.save()
             updated_post_karma = Post.objects.filter(id=post.id).first().post_karma
+            notify.send(user, recipient=post.user, verb=f'{user} изменил оценку поста', description='post_karma',
+                        target=post)
             return JsonResponse({'result': str(updated_post_karma)})
 
 
@@ -91,10 +94,14 @@ def perform_comment_karma_update(post, comment, user, karma):
         new_object = CommentKarma.objects.create(comment=comment, user=user, karma=karma)
         new_object.save()
         updated_comment_karma = Comment.objects.filter(id=comment.id).first().comment_karma
+        notify.send(user, recipient=comment.author, verb=f'{user} оценил Ваш коммент', description='komment_karma',
+                    target=comment.comment_post)
         return JsonResponse({'result': str(updated_comment_karma)})
     else:
         already_liked.delete()
         updated_comment_karma = Comment.objects.filter(id=comment.id).first().comment_karma
+        notify.send(user, recipient=comment.author, verb=f'{user} изменил оценку коммента', description='komment_karma',
+                    target=comment.comment_post)
         return JsonResponse({'result': str(updated_comment_karma)})
 
 
@@ -200,6 +207,10 @@ def ajax_comment_delete(request, pk, comment_id):
     }
 
     result = render_to_string('post/includes/comment_post.html', content, request=request)
+    post_user = HubUser.objects.get(pk=post.user_id)
+    if not request.user == post_user:
+        notify.send(request.user, recipient=post_user, verb=f'{request.user} оставил коммент', description='komment',
+                    target=post)
     if request.is_ajax():
         # print(f'ajax data on view ajax_comment_update')
         return JsonResponse({'result': result})
@@ -248,6 +259,7 @@ def add_comment(request, pk):
 
         try:
             comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
+
             comment.path.append(comment.id)
             # print('получилось')
         except ObjectDoesNotExist:
@@ -255,6 +267,10 @@ def add_comment(request, pk):
             # print('не получилось')
 
         comment.save()
+        post_user = HubUser.objects.get(pk=post.user_id)
+        if not request.user == post_user:
+            notify.send(request.user, recipient=post_user, verb=f'{request.user} оставил коммент', description='komment',
+                        target=post)
         return True
 
     # form = CommentForm(request.POST)
