@@ -49,13 +49,13 @@
                 <div class="dropdown-item item-{{ forloop.counter }}" role="alert">
 
                     {% if notification.description == 'moderate' %}
-                <a href="{% url 'post:post' notification.actor_object_id %}" style="text-decoration: none;">{{ notification.verb }}</a>
+                <a href="{% url 'post:post' notification.actor_object_id %}" style="text-decoration: none;" class="notif-object">{{ notification.verb }}</a>
                     {% elif notification.description == 'post_karma' %}
-                <a href="{% url 'post:post' notification.target_object_id %}" style="text-decoration: none;">{{ notification.verb }}</a>
-                    {% elif notification.description == 'komment' %}
-                <a href="{% url 'post:post' notification.target_object_id %}" style="text-decoration: none;">{{ notification.verb }}</a>
+                <a href="{% url 'post:post' notification.target_object_id %}" style="text-decoration: none;" class="notif-object">{{ notification.verb }}</a>
+                    {% elif notification.description == 'komment' or notification.description == 'komment_karma' %}
+                <a href="{% url 'post:post' notification.action_object_object_id %}#comment-{{ notification.target_object_id }}" style="text-decoration: none;" class="notif-object">{{ notification.verb }}</a>
                     {% else %}
-                <a href="#" style="text-decoration: none;">{{ notification.verb }}</a>
+                <a href="#" style="text-decoration: none;" class="notif-object">{{ notification.verb }}</a>
                     {% endif %}
 
 

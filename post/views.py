@@ -95,13 +95,13 @@ def perform_comment_karma_update(post, comment, user, karma):
         new_object.save()
         updated_comment_karma = Comment.objects.filter(id=comment.id).first().comment_karma
         notify.send(user, recipient=comment.author, verb=f'{user} оценил Ваш коммент', description='komment_karma',
-                    target=comment.comment_post)
+                    target=comment, action_object=comment.comment_post)
         return JsonResponse({'result': str(updated_comment_karma)})
     else:
         already_liked.delete()
         updated_comment_karma = Comment.objects.filter(id=comment.id).first().comment_karma
         notify.send(user, recipient=comment.author, verb=f'{user} изменил оценку коммента', description='komment_karma',
-                    target=comment.comment_post)
+                    target=comment, action_object=comment.comment_post)
         return JsonResponse({'result': str(updated_comment_karma)})
 
 
@@ -209,8 +209,8 @@ def ajax_comment_delete(request, pk, comment_id):
     result = render_to_string('post/includes/comment_post.html', content, request=request)
     post_user = HubUser.objects.get(pk=post.user_id)
     if not request.user == post_user:
-        notify.send(request.user, recipient=post_user, verb=f'{request.user} оставил коммент', description='komment',
-                    target=post)
+        notify.send(request.user, recipient=post_user, verb=f'{request.user} удалил коммент', description='komment',
+                    target=comment, action_object=post)
     if request.is_ajax():
         # print(f'ajax data on view ajax_comment_update')
         return JsonResponse({'result': result})
@@ -244,6 +244,8 @@ def ajax_comment_update(request, pk):
 def add_comment(request, pk):
     post = get_object_or_404(Post, id=pk)
     form = CommentForm(request.POST)
+    post_user = HubUser.objects.get(pk=post.user_id)
+    notif_send = False
     if form.is_valid():
         comment = Comment(
             path=[],
@@ -258,19 +260,25 @@ def add_comment(request, pk):
         # и пересохраним комментарий
 
         try:
-            comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
-
+            parent_comment = Comment.objects.get(id=form.cleaned_data['parent_comment'])
+            comment.path.extend(parent_comment.path)
             comment.path.append(comment.id)
+
+            if not request.user == parent_comment.author:
+                notify.send(request.user, recipient=parent_comment.author, verb=f'{request.user} ответил на Ваш коммент',
+                            description='komment',
+                            target=comment, action_object=post)
+                notif_send = True
             # print('получилось')
         except ObjectDoesNotExist:
             comment.path.append(comment.id)
             # print('не получилось')
 
         comment.save()
-        post_user = HubUser.objects.get(pk=post.user_id)
-        if not request.user == post_user:
+
+        if not request.user == post_user and not notif_send:
             notify.send(request.user, recipient=post_user, verb=f'{request.user} оставил коммент', description='komment',
-                        target=post)
+                        target=comment, action_object=post)
         return True
 
     # form = CommentForm(request.POST)
