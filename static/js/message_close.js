@@ -40,4 +40,17 @@ window.onload = function () {
         let make_count = parseInt(count[0].textContent) - 1;
         count.prop('textContent', make_count);
     });
+
+    $('.notif-object').click(function (e) {
+        let target = e.target;
+        let par = $(this).parent();
+
+        $.ajax({
+            url: par[0].children[1].id,
+        });
+        par.prop('style', 'display:none');
+        let count = $('.notif-count');
+        let make_count = parseInt(count[0].textContent) - 1;
+        count.prop('textContent', make_count);
+    });
 };
