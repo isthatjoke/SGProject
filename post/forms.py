@@ -1,27 +1,33 @@
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
+from django.forms import CheckboxSelectMultiple
 
 from hub.models import HubCategory
-from post.models import Post, get_all_tags
+from post.models import Post, get_all_tags, Tags
 from django.contrib.postgres.forms import SimpleArrayField
 
 
 class PostCreationForm(forms.ModelForm):
     content = forms.CharField(label='Содержание', widget=CKEditorUploadingWidget(config_name='default'))
     # tags = SimpleArrayField(forms.IntegerField)
+    CHOICES = tuple((x.id, x.tag) for x in Tags.objects.all())
+    # field2 = forms.MultipleChoiceField(choices=CHOICES, widget=Select2MultipleWidget)
+    field2 = forms.MultipleChoiceField(choices=CHOICES, label = "Выбор тегов", widget=forms.SelectMultiple())
+
     tags_str = forms.CharField(
         label='Тэги поста:',
         max_length=200,
         required=False,
-        widget=forms.TextInput(
-            attrs={'size': 67, 'placeholder': 'Тэги введите через запятую', }
+        # widget=forms.TextInput(
+        #     attrs={'size': 67,
+        #            'placeholder': 'Тэги не заданы. Выберите из списка!',}
+
         )
-    )
 
     class Meta:
         model = Post
-        exclude = ('tags', 'moderated', 'moderated_at', 'moderate_desc')
-        fields = ('name', 'hub_category', 'tags_str', 'status', 'user', 'karma_count', 'content')
+        exclude = ('moderated', 'moderated_at', 'moderate_desc')
+        fields = ('name', 'hub_category', 'tags_str', 'field2', 'status', 'user', 'karma_count', 'content')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -32,23 +38,34 @@ class PostCreationForm(forms.ModelForm):
                 field.widget = forms.HiddenInput()
             if field_name == 'hub_category':
                 field.widget.attrs['required'] = True
+            if field_name == 'tags_str':
+                field.widget.attrs['id'] = 'tags_str'
+                field.widget.attrs['required'] = False
+                field.widget.attrs['readonly'] = True
+                field.widget.attrs['placeholder'] = 'Тэги не заданы. Выберите из списка!'
+
 
 
 class PostEditForm(forms.ModelForm):
     content = forms.CharField(label='Содержание', widget=CKEditorUploadingWidget(config_name='default'))
+    CHOICES = tuple((x.id, x.tag) for x in Tags.objects.all())
+    field2 = forms.MultipleChoiceField(choices=CHOICES, label="Выбор тегов", widget=forms.SelectMultiple())
+
     tags_str = forms.CharField(
         label='Тэги поста:',
         max_length=200,
         required=False,
         widget=forms.TextInput(
-            attrs={'size': 67, 'placeholder': 'Тэги введите через запятую', }
+            attrs={'size': 67,
+                   'placeholder': 'Тэги не заданы. Выберите из списка!',}
+
         )
     )
 
     class Meta:
         model = Post
         exclude = ('tags', 'moderated', 'moderated_at', 'moderate_desc')
-        fields = ('name', 'hub_category', 'tags_str', 'status', 'user', 'karma_count', 'content')
+        fields = ('name', 'hub_category', 'tags_str', 'field2', 'status', 'user', 'karma_count', 'content')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -59,6 +76,11 @@ class PostEditForm(forms.ModelForm):
                 field.widget = forms.HiddenInput()
             if field_name == 'hub_category':
                 field.widget.attrs['required'] = True
+            if field_name == 'tags_str':
+                field.widget.attrs['id'] = 'tags_str'
+                field.widget.attrs['required'] = False
+                field.widget.attrs['readonly'] = True
+                field.widget.attrs['placeholder'] = 'Тэги не заданы. Выберите из списка!'
 
 
 class PostModeratorEditForm(forms.ModelForm):
@@ -100,6 +122,10 @@ class PostModeratorEditForm(forms.ModelForm):
             if field_name in ('post_karma', 'karma_count', 'user', 'hub_category'):
                 field.widget = forms.HiddenInput()
             if field_name in ('tags_str', 'content', 'category', 'name'):
+                field.widget.attrs['readonly'] = True
+            if field_name == 'tags_str':
+                field.widget.attrs['id'] = 'tags_str'
+                field.widget.attrs['required'] = False
                 field.widget.attrs['readonly'] = True
 
         instance = getattr(self, 'instance', None)
