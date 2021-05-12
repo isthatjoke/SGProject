@@ -15,9 +15,7 @@
                         {% endif %}
                         {% csrf_token %}
                         {{ form.media }}
-                        <table>
                         {{ form.as_p }}
-                        </table>
 
                         <div class="form-button">
                             <button id="submit" type="submit"
