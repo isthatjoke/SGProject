@@ -463,7 +463,7 @@ class PostUpdateView(UpdateView, LoginRequiredDispatchMixin):
                 tmp_tags[key] = el.strip()  # убрал пробелы
 
             new_tags = []  # массив куда складываются id тэгов для записи в поле тэг поста
-            form.instance.tags.clear() # очищаем поле перед новой записью
+            form.instance.tags.clear()  # очищаем поле перед новой записью
             for tmp_tag in tmp_tags:
                 # проевряем есть тэг в таблице тэгов
                 tag_exists = tmp_tag is not None and Tags.objects.filter(tag=tmp_tag).exists()
@@ -509,7 +509,8 @@ class PostModerateView(UpdateView, LoginRequiredDispatchMixin):
             form.instance.moderated = True
             form.instance.moderated_at = datetime.now(pytz.timezone(settings.TIME_ZONE))
             form.instance.save()
-            notify.send(self.object, recipient=form.instance.user, verb='пост прошел модерацию и опубликован', description='moderate')
+            notify.send(self.object, recipient=form.instance.user, verb='пост прошел модерацию и опубликован',
+                        description='moderate')
 
         return super().form_valid(form)
 
@@ -665,7 +666,7 @@ class CreateComplaintView(CreateView, SuccessMessageMixin, LoginRequiredDispatch
         context = super(CreateComplaintView, self).get_context_data(**kwargs)
         context['form']['user'].initial = self.request.user
         context['form']['comment'].initial = self.kwargs.get('comment_id', '')
-        context['title'] = 'Создание жалобы на комментарий'
+        context['title'] = 'Жалоба на комментарий'
         return context
 
     def form_valid(self, form):
@@ -684,19 +685,26 @@ class CreateComplaintView(CreateView, SuccessMessageMixin, LoginRequiredDispatch
         return reverse_lazy('post:post', kwargs={'pk': post_id})
 
 
-def satisfy_comment_complaint(request, pk, comment_id):
+def satisfy_comment_complaint(request, pk, comment_id, complaint_id):
+    post = get_object_or_404(Post, id=pk)
     comment = get_object_or_404(Comment, id=comment_id)
-    complaint = get_object_or_404(CommentComplaint, id=comment.complaint.first().id)
+    complaint = get_object_or_404(CommentComplaint, id=complaint_id)
     comment.published = False
     comment.save()
     complaint.is_satisfied = True
     complaint.save()
+    notify.send(request.user, recipient=comment.author, verb='Ваш комментарий был удален по жалобе пользователя',
+                description='komment', target=comment, action_object=post)
     return HttpResponseRedirect(reverse_lazy('post:post', kwargs={'pk': pk}))
 
 
-def dismiss_comment_complaint(request, pk, comment_id):
+def dismiss_comment_complaint(request, pk, comment_id, complaint_id):
+    post = get_object_or_404(Post, id=pk)
     comment = get_object_or_404(Comment, id=comment_id)
-    complaint = get_object_or_404(CommentComplaint, id=comment.complaint.first().id)
+    complaint = get_object_or_404(CommentComplaint, id=complaint_id)
     complaint.is_satisfied = False
+    complaint.is_processed = True
     complaint.save()
+    notify.send(request.user, recipient=complaint.user, verb='Ваша жалоба на комментарий была отклонена',
+                description='komment', target=comment, action_object=post)
     return HttpResponseRedirect(reverse_lazy('post:post', kwargs={'pk': pk}))

@@ -2,15 +2,6 @@
 {% block post-menu %}
 
     <ul class="nav nav-tabs">
-
-        <li class="nav-item">
-            {% if not request.GET.status %}
-                <a class="nav-link active" href="{% url 'post:users_posts' %}">Неопубликованные</a>
-            {% else %}
-                <a class="nav-link" href="{% url 'post:users_posts' %}">Неопубликованные</a>
-            {% endif %}
-        </li>
-
         <li class="nav-item">
             {% if request.GET.status == 'published' %}
                 <a class="nav-link active" aria-current="page" href="{% url 'post:users_posts' %}?status=published">Опубликованные</a>
@@ -18,7 +9,13 @@
                 <a class="nav-link" aria-current="page" href="{% url 'post:users_posts' %}?status=published">Опубликованные</a>
             {% endif %}
         </li>
-
+        <li class="nav-item">
+            {% if not request.GET.status %}
+                <a class="nav-link active" href="{% url 'post:users_posts' %}">Неопубликованные</a>
+            {% else %}
+                <a class="nav-link" href="{% url 'post:users_posts' %}">Неопубликованные</a>
+            {% endif %}
+        </li>
         <li class="nav-item">
             {% if request.GET.status == 'archive' %}
                 <a class="nav-link active" href="{% url 'post:users_posts' %}?status=archive">Архивные</a>
@@ -26,7 +23,6 @@
                 <a class="nav-link" href="{% url 'post:users_posts' %}?status=archive">Архивные</a>
             {% endif %}
         </li>
-
         <li class="nav-item">
             {% if request.GET.status == 'template' %}
                 <a class="nav-link active" href="{% url 'post:users_posts' %}?status=template">Шаблоны</a>
@@ -34,9 +30,7 @@
                 <a class="nav-link" href="{% url 'post:users_posts' %}?status=template">Шаблоны</a>
             {% endif %}
         </li>
-
         {% if not user.is_staff %}
-
             <li class="nav-item">
                 {% if request.GET.status == 'moderate' %}
                     <a class="nav-link active" href="{% url 'post:users_posts' %}?status=moderate">На модерации</a>
@@ -44,9 +38,7 @@
                     <a class="nav-link" href="{% url 'post:users_posts' %}?status=moderate">На модерации</a>
                 {% endif %}
             </li>
-
         {% else %}
-
             <li class="nav-item">
                 {% if request.GET.status == 'moderate' %}
                     <a class="nav-link active" href="{% url 'post:post_to_moderate' %}?status=moderate">Требуют
@@ -57,8 +49,5 @@
                 {% endif %}
             </li>
         {% endif %}
-
     </ul>
-
-
 {% endblock %}

@@ -47,7 +47,6 @@ class PostCreationForm(forms.ModelForm):
                 field.widget.attrs['placeholder'] = 'Тэги не заданы. Выберите из списка!'
 
 
-
 class PostEditForm(forms.ModelForm):
     content = forms.CharField(label='Содержание', widget=CKEditorUploadingWidget(config_name='default'))
     CHOICES = tuple((x.id, x.tag) for x in Tags.objects.all())
@@ -147,6 +146,19 @@ class CommentForm(forms.Form):
 
 
 class CreateCommentComplaintForm(forms.ModelForm):
+    SPAM = 'spam'
+    VIOLATION = 'violation'
+    ABUSE = 'abuse'
+    PRON = 'pron'
+
+    STATUSES = (
+        (SPAM, 'Рассылка спама'),
+        (VIOLATION, 'Нарушение правил сайта'),
+        (ABUSE, 'Оскорбления'),
+        (PRON, 'Распространение порнографии'),
+    )
+    complaint_type = forms.ChoiceField(choices=STATUSES, label='Тип нарушения', initial=SPAM)
+
     class Meta:
         model = CommentComplaint
         exclude = ('is_satisfied', 'created_at', 'updated_at',)
