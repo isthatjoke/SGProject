@@ -495,11 +495,11 @@ class PostModerateView(UpdateView, LoginRequiredDispatchMixin):
             notify.send(self.object, recipient=form.instance.user, verb='пост не прошел модерацию',
                         description='moderate')
 
-        if form.instance.status == 'unpublished':
+        if form.instance.status == 'published':
             form.instance.moderated = True
             form.instance.moderated_at = datetime.now(pytz.timezone(settings.TIME_ZONE))
             form.instance.save()
-            notify.send(self.object, recipient=form.instance.user, verb='пост прошел модерацию', description='moderate')
+            notify.send(self.object, recipient=form.instance.user, verb='пост прошел модерацию и опубликован', description='moderate')
 
         return super().form_valid(form)
 
