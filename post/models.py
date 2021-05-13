@@ -71,7 +71,7 @@ class Post(models.Model):
     @staticmethod
     def get_all_posts():
         return Post.objects.filter(status=Post.STATUS_PUBLISHED).order_by('-updated_at')
-      
+
     # подсчет постов на модерации
     @staticmethod
     def on_moderate_count():
@@ -137,6 +137,7 @@ class Comment(models.Model):
     author = models.ForeignKey(HubUser, related_name='author_id', verbose_name='пользователь', on_delete=models.CASCADE,
                                **NULLABLE)
     content = models.TextField(verbose_name='комментарий')
+    has_complaint = models.BooleanField(default=False, verbose_name='есть жалобы')
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True)
 
     def __str__(self):
@@ -210,3 +211,32 @@ class CommentKarma(models.Model):
 
     def __str__(self):
         return f'{self.user} - "{self.comment}": {self.karma}'
+
+
+class CommentComplaint(models.Model):
+    SPAM = 'spam'
+    VIOLATION = 'violation'
+    ABUSE = 'abuse'
+    PRON = 'pron'
+
+    STATUSES = (
+        (SPAM, 'Рассылка спама'),
+        (VIOLATION, 'Нарушение правил сайта'),
+        (ABUSE, 'Оскорбления'),
+        (PRON, 'Распространение порнографии'),
+    )
+
+    class Meta:
+        verbose_name = 'жалоба на комментарий'
+        verbose_name_plural = 'жалобы на комментарии'
+        ordering = ('-created_at', '-comment',)
+
+    comment = models.ForeignKey(Comment, related_name='complaint', on_delete=models.CASCADE, verbose_name='комментарий',
+                                **NULLABLE)
+    user = models.ForeignKey(HubUser, related_name='complaint_user', on_delete=models.CASCADE,
+                             verbose_name='пользователь', **NULLABLE)
+    complaint_type = models.CharField(verbose_name='тип жалобы', choices=STATUSES, default=SPAM, max_length=10)
+    complaint_text = models.CharField(max_length=200, verbose_name='текст жалобы', **NULLABLE)
+    is_satisfied = models.BooleanField(verbose_name='жалоба удовлетворена', **NULLABLE)
+    created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True)
+    updated_at = models.DateTimeField(verbose_name='время изменения', auto_now=True)

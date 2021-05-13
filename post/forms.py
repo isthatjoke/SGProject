@@ -2,7 +2,7 @@ from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
 
 from hub.models import HubCategory
-from post.models import Post, get_all_tags
+from post.models import Post, get_all_tags, CommentComplaint
 from django.contrib.postgres.forms import SimpleArrayField
 
 
@@ -62,7 +62,6 @@ class PostEditForm(forms.ModelForm):
 
 
 class PostModeratorEditForm(forms.ModelForm):
-
     STATUS_PUBLISHED = 'published'
     STATUS_ON_MODERATE = 'on_moderate'
     STATUS_NEED_REVIEW = 'need_review'
@@ -89,7 +88,7 @@ class PostModeratorEditForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        exclude = ('tags', 'moderated', 'moderated_at', )
+        exclude = ('tags', 'moderated', 'moderated_at',)
         fields = ('name', 'category', 'tags_str', 'status', 'user', 'moderate_desc', 'karma_count', 'content')
 
     def __init__(self, *args, **kwargs):
@@ -117,3 +116,22 @@ class CommentForm(forms.Form):
         label="",
         widget=forms.Textarea
     )
+
+
+class CreateCommentComplaintForm(forms.ModelForm):
+    class Meta:
+        model = CommentComplaint
+        exclude = ('is_satisfied', 'created_at', 'updated_at',)
+        fields = ('comment', 'user', 'complaint_type', 'complaint_text',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+            field.help_text = ''
+            if field_name == 'user':
+                field.widget = forms.HiddenInput()
+            elif field_name == 'comment':
+                field.widget.attrs['readonly'] = True
+            elif field_name == 'complaint_text':
+                field.widget = forms.Textarea()
