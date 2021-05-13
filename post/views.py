@@ -327,6 +327,8 @@ class PostCreateView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin
 
             if form.is_valid():
                 f = form.save()
+                form.instance.tags.clear()  # очищаем поле перед новой записью
+
             for tmp_tag in tmp_tags:
                 # проевряем есть тэг в таблице тэгов
                 tag_exists = tmp_tag is not None and Tags.objects.filter(tag=tmp_tag).exists()
@@ -448,17 +450,20 @@ class PostUpdateView(UpdateView, LoginRequiredDispatchMixin):
         return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
 
     def form_valid(self, form):
+        # print(f'Влидация формы: !!!!!!!!!!!!!!!!!!!!')
         messages.add_message(self.request, messages.SUCCESS, self.success_message)
         tags = form.cleaned_data['tags_str']  # строка с тегами из формы
+        # print(f'tags: {tags}')
         self.object.tags.clear()
         self.object.save()
         if tags:
             tmp_tags = str(tags).split(',')  # распарсил теги
+            print(f'распарсил теги: {tmp_tags}')
             for key, el in enumerate(tmp_tags):
                 tmp_tags[key] = el.strip()  # убрал пробелы
 
             new_tags = []  # массив куда складываются id тэгов для записи в поле тэг поста
-
+            form.instance.tags.clear() # очищаем поле перед новой записью
             for tmp_tag in tmp_tags:
                 # проевряем есть тэг в таблице тэгов
                 tag_exists = tmp_tag is not None and Tags.objects.filter(tag=tmp_tag).exists()
@@ -483,8 +488,10 @@ class PostModerateView(UpdateView, LoginRequiredDispatchMixin):
     success_message = 'пост проверен'
 
     def get_context_data(self, **kwargs):
+        post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
         context = super(PostModerateView, self).get_context_data(**kwargs)
         context['title'] = f'Модерирование поста {self.object.name}'
+        context['form']['tags_str'].initial = post.get_all_tags()
 
         return context
 
@@ -502,7 +509,7 @@ class PostModerateView(UpdateView, LoginRequiredDispatchMixin):
             form.instance.moderated = True
             form.instance.moderated_at = datetime.now(pytz.timezone(settings.TIME_ZONE))
             form.instance.save()
-            notify.send(self.object, recipient=form.instance.user, verb='пост прошел модерацию', description='moderate')
+            notify.send(self.object, recipient=form.instance.user, verb='пост прошел модерацию и опубликован', description='moderate')
 
         return super().form_valid(form)
 
