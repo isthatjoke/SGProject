@@ -2,7 +2,7 @@ from django.core.management import BaseCommand
 
 from authapp.models import HubUser
 from hub.models import Hub, HubCategory
-from post.models import Post
+from post.models import Post, Tags
 
 
 class Command(BaseCommand):
@@ -14,6 +14,11 @@ class Command(BaseCommand):
         Hub.objects.all().delete()
         HubCategory.objects.all().delete()
         Post.objects.all().delete()
+        Tags.objects.all().delete()
+
+        tags_list = list()
+        tags_name = ('#python', '#Docker', '#3d-maker', '#Photoshop', '#Linux', '#swift', '#Java', '#programmer',
+                     '#blender', '#inovations', '#DevOps', '#PyQt')
 
         user_list = list()
         user_names = [
@@ -239,5 +244,11 @@ class Command(BaseCommand):
                                   user=user_id,
                                   status=Post.STATUS_PUBLISHED))
         Post.objects.bulk_create(post_list)
+
+        for item in tags_name:
+            tags_list.append(Tags(tag=item))
+
+        Tags.objects.bulk_create(tags_list)
+
 
         print(f'Перезагрузка БД выполнена')
