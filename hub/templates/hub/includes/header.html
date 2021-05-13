@@ -2,24 +2,25 @@
     {% load notifications_tags %}
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/">HUB</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNavDropdown">
-      <ul class="navbar-nav">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">HUB</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                    aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
 
-          {% include 'hub/includes/hub_menu.html' %}
+                    {% include 'hub/includes/hub_menu.html' %}
 
-      </ul>
-    </div>
-  <div class="d-flex">
+                </ul>
+            </div>
+            <div class="d-flex">
 
-        <ul class="navbar-nav">
+                <ul class="navbar-nav">
 
-            {% if user.banned == 'banned_for_time' %}
-        <li class="nav-item">
+                    {% if user.banned == 'banned_for_time' %}
+                        <li class="nav-item">
           <span class="nav-link">
 
                 <p style="color: red; margin-right: 15px;">Вы забанены до {{ user.banned_to }}</p>
@@ -27,104 +28,126 @@
                 <p style="color: red; margin-right: 15px;">Вы забанены навсегда</p>
 
           </span>
-        </li>
-            {% endif %}
-
-        {% if user.is_authenticated %}
-
-        <li class="nav-item"><span class="nav-link">Привет, {{ user.username }}</span></li>
-
-            {% notifications_unread as unread_count %}
-{#            {% if unread_count %}#}
-        <li class="nav-item dropdown">
-
-        <a href="#" class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Уведомления <span class="badge bg-danger notif-count">{% notifications_unread %}</span>
-
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-
-            {% for notification in user.notifications.unread %}
-
-                <div class="dropdown-item item-{{ forloop.counter }}" role="alert">
-
-                    {% if notification.description == 'moderate' %}
-                <a href="{% url 'post:post' notification.actor_object_id %}" style="text-decoration: none;" class="notif-object">{{ notification.verb }}</a>
-                    {% elif notification.description == 'post_karma' %}
-                <a href="{% url 'post:post' notification.target_object_id %}" style="text-decoration: none;" class="notif-object">{{ notification.verb }}</a>
-                    {% elif notification.description == 'komment' or notification.description == 'komment_karma' %}
-                <a href="{% url 'post:post' notification.action_object_object_id %}#comment-{{ notification.target_object_id }}" style="text-decoration: none;" class="notif-object">{{ notification.verb }}</a>
-                    {% else %}
-                <a href="#" style="text-decoration: none;" class="notif-object">{{ notification.verb }}</a>
+                        </li>
                     {% endif %}
 
+                    {% if user.is_authenticated %}
 
-                    <a href="#" id="{% url 'notifications:mark_as_read' notification.slug %}" type="button" class="btn-close notif-close" aria-label="Close"></a>
+                        <li class="nav-item"><span class="nav-link">Привет, {{ user.username }}</span></li>
+
+                        {% notifications_unread as unread_count %}
+                        {#            {% if unread_count %}#}
+                        <li class="nav-item dropdown">
+
+                            <a href="#" class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                Уведомления <span class="badge bg-danger notif-count">{% notifications_unread %}</span>
+
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+
+                                {% for notification in user.notifications.unread %}
+
+                                    <div class="dropdown-item item-{{ forloop.counter }}" role="alert">
+
+                                        {% if notification.description == 'moderate' %}
+                                            <a href="{% url 'post:post' notification.actor_object_id %}"
+                                               style="text-decoration: none;"
+                                               class="notif-object">{{ notification.verb }}</a>
+                                        {% elif notification.description == 'post_karma' %}
+                                            <a href="{% url 'post:post' notification.target_object_id %}"
+                                               style="text-decoration: none;"
+                                               class="notif-object">{{ notification.verb }}</a>
+                                        {% elif notification.description == 'komment' or notification.description == 'komment_karma' %}
+                                            <a href="{% url 'post:post' notification.action_object_object_id %}#comment-{{ notification.target_object_id }}"
+                                               style="text-decoration: none;"
+                                               class="notif-object">{{ notification.verb }}</a>
+                                            {% if user.is_staff %}
+                                                {% if notification.description == 'comment_complaint' %}
+                                                    <a href="{% url 'post:post' notification.action_object_object_id %}#comment-{{ notification.target_object_id }}"
+                                                       style="text-decoration: none;"
+                                                       class="notif-object">{{ notification.verb }}</a>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% else %}
+                                            <a href="#" style="text-decoration: none;"
+                                               class="notif-object">{{ notification.verb }}</a>
+                                        {% endif %}
 
 
-                </div>
-{#                <li><a class="dropdown-item" href="#" style="font-size: 13px;">#}
-{#                    {{ notification.verb }}</a><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>#}
-{#                </li>#}
-                <div class="dropdown-divider"></div>
-            {% endfor %}
+                                        <a href="#" id="{% url 'notifications:mark_as_read' notification.slug %}"
+                                           type="button" class="btn-close notif-close" aria-label="Close"></a>
 
 
-        </ul>
+                                    </div>
+                                    {#                <li><a class="dropdown-item" href="#" style="font-size: 13px;">#}
+                                    {#                    {{ notification.verb }}</a><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>#}
+                                    {#                </li>#}
+                                    <div class="dropdown-divider"></div>
+                                {% endfor %}
 
-        </li>
-{#            {% endif %}#}
 
-        <li class="nav-item">
-          <a href="{% url 'post:users_posts' %}" class="nav-link" title="Мои посты">
-              <i class="fa fa-clipboard" aria-hidden="true">
-                  {% if user.is_staff and on_moderate > 0 %}
-                                <b style="color: red">{{ on_moderate }}</b>
-                                {% endif %}
-              </i></a>
-        </li>
+                            </ul>
 
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'post:comment_list' %}" title="Мои коментарии"><i class="fa fa-comments-o" aria-hidden="true"></i></a>
-        </li>
+                        </li>
+                        {#            {% endif %}#}
 
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'post:post_create' %}" title="Создать пост"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'post:users_posts' %}" class="nav-link" title="Мои посты">
+                                <i class="fa fa-clipboard" aria-hidden="true">
+                                    {% if user.is_staff and on_moderate > 0 %}
+                                        <b style="color: red">{{ on_moderate }}</b>
+                                    {% endif %}
+                                </i></a>
+                        </li>
 
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'authapp:update' %}" title="Профиль"><i class="fa fa-user" aria-hidden="true"></i></a>
-        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'post:comment_list' %}" title="Мои коментарии"><i
+                                    class="fa fa-comments-o" aria-hidden="true"></i></a>
+                        </li>
 
-            {% if user.is_staff %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'post:post_create' %}" title="Создать пост"><i
+                                    class="fa fa-pencil" aria-hidden="true"></i></a>
+                        </li>
 
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'adminapp:users_list' %}" title="Админка"><i class="fa fa-address-book" aria-hidden="true"></i></a>
-        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'authapp:update' %}" title="Профиль"><i class="fa fa-user"
+                                                                                                     aria-hidden="true"></i></a>
+                        </li>
 
-                {% endif %}
+                        {% if user.is_staff %}
 
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'authapp:logout' %}" title="Выход"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
-        </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'adminapp:users_list' %}" title="Админка"><i
+                                        class="fa fa-address-book" aria-hidden="true"></i></a>
+                            </li>
 
-            {% else %}
+                        {% endif %}
 
-        <li class="nav-item"><span class="nav-link">Привет, незнакомец!</span></li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'authapp:logout' %}" title="Выход"><i
+                                    class="fa fa-sign-out" aria-hidden="true"></i></a>
+                        </li>
 
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'authapp:login' %}" title="Войти"><i class="fa fa-sign-in" aria-hidden="true"></i></a>
-        </li>
+                    {% else %}
 
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'authapp:register' %}" title="Регистрация">Регистрация</a>
-        </li>
+                        <li class="nav-item"><span class="nav-link">Привет, незнакомец!</span></li>
 
-    {% endif %}
-      </ul>
-    </div>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'authapp:login' %}" title="Войти"><i class="fa fa-sign-in"
+                                                                                                  aria-hidden="true"></i></a>
+                        </li>
 
-</div>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'authapp:register' %}" title="Регистрация">Регистрация</a>
+                        </li>
+
+                    {% endif %}
+                </ul>
+            </div>
+
+        </div>
     </nav>
 
 {% endblock %}

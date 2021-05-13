@@ -3,7 +3,6 @@ from post import views
 
 app_name = 'post'
 
-
 urlpatterns = [
     path('<int:pk>/', views.PostDetailView.as_view(), name='post'),
 
@@ -23,7 +22,6 @@ urlpatterns = [
     # path('moderate/<int:pk>/', views.post_need_review, name='post_need_review'),
     # path('moderate/<int:pk>/', views.post_moderate_false, name='post_moderate_false'),
 
-
     path('<int:pk>/karma/<int:pk2>/', views.karma_update, name='karma_update'),
     # path('comment/<int:pk>/', views.add_comment, name='add_comment'),
     path('<int:pk>/comment/update/', views.ajax_comment_update, name='comment_update'),
@@ -31,10 +29,10 @@ urlpatterns = [
     path('<int:pk>/comment/del/<int:comment_id>/', views.ajax_comment_delete, name='del_comment'),
     path('mycomments/', views.CommentUserlist.as_view(), name='comment_list'),
     path('<int:pk>/comment/<int:pk2>/karma/<int:pk3>/', views.comment_karma_update, name='comment_karma_update'),
+
+    path('<int:pk>/comment/<int:comment_id>/complaint/', views.CreateComplaintView.as_view(), name='complaint_create'),
+    path('<int:pk>/comment/<int:comment_id>/complaint/satisfy/', views.satisfy_comment_complaint,
+         name='satisfy_comment_complaint'),
+    path('<int:pk>/comment/<int:comment_id>/complaint/dismiss/', views.dismiss_comment_complaint,
+         name='dismiss_comment_complaint')
 ]
-
-
-
-
-
-

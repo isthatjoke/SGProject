@@ -24,8 +24,8 @@ from authapp.models import HubUser
 from backend import settings
 from backend.utils import LoginRequiredDispatchMixin
 from hub.models import get_hub_cats_dict
-from post.forms import PostEditForm, PostCreationForm, CommentForm, PostModeratorEditForm
-from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma, Tags, get_all_tags
+from post.forms import PostEditForm, PostCreationForm, CommentForm, PostModeratorEditForm, CreateCommentComplaintForm
+from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma, Tags, get_all_tags, CommentComplaint
 from post.tables import PostsTable, ModeratorPostsTable
 
 
@@ -58,7 +58,8 @@ def perform_karma_update(post, user, karma):
             post.karma_count = F('karma_count') + karma
             post.save()
             updated_post_karma = Post.objects.filter(id=post.id).first().post_karma
-            notify.send(user, recipient=post.user, verb=f'{user} оценил Ваш пост', description='post_karma', target=post)
+            notify.send(user, recipient=post.user, verb=f'{user} оценил Ваш пост', description='post_karma',
+                        target=post)
             return JsonResponse({'result': str(updated_post_karma)})
         else:
             already_liked.delete()
@@ -265,7 +266,8 @@ def add_comment(request, pk):
             comment.path.append(comment.id)
 
             if not request.user == parent_comment.author:
-                notify.send(request.user, recipient=parent_comment.author, verb=f'{request.user} ответил на Ваш коммент',
+                notify.send(request.user, recipient=parent_comment.author,
+                            verb=f'{request.user} ответил на Ваш коммент',
                             description='komment',
                             target=comment, action_object=post)
                 notif_send = True
@@ -277,7 +279,8 @@ def add_comment(request, pk):
         comment.save()
 
         if not request.user == post_user and not notif_send:
-            notify.send(request.user, recipient=post_user, verb=f'{request.user} оставил коммент', description='komment',
+            notify.send(request.user, recipient=post_user, verb=f'{request.user} оставил коммент',
+                        description='komment',
                         target=comment, action_object=post)
         return True
 
@@ -651,3 +654,49 @@ def ordering(request):
         posts = posts.order_by('karma_count')
 
     return posts
+
+
+class CreateComplaintView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin):
+    template_name = 'post/create_comment_complaint.html'
+    form_class = CreateCommentComplaintForm
+    success_message = 'Жалоба отправлена'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(CreateComplaintView, self).get_context_data(**kwargs)
+        context['form']['user'].initial = self.request.user
+        context['form']['comment'].initial = self.kwargs.get('comment_id', '')
+        context['title'] = 'Создание жалобы на комментарий'
+        return context
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, self.success_message)
+        comment = get_object_or_404(Comment, id=self.kwargs.get('comment_id', ''))
+        post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
+        comment.has_complaint = True
+        comment.save()
+        moderators = HubUser.objects.filter(is_staff=True)
+        notify.send(self.request.user, recipient=moderators, verb='Жалоба на комментарий',
+                    description='comment_complaint', target=comment, action_object=post)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        post_id = self.kwargs.get('pk', None)
+        return reverse_lazy('post:post', kwargs={'pk': post_id})
+
+
+def satisfy_comment_complaint(request, pk, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    complaint = get_object_or_404(CommentComplaint, id=comment.complaint.first().id)
+    comment.published = False
+    comment.save()
+    complaint.is_satisfied = True
+    complaint.save()
+    return HttpResponseRedirect(reverse_lazy('post:post', kwargs={'pk': pk}))
+
+
+def dismiss_comment_complaint(request, pk, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    complaint = get_object_or_404(CommentComplaint, id=comment.complaint.first().id)
+    complaint.is_satisfied = False
+    complaint.save()
+    return HttpResponseRedirect(reverse_lazy('post:post', kwargs={'pk': pk}))
