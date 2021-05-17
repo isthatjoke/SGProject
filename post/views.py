@@ -482,7 +482,7 @@ class PostUpdateView(UpdateView, LoginRequiredDispatchMixin):
 
 class PostModerateView(UpdateView, LoginRequiredDispatchMixin):
     model = Post
-    template_name = 'post/post_form.html'
+    template_name = 'post/post_moderation.html'
     form_class = PostModeratorEditForm
     success_url = reverse_lazy('post:users_posts')
     success_message = 'пост проверен'
