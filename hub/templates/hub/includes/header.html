@@ -47,9 +47,7 @@
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
 
                                 {% for notification in user.notifications.unread %}
-
                                     <div class="dropdown-item item-{{ forloop.counter }}" role="alert">
-
                                         {% if notification.description == 'moderate' %}
                                             <a href="{% url 'post:post' notification.actor_object_id %}"
                                                style="text-decoration: none;"
@@ -62,27 +60,21 @@
                                             <a href="{% url 'post:post' notification.action_object_object_id %}#comment-{{ notification.target_object_id }}"
                                                style="text-decoration: none;"
                                                class="notif-object">{{ notification.verb }}</a>
-                                            {% if user.is_staff %}
-                                                {% if notification.description == 'comment_complaint' %}
-                                                    <a href="{% url 'post:post' notification.action_object_object_id %}#comment-{{ notification.target_object_id }}"
-                                                       style="text-decoration: none;"
-                                                       class="notif-object">{{ notification.verb }}</a>
-                                                {% endif %}
-                                            {% endif %}
+                                        {% elif notification.description == 'comment_complaint' %}
                                         {% else %}
                                             <a href="#" style="text-decoration: none;"
                                                class="notif-object">{{ notification.verb }}</a>
                                         {% endif %}
-
-
+                                        {% if user.is_staff %}
+                                            {% if notification.description == 'comment_complaint' %}
+                                                <a href="{% url 'post:post' notification.action_object_object_id %}#comment-{{ notification.target_object_id }}"
+                                                   style="text-decoration: none;"
+                                                   class="notif-object">{{ notification.verb }}</a>
+                                            {% endif %}
+                                        {% endif %}
                                         <a href="#" id="{% url 'notifications:mark_as_read' notification.slug %}"
                                            type="button" class="btn-close notif-close" aria-label="Close"></a>
-
-
                                     </div>
-                                    {#                <li><a class="dropdown-item" href="#" style="font-size: 13px;">#}
-                                    {#                    {{ notification.verb }}</a><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>#}
-                                    {#                </li>#}
                                     <div class="dropdown-divider"></div>
                                 {% endfor %}
 

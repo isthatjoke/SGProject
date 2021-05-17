@@ -31,8 +31,8 @@ urlpatterns = [
     path('<int:pk>/comment/<int:pk2>/karma/<int:pk3>/', views.comment_karma_update, name='comment_karma_update'),
 
     path('<int:pk>/comment/<int:comment_id>/complaint/', views.CreateComplaintView.as_view(), name='complaint_create'),
-    path('<int:pk>/comment/<int:comment_id>/complaint/satisfy/', views.satisfy_comment_complaint,
+    path('<int:pk>/comment/<int:comment_id>/complaint/<int:complaint_id>/satisfy/', views.satisfy_comment_complaint,
          name='satisfy_comment_complaint'),
-    path('<int:pk>/comment/<int:comment_id>/complaint/dismiss/', views.dismiss_comment_complaint,
+    path('<int:pk>/comment/<int:comment_id>/complaint/<int:complaint_id>/dismiss/', views.dismiss_comment_complaint,
          name='dismiss_comment_complaint')
 ]

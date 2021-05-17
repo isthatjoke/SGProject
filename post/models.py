@@ -235,8 +235,9 @@ class CommentComplaint(models.Model):
                                 **NULLABLE)
     user = models.ForeignKey(HubUser, related_name='complaint_user', on_delete=models.CASCADE,
                              verbose_name='пользователь', **NULLABLE)
-    complaint_type = models.CharField(verbose_name='тип жалобы', choices=STATUSES, default=SPAM, max_length=10)
+    complaint_type = models.CharField(verbose_name='тип жалобы', choices=STATUSES, default=SPAM, max_length=30)
     complaint_text = models.CharField(max_length=200, verbose_name='текст жалобы', **NULLABLE)
     is_satisfied = models.BooleanField(verbose_name='жалоба удовлетворена', **NULLABLE)
+    is_processed = models.BooleanField(verbose_name='жалоба обработана', default=False)
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name='время изменения', auto_now=True)
