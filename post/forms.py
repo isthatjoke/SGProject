@@ -97,7 +97,7 @@ class PostModeratorEditForm(forms.ModelForm):
         (STATUS_MODERATE_FALSE, 'модерация не пройдена'),
     )
 
-    content = forms.CharField(label='Содержание', widget=CKEditorUploadingWidget(config_name='default'))
+    # content = forms.CharField(label='Содержание', widget=CKEditorUploadingWidget(config_name='default'))
     status = forms.ChoiceField(choices=STATUSES, label='Статус', initial=STATUS_ON_MODERATE)
     category = forms.CharField(max_length=50, label='Подкатегория')
     tags_str = forms.CharField(
@@ -111,8 +111,8 @@ class PostModeratorEditForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        exclude = ('tags', 'moderated', 'moderated_at',)
-        fields = ('name', 'category', 'tags_str', 'status', 'user', 'moderate_desc', 'karma_count', 'content')
+        exclude = ('tags', 'moderated', 'moderated_at', 'content')
+        fields = ('name', 'category', 'tags_str', 'status', 'user', 'moderate_desc', 'karma_count', )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

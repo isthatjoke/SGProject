@@ -1,0 +1,50 @@
+{% extends 'hub/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="card mt-3 mb-5">
+
+        <div class="card-body">
+
+            <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
+                 class="card-img-top" alt="...">
+            <div class="post__container">
+                <form id="form-horizontal m-t-30" method="post" enctype="multipart/form-data">
+                    <p style="color: darkorange">Пост - {{ form.instance.get_status_display }}</p>
+                    {% if user.is_staff and form.instance.user is not None %}
+                        <p style="color: darkorange">автор <a href="#" style="color: black">{{ form.instance.user }}</a>
+                        </p>
+                    {% endif %}
+                    {% csrf_token %}
+                    {{ form.media }}
+                    {{ form.as_p }}
+                    <p>Содержание:</p>
+                <div class="card mt-3 mb-5">
+                <div class="card-body">
+                    <p>
+                    {{ post.content|safe }}
+                    </p>
+                </div>
+                </div>
+                    <div class="form-button">
+                        <button id="submit" type="submit"
+                                class="btn btn-primary w-md waves-effect waves-light">Сохранить
+                        </button>
+                    </div>
+
+                </form>
+                {#                <div class="post__user">Пользователь: <span>{{ post.user_id }}</span></div>#}
+                {#                <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>#}
+                {#                <div class="post__title"><h3>{{ post.name }}</h3></div>#}
+                {#                <div class="post__body">#}
+                {#                    <p>#}
+                {#                        {{ post.post_text }}#}
+                {#                    </p>#}
+                {##}
+                {#                </div>#}
+            </div>
+        </div>
+
+    </div>
+
+
+{% endblock %}
