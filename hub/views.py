@@ -134,10 +134,10 @@ def ordering(request, pk=None, cat=None):
             posts = posts.filter(tags__tag__iexact=tag)
 
     if request.GET.get('msg_type') == 'date_up':
-        posts = posts.order_by('-updated_at')
+        posts = posts.order_by('-moderated_at')
 
     elif request.GET.get('msg_type') == 'date_down':
-        posts = posts.order_by('updated_at')
+        posts = posts.order_by('moderated_at')
 
     elif request.GET.get('msg_type') == 'karma_up':
         posts = posts.order_by('-karma_count')

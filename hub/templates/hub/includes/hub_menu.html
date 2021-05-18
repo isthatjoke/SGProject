@@ -1,20 +1,23 @@
 {% for key, cats in head_menu_object_list.items %}
-
-<li class="nav-item dropdown">
-{% if key.name == title %}
-          <a class="nav-link dropdown-toggle" href="{% url 'hub:hub' key.id %}" style="color: black" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {{ key.name|title }}
-          </a>
-{% else %}
-    <a class="nav-link dropdown-toggle" href="{% url 'hub:hub' key.id %}" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {{ key.name|title }}
-          </a>
-{% endif %}
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-              {% for cat in cats.0 %}
-            <li><a class="dropdown-item" href="{% url 'hub:hub_category' key.id cat.id %}">{{ cat.name|title }}</a></li>
+    <li class="nav-item dropdown">
+        {% if key.name == title %}
+            <a class="nav-link dropdown-toggle" href="{% url 'hub:hub' key.id %}" style="color: black"
+               id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ key.name|title }}
+            </a>
+        {% else %}
+            <a class="nav-link dropdown-toggle" href="{% url 'hub:hub' key.id %}" id="navbarDropdownMenuLink"
+               role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ key.name|title }}
+            </a>
+        {% endif %}
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            {% for cat in cats.0 %}
+                <li>
+                    <a class="dropdown-item" href="{% url 'hub:hub_category' key.id cat.id %}">{{ cat.name|title }}
+                    </a>
+                </li>
             {% endfor %}
-          </ul>
-        </li>
-
-        {% endfor %}
+        </ul>
+    </li>
+{% endfor %}

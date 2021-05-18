@@ -1,8 +1,6 @@
 {% load static %}
 {% block post_moderate_status %}
-
     {% if post.status == 'on_moderate' or post.status == 'need_review' or post.status == 'moderate_false' %}
         <p>{{ post.get_status_display }}</p>
     {% endif %}
-
 {% endblock %}

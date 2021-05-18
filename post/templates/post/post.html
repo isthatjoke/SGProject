@@ -11,7 +11,7 @@
                  class="card-img-top" alt="...">
             {% include 'post/includes/post_moderate_status.html' %}
             <div class="post__user">Пользователь: <span>{{ post.user }}</span></div>
-            <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
+            <div class="post__date">Дата публицкации: <span>{{ post.moderated_at }}</span></div>
             <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
             {% if post.tags %}
                 <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.get_all_tags }}</div>
@@ -21,7 +21,6 @@
                 <p>
                     {{ post.content|safe }}
                 </p>
-
             </div>
             {% if post.status == 'need_review' or post.status == 'moderate_false' %}
                 _______________
@@ -42,11 +41,11 @@
                                         <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
                                     </bottom>
                                     <bottom type="button" id="likes_up">
-                                        <i class="fa fa-thumbs-o-up liked" aria-hidden="true"></i>
+                                        <i class="fa fa-thumbs-o-up" style="opacity: 0.5" aria-hidden="true"></i>
                                     </bottom>
                                 {% elif post.post_id.first.karma == -1 %}
                                     <bottom type="button" id="likes_down">
-                                        <i class="fa fa-thumbs-o-down liked" aria-hidden="true"></i>&nbsp;&nbsp;
+                                        <i class="fa fa-thumbs-o-down" style="opacity: 0.5" aria-hidden="true"></i>&nbsp;&nbsp;
                                     </bottom>
                                     <bottom type="button" id="likes_up">
                                         <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
@@ -102,7 +101,7 @@
                                 <a href="#comment-{{ comment.id }}">#</a>
                             </div>
                             <div class="panel-body">
-                                <div>
+                                <div style="word-wrap: break-word;">
                                     {{ comment.content|safe }}
                                     <div>
                                         <i class="fa fa-bar-chart" aria-hidden="true"></i>
@@ -117,12 +116,14 @@
                                                         <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
                                                     </bottom>
                                                     <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
-                                                        <i class="fa fa-thumbs-o-up liked" aria-hidden="true"></i>
+                                                        <i class="fa fa-thumbs-o-up" style="opacity: 0.5"
+                                                           aria-hidden="true"></i>
                                                     </bottom>
                                                 {% elif comment.karma.first.karma == -1 %}
                                                     <bottom type="button" id="{{ comment.id }}"
                                                             name="comment_likes_down">
-                                                        <i class="fa fa-thumbs-o-down liked" aria-hidden="true"></i>&nbsp;&nbsp;
+                                                        <i class="fa fa-thumbs-o-down" style="opacity: 0.5"
+                                                           aria-hidden="true"></i>&nbsp;&nbsp;
                                                     </bottom>
                                                     <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
                                                         <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
@@ -141,8 +142,8 @@
                                         {% endif %}
                                         {% if not request.user == comment.author %}
                                             {% if not request.user.is_staff %}
-                                                {% if not request.user.id == comment.complaint.first.user.id %}
-                                                    &nbsp;&nbsp;
+                                                {% if not request.user.id == comment.complaint.first.user.id %}&nbsp;
+                                                    &nbsp;
                                                     <a href="{% url 'post:complaint_create' post.id comment.id %}"
                                                        title="Пожаловаться"><i class="fa fa-exclamation-triangle"></i>
                                                     </a>
@@ -161,8 +162,7 @@
                                             <div style="background-color: #ffb4b3; border: black solid 1px;">
                                                 <span>&nbsp;<b>Пользователь:</b> {{ comment.complaint.first.user }}</span><br>
                                                 <span>&nbsp;<b>Тип жалобы:</b> {{ comment.complaint.first.complaint_type }}</span><br>
-                                                <span>&nbsp;<b>Жалоба:</b> {{ comment.complaint.first.complaint_text }}</span><br>
-                                                &nbsp;
+                                                <span>&nbsp;<b>Жалоба:</b> {{ comment.complaint.first.complaint_text }}</span><br>&nbsp;
                                                 <a class="btn btn-default btn-xs"
                                                    href="{% url 'post:satisfy_comment_complaint' post.id comment.id comment.complaint.first.id %}">
                                                     <i class="fa fa-check-circle"></i>&nbsp;Принять
@@ -227,7 +227,7 @@
                     {% bootstrap_form form %}
                     {% buttons %}
                         <button type="submit" class="btn btn-primary" value="{{ post.id }}"
-                                id="add_comment_but"><i class="fa fa-comment"></i>&nbsp;&nbsp;
+                                id="add_comment_but" style="margin: 12px 0;"><i class="fa fa-comment"></i>&nbsp;&nbsp;
                             <a onClick="ajax_comment()">Комментировать</a>
                         </button>
                     {% endbuttons %}

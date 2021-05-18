@@ -1,114 +1,107 @@
 {% load static %}
 {% load bootstrap3 %}
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'css/bootstrap-grid.css' %}" rel="stylesheet">
-    <link href="{% static 'css/bootstrap-reboot.css' %}" rel="stylesheet">
-    <link href="{% static 'css/bootstrap-utilities.css' %}" rel="stylesheet">
-
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-
-    {% for comment in comments %}
-        <a name="comment-{{ comment.id }}"></a>
-        <div class="row" id="{{ comment.id }}">
-            <div class="col-md-{{ comment.get_offset }}"></div>
-            <div class="col-md-{{ comment.get_col }} row-comment">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <strong>{{ comment.author_id.get_full_name|default:comment.author.username }}</strong>&nbsp;&nbsp;
-                        {{ comment.created_at }}
-                        <a href="#comment-{{ comment.id }}">#</a>
-                    </div>
-                    <div class="panel-body">
-                         <div>
-                            {{ comment.content|safe }}
-                            <div>
-                                <i class="fa fa-bar-chart" aria-hidden="true"></i>
-                                <span id="{{ comment.id }}"
-                                      class="comment__karma__count">{{ comment.comment_karma }}</span>&nbsp;
-                                <span id="{{ comment.id }}" class="comment__karma__msg"></span>&nbsp;
-                                {% if request.user.is_authenticated %}
-                                    {% if request.user == comment.karma.first.user %}
-                                        {% if comment.karma.first.karma == 1 %}
-                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
-                                                <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
-                                            </bottom>
-                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
-                                                <i class="fa fa-thumbs-o-up liked" aria-hidden="true"></i>
-                                            </bottom>
-                                        {% elif comment.karma.first.karma == -1 %}
-                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
-                                                <i class="fa fa-thumbs-o-down liked" aria-hidden="true"></i>&nbsp;&nbsp;
-                                            </bottom>
-                                            <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
-                                                <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
-                                            </bottom>
-                                        {% endif %}
-                                    {% else %}
+<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+<link href="{% static 'css/bootstrap-grid.css' %}" rel="stylesheet">
+<link href="{% static 'css/bootstrap-reboot.css' %}" rel="stylesheet">
+<link href="{% static 'css/bootstrap-utilities.css' %}" rel="stylesheet">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+{% for comment in comments %}
+    <a name="comment-{{ comment.id }}"></a>
+    <div class="row" id="{{ comment.id }}">
+        <div class="col-md-{{ comment.get_offset }}"></div>
+        <div class="col-md-{{ comment.get_col }} row-comment">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>{{ comment.author_id.get_full_name|default:comment.author.username }}</strong>&nbsp;&nbsp;
+                    {{ comment.created_at }}
+                    <a href="#comment-{{ comment.id }}">#</a>
+                </div>
+                <div class="panel-body">
+                    <div>
+                        {{ comment.content|safe }}
+                        <div>
+                            <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                            <span id="{{ comment.id }}"
+                                  class="comment__karma__count">{{ comment.comment_karma }}</span>&nbsp;
+                            <span id="{{ comment.id }}" class="comment__karma__msg"></span>&nbsp;
+                            {% if request.user.is_authenticated %}
+                                {% if request.user == comment.karma.first.user %}
+                                    {% if comment.karma.first.karma == 1 %}
                                         <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
                                             <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
+                                        </bottom>
+                                        <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
+                                            <i class="fa fa-thumbs-o-up liked" aria-hidden="true"></i>
+                                        </bottom>
+                                    {% elif comment.karma.first.karma == -1 %}
+                                        <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
+                                            <i class="fa fa-thumbs-o-down liked" aria-hidden="true"></i>&nbsp;&nbsp;
                                         </bottom>
                                         <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
                                             <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
                                         </bottom>
                                     {% endif %}
                                 {% else %}
-                                    <span>Для выставления оценки авторизуйтесь.</span>
+                                    <bottom type="button" id="{{ comment.id }}" name="comment_likes_down">
+                                        <i class="fa fa-thumbs-o-down" aria-hidden="true"></i>&nbsp;&nbsp;
+                                    </bottom>
+                                    <bottom type="button" id="{{ comment.id }}" name="comment_likes_up">
+                                        <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                                    </bottom>
                                 {% endif %}
-                            </div>
+                            {% else %}
+                                <span>Для выставления оценки авторизуйтесь.</span>
+                            {% endif %}
                         </div>
-
-                        {% if comment.published %}
-                                {% if form %}
-
-                                        <a class="btn btn-default btn-xs pull-right"
-                                           onclick="return show_comments_form({{ comment.id }})">
-                                             &nbsp;&nbsp;Ответить
-                                        </a>
-                                        {% if comment.author.username == request.user.username %}
-                                            &nbsp;&nbsp;
-<!--                                            <a href="comment/delete/{{ comment.id }}" class="btn btn-default btn-xs pull-right">-->
-<!--                                                Удалить</a>-->
-                        <a onClick="ajax_comment_del('{{ comment.id }}')" class="btn btn-default btn-xs pull-right">Удалить</a>
-
-                                        {% endif %}
-                                {% endif %}
-                        {% endif %}
                     </div>
+                    {% if comment.published %}
+                        {% if form %}
+                            <a class="btn btn-default btn-xs pull-right"
+                               onclick="return show_comments_form({{ comment.id }})">
+                                &nbsp;&nbsp;Ответить
+                            </a>
+                            {% if comment.author.username == request.user.username %}
+                                &nbsp;&nbsp;
+                                <!--                                            <a href="comment/delete/{{ comment.id }}" class="btn btn-default btn-xs pull-right">-->
+                                <!--                                                Удалить</a>-->
+                                <a onClick="ajax_comment_del('{{ comment.id }}')"
+                                   class="btn btn-default btn-xs pull-right">Удалить</a>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
         </div>
-    {% endfor %}
+    </div>
+{% endfor %}
+{% if post.status == 'published' %}
+    {% if form %}
+        <h3 id="write_comment"><a style="color: black;" onclick="return show_comments_form('write_comment')">Написать
+            комментарий</a></h3>
+        <form id="comment_form" method="post" action="comment/update/">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            {% buttons %}
+                <button type="submit" class="btn btn-primary" value="{{ post.id }}"
+                        id="add_comment_but"><i class="fa fa-comments" aria-hidden="true"></i>&nbsp;
+                    <a onClick="ajax_comment()">Комментировать</a>
+                </button>
+            {% endbuttons %}
+        </form>
+        <!--                <div class="row">-->
+        <!--                    <div class="col mb-5">-->
 
-    {% if post.status == 'published' %}
-            {% if form %}
-                <h3 id="write_comment"><a style="color: black;" onclick="return show_comments_form('write_comment')">Написать
-                    комментарий</a></h3>
-                <form id="comment_form" method="post" action="comment/update/">
-                    {% csrf_token %}
-                    {% bootstrap_form form %}
-
-                    {% buttons %}
-                        <button type="submit" class="btn btn-primary" value="{{ post.id }}" id="add_comment_but">{% bootstrap_icon "comment" %}&nbsp;
-                        <a onClick="ajax_comment()">Комментировать</a>
-                        </button>
-                    {% endbuttons %}
-                    </form>
-<!--                <div class="row">-->
-<!--                    <div class="col mb-5">-->
-
-<!--                    </div>-->
-<!--                </div>-->
-            {% else %}
-                <div class="panel panel-warning">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Комментарии</h3>
-                    </div>
-                    <div class="panel-body">
-                        Только авторизованные пользователи могут оставлять комментарии.<br/>
-                    </div>
-                </div>
-            {% endif %}
+        <!--                    </div>-->
+        <!--                </div>-->
+    {% else %}
+        <div class="panel panel-warning">
+            <div class="panel-heading">
+                <h3 class="panel-title">Комментарии</h3>
+            </div>
+            <div class="panel-body">
+                Только авторизованные пользователи могут оставлять комментарии.<br/>
+            </div>
+        </div>
     {% endif %}
-
-
+{% endif %}

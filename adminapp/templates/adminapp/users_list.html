@@ -1,103 +1,90 @@
 {% extends 'hub/base.html' %}
 {% load static %}
 {% block content %}
-
     <div class="row">
-
         <div class="col">
-
             <table id="datatable" class="table table-hover">
-                        <thead>
-                        <tr>
-                            <th>Никнейм</th>
-                            <th>Забанен</th>
-                            <th>Забанен до</th>
-                            <th>Действия</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for user in users %}
-                            <tr>
-                                <td id="username-{{ forloop.counter }}">{{ user.username }}</td>
-                                <td>{{ user.get_banned_display }}</td>
-
-                            {% if user.banned_to is not None %}
-                                <td>{{ user.banned_to }}</td>
+                <thead>
+                <tr>
+                    <th>Никнейм</th>
+                    <th>Забанен</th>
+                    <th>Забанен до</th>
+                    <th>Действия</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td id="username-{{ forloop.counter }}">{{ user.username }}</td>
+                        <td>{{ user.get_banned_display }}</td>
+                        {% if user.banned_to is not None %}
+                            <td>{{ user.banned_to }}</td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                        <td>
+                            {% if user.banned_to or user.banned == 'banned_forever' %}
+                                <button id="link-{{ forloop.counter }}" class="btn btn-success link">разбанить</button>
                             {% else %}
-                                <td></td>
+                                <button type="button" id="link-{{ forloop.counter }}" class="btn btn-danger link">
+                                    забанить
+                                </button>
                             {% endif %}
-
-                                <td>
-                                    {% if user.banned_to or user.banned == 'banned_forever' %}
-                                        <button id="link-{{ forloop.counter }}" class="btn btn-success link">разбанить</button>
-                                    {% else %}
-
-                                        <button type="button" id="link-{{ forloop.counter }}" class="btn btn-danger link">забанить</button>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                <form action="{% url 'adminapp:user_ban' user.id %}" method="post" class="form" id="form-{{ forloop.counter }}" style="display: none;">
-                                    {% csrf_token %}
-{#                                    {{ form.media }}#}
-{#                                    {{ form.as_p }}#}
+                        </td>
+                        <td>
+                            <form action="{% url 'adminapp:user_ban' user.id %}" method="post" class="form"
+                                  id="form-{{ forloop.counter }}" style="display: none;">
+                                {% csrf_token %}
+                                {#                                    {{ form.media }}#}
+                                {#                                    {{ form.as_p }}#}
                                 <p>
-                                    <input class="ban_time" type="number" name="ban_time" placeholder="кол-во дней" min="1" id="id_ban_time-{{ forloop.counter }}">
+                                    <input class="ban_time" type="number" name="ban_time" placeholder="кол-во дней"
+                                           min="1" id="id_ban_time-{{ forloop.counter }}">
                                 </p>
-
-
-
-
-                                    <div class="form-button">
-                            <button id="ban_submit-{{ forloop.counter }}" type="submit"
-                                    class="btn btn-success ban-submit">навсегда
-                            </button>
-                        </div>
-                                </form>
-                                </td>
-                            <td>
-
-                                <a href="{% url 'adminapp:user_ban' user.id %}" style="display: none;"
-                                   id="submit-{{ forloop.counter }}" class="btn btn-success">подтвердить</a>
-
-                            </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-
+                                <div class="form-button">
+                                    <button id="ban_submit-{{ forloop.counter }}" type="submit"
+                                            class="btn btn-success ban-submit">навсегда
+                                    </button>
+                                </div>
+                            </form>
+                        </td>
+                        <td>
+                            <a href="{% url 'adminapp:user_ban' user.id %}" style="display: none;"
+                               id="submit-{{ forloop.counter }}" class="btn btn-success">подтвердить</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
             {% if users %}
-    <nav aria-label="Page navigation example" class="mt-3">
-                        <ul class="pagination">
-                            <li class="page-item">
-                                {% if page_obj.has_previous %}
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}"
-                                       aria-label="Previous" style="color: black">
-                                        <span aria-hidden="true">&laquo;</span>
-                                        <span class="sr-only">Previous</span>
-                                    </a>
-                                {% endif %}
-                            </li>
-                            <li class="page-item"><a class="page-link" href="#"  style="color: black">Страница {{ page_obj.number }}
-                                из {{ page_obj.paginator.num_pages }}
-                            </a></li>
-                            <li class="page-item">
-                                {% if page_obj.has_next %}
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}"
-                                       aria-label="Next"  style="color: black">
-                                        <span aria-hidden="true">&raquo;</span>
-                                        <span class="sr-only">Next</span>
-                                    </a>
-                                {% endif %}
-                            </li>
-                        </ul>
-                    </nav>
-    {% endif %}
-
+                <nav aria-label="Page navigation example" class="mt-3">
+                    <ul class="pagination">
+                        <li class="page-item">
+                            {% if page_obj.has_previous %}
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}"
+                                   aria-label="Previous" style="color: black">
+                                    <span aria-hidden="true">&laquo;</span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                            {% endif %}
+                        </li>
+                        <li class="page-item"><a class="page-link" href="#"
+                                                 style="color: black">Страница {{ page_obj.number }}
+                            из {{ page_obj.paginator.num_pages }}
+                        </a></li>
+                        <li class="page-item">
+                            {% if page_obj.has_next %}
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}"
+                                   aria-label="Next" style="color: black">
+                                    <span aria-hidden="true">&raquo;</span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </nav>
+            {% endif %}
         </div>
-
     </div>
-
-
-
 {% endblock %}

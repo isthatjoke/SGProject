@@ -2,60 +2,65 @@
 {% load static %}
 {% block content %}
     <form class="d-flex">
-        <input class="form-control me-2" type="text" placeholder="Поиск по слову" aria-label="Search" name="search" value="{{ request.GET.search }}">
-        <input class="form-control me-2" type="text" placeholder="Поиск по тэгам" aria-label="Search" name="tags" value="{{ request.GET.tags }}">
-        <input class="form-control me-2" type="number" placeholder="За последние 20 дней " aria-label="Search" name="days" value="{{ request.GET.days }}">
+        <input class="form-control me-2" type="text" placeholder="Поиск по слову" aria-label="Search" name="search"
+               value="{{ request.GET.search }}">
+        <input class="form-control me-2" type="text" placeholder="Поиск по тэгам" aria-label="Search" name="tags"
+               value="{{ request.GET.tags }}">
+        <input class="form-control me-2" type="number" placeholder="За последние 20 дней " aria-label="Search"
+               name="days" value="{{ request.GET.days }}">
         <select class="form-select" aria-label="Default select example" name="msg_type">
-              <option selected>Все</option>
-              <option {% if request.GET.msg_type == 'date_up' %}selected{% endif %} value="date_up">по дате - сначала новые</option>
-              <option {% if request.GET.msg_type == 'date_down' %}selected{% endif %} value="date_down">по дате - сначала старые</option>
-              <option {% if request.GET.msg_type == 'karma_up' %}selected{% endif %} value="karma_up">по карме - сначала больше</option>
-              <option {% if request.GET.msg_type == 'karma_down' %}selected{% endif %} value="karma_down">по карме - сначала меньше</option>
-              <option {% if request.GET.msg_type == 'comments_up' %}selected{% endif %} value="comments_up">горячие посты - горячее <i class="fa fa-sort-down"></i></option>
-              <option {% if request.GET.msg_type == 'comments_down' %}selected{% endif %} value="comments_down">горячие посты - холоднее <i class="fa fa-sort-up"></i></option>
+            <option selected>Все</option>
+            <option {% if request.GET.msg_type == 'date_up' %}selected{% endif %} value="date_up">по дате - сначала
+                новые
+            </option>
+            <option {% if request.GET.msg_type == 'date_down' %}selected{% endif %} value="date_down">по дате - сначала
+                старые
+            </option>
+            <option {% if request.GET.msg_type == 'karma_up' %}selected{% endif %} value="karma_up">по карме - сначала
+                больше
+            </option>
+            <option {% if request.GET.msg_type == 'karma_down' %}selected{% endif %} value="karma_down">по карме -
+                сначала меньше
+            </option>
+            <option {% if request.GET.msg_type == 'comments_up' %}selected{% endif %} value="comments_up">горячие посты
+                - горячее <i class="fa fa-sort-down"></i></option>
+            <option {% if request.GET.msg_type == 'comments_down' %}selected{% endif %} value="comments_down">горячие
+                посты - холоднее <i class="fa fa-sort-up"></i></option>
         </select>
         <button class="btn btn-outline-success" type="submit">Отфильтровать</button>
-      </form>
-
-
-        {% for post in posts %}
-            <div class="card mt-3">
+    </form>
+    {% for post in posts %}
+        <div class="card mt-3">
             <div class="card-body">
-            <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044" class="card-img-top" alt="...">
-
+                <img src="https://media.istockphoto.com/vectors/thin-line-design-concept-for-project-website-banner-vector-id510855044"
+                     class="card-img-top" alt="...">
                 <div class="post__container">
                     <div class="post__user">Пользователь: <span>{{ post.user }}</span></div>
-                    <div class="post__date">Дата публицкации: <span>{{ post.updated_at }}</span></div>
-                    <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}</div>
-                        {% if post.tags %}
-                            <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.get_all_tags }}</div>
-                        {% endif %}
+                    <div class="post__date">Дата публицкации: <span>{{ post.moderated_at }}</span></div>
+                    <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.hub_category.name }}
+                    </div>
+                    {% if post.tags %}
+                        <div class="post__tags"><i class="fa fa-tags" aria-hidden="true"></i> {{ post.get_all_tags }}
+                        </div>
+                    {% endif %}
                     <div class="post__title"><h3>{{ post.name }}</h3></div>
                     <div class="post__body">
                         <p>
                             {{ post.content|safe|truncatewords:50 }}
                         </p>
-
                     </div>
-
-
-                        <a href="{% url 'post:post' post.id %}" class="btn btn-primary">
-                            Читать далее...
-                        </a>
-                        {% if post.status == 'published' and post.user == user %}
-
-{#                        <a href="{% url 'post:post_update' post.id %}">#}
-{#                            <button>Редактировать</button>#}
-{#                        </a>#}
-
-                        <a href="{% url 'post:post_update' post.id %}" class="btn btn-primary">
+                    <a href="{% url 'post:post' post.id %}" class="btn btn-primary" style="margin: 0 0 12px 0;">
+                        Читать далее...
+                    </a>
+                    {% if post.status == 'published' and post.user == user %}
+                        {#                        <a href="{% url 'post:post_update' post.id %}">#}
+                        {#                            <button>Редактировать</button>#}
+                        {#                        </a>#}
+                        <a href="{% url 'post:post_update' post.id %}" class="btn btn-primary"
+                           style="margin: 0 0 12px 0;">
                             Удалить
                         </a>
-
-                        {% endif %}
-
-
-
+                    {% endif %}
                     <div class="post__statistic">
                         <div class="post__karma"><i class="fa fa-bar-chart" aria-hidden="true"></i><span
                                 class="post__karma__count">{{ post.post_karma }}</span>
@@ -63,10 +68,6 @@
                     </div>
                 </div>
             </div>
-
-    </div>
+        </div>
     {% endfor %}
-
-
-
 {% endblock %}
