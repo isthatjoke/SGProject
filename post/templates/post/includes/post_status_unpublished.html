@@ -8,10 +8,10 @@
             <a href="{% url 'post:post_publish' post.id %}?next={% url 'post:users_posts' %}" class="btn btn-primary">
                 Опубликовать
             </a>
-        {% elif user.rating < 7 and post.moderated == True %}
-            <a href="{% url 'post:post_publish' post.id %}" class="btn btn-primary">
-                Опубликовать
-            </a>
+{#        {% elif user.rating < 7 and post.moderated == True %}#}
+{#            <a href="{% url 'post:post_publish' post.id %}" class="btn btn-primary">#}
+{#                Опубликовать#}
+{#            </a>#}
         {% else %}
             <a href="{% url 'post:post_moderate' post.id %}?next={% url 'post:users_posts' %}" class="btn btn-primary">
                 Отправить на модерацию

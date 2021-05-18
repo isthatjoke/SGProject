@@ -519,6 +519,7 @@ class PostModerateView(UpdateView, LoginRequiredDispatchMixin):
 def post_publish(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.status = post.STATUS_PUBLISHED
+    post.moderated_at = datetime.now()
     post.save()
     return HttpResponseRedirect(reverse('post:users_posts'))
 
@@ -643,10 +644,10 @@ def ordering(request):
     posts = Post.objects.filter(user=request.user).select_related().filter(updated_at__gte=now)
 
     if request.GET.get('msg_type') == 'date_up':
-        posts = posts.order_by('-updated_at')
+        posts = posts.order_by('-moderated_at')
 
     elif request.GET.get('msg_type') == 'date_down':
-        posts = posts.order_by('updated_at')
+        posts = posts.order_by('moderated_at')
 
     elif request.GET.get('msg_type') == 'karma_up':
         posts = posts.order_by('-karma_count')

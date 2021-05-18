@@ -1,27 +1,25 @@
 {% extends 'hub/base.html' %}
 {% load static %}
 {% block content %}
-
     <div class="row">
-    <div class="col-3"></div>
-    <div class="col-6">
-        <main class="form-signin mt-5">
-            <form id="formcontrol" action="{% url 'authapp:update' %}" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ update_form.as_p }}
-                {{ profile_form.as_p }}
-                <div class="form-button">
-                    <button id="submit" type="submit" class="w-100 btn btn-lg btn-primary">Сохранить</button>
+        <div class="col-3"></div>
+        <div class="col-6">
+            <main class="form-signin mt-5">
+                <form id="formcontrol" action="{% url 'authapp:update' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ update_form.as_p }}
+                    {{ profile_form.as_p }}
+                    <div class="form-button" style="margin: 12px 0;">
+                        <button id="submit" type="submit" class="w-100 btn btn-lg btn-primary">Сохранить</button>
+                    </div>
+                </form>
+                <div class="row">
+                    <div class="col text-center" style="margin: 12px 0;">
+                        <a href="https://google.com" target="_blank"><i class="fa fa-google fa-3x"></i></a>
+                        <a href="https://github.com" target="_blank"><i class="fa fa-github-alt fa-3x"></i></a>
+                    </div>
                 </div>
-            </form>
-            <div class="row">
-        <div class="col text-center">
-                <a href="https://google.com" target="_blank"><i class="fa fa-google fa-3x"></i></a>
-                <a href="https://github.com" target="_blank"><i class="fa fa-github-alt fa-3x"></i></a>
+            </main>
         </div>
     </div>
-        </main>
-        </div>
-    </div>
-
 {% endblock %}
