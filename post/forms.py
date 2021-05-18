@@ -12,9 +12,9 @@ from django.contrib.postgres.forms import SimpleArrayField
 class PostCreationForm(forms.ModelForm):
     content = forms.CharField(label='Содержание', widget=CKEditorUploadingWidget(config_name='default'))
     # tags = SimpleArrayField(forms.IntegerField)
-    CHOICES = tuple((x.id, x.tag) for x in Tags.objects.all())
+    # CHOICES = tuple((x.id, x.tag) for x in Tags.objects.all())
     # field2 = forms.MultipleChoiceField(choices=CHOICES, widget=Select2MultipleWidget)
-    field2 = forms.MultipleChoiceField(choices=CHOICES, label = "Выбор тегов", widget=forms.SelectMultiple())
+    field2 = forms.MultipleChoiceField(label="Выбор тегов", widget=forms.SelectMultiple())
 
     tags_str = forms.CharField(
         label='Тэги поста:',
@@ -45,12 +45,13 @@ class PostCreationForm(forms.ModelForm):
                 field.widget.attrs['required'] = False
                 field.widget.attrs['readonly'] = True
                 field.widget.attrs['placeholder'] = 'Тэги не заданы. Выберите из списка!'
+        self.fields['field2'].choices = tuple((x.id, x.tag) for x in Tags.objects.all())
 
 
 class PostEditForm(forms.ModelForm):
     content = forms.CharField(label='Содержание', widget=CKEditorUploadingWidget(config_name='default'))
-    CHOICES = tuple((x.id, x.tag) for x in Tags.objects.all())
-    field2 = forms.MultipleChoiceField(choices=CHOICES, label="Выбор тегов", widget=forms.SelectMultiple())
+    # CHOICES = tuple((x.id, x.tag) for x in Tags.objects.all())
+    field2 = forms.MultipleChoiceField(label="Выбор тегов", widget=forms.SelectMultiple())
 
     tags_str = forms.CharField(
         label='Тэги поста:',
@@ -82,6 +83,7 @@ class PostEditForm(forms.ModelForm):
                 field.widget.attrs['required'] = False
                 field.widget.attrs['readonly'] = True
                 field.widget.attrs['placeholder'] = 'Тэги не заданы. Выберите из списка!'
+        self.fields['field2'].choices = tuple((x.id, x.tag) for x in Tags.objects.all())
 
 
 class PostModeratorEditForm(forms.ModelForm):
