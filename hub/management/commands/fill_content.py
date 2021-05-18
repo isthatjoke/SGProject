@@ -1,3 +1,5 @@
+import datetime
+
 from django.core.management import BaseCommand
 
 from authapp.models import HubUser
@@ -242,13 +244,14 @@ class Command(BaseCommand):
                                   content=item['content'],
                                   hub_category=hub_category,
                                   user=user_id,
-                                  status=Post.STATUS_PUBLISHED))
+                                  status=Post.STATUS_PUBLISHED,
+                                  moderated=True,
+                                  moderated_at=datetime.datetime.now()))
         Post.objects.bulk_create(post_list)
 
         for item in tags_name:
             tags_list.append(Tags(tag=item))
 
         Tags.objects.bulk_create(tags_list)
-
 
         print(f'Перезагрузка БД выполнена')

@@ -1,8 +1,6 @@
 {% load static %}
 {% block post_status_template %}
-
-                                <a href="{% url 'post:post_archive' post.id %}" class="btn btn-primary">
-                                    Удалить
-                                </a>
-
+    <a href="{% url 'post:post_archive' post.id %}" class="btn btn-primary">
+        Удалить
+    </a>
 {% endblock %}
