@@ -31,7 +31,7 @@ class HubUser(AbstractUser):
     updated_at = models.DateTimeField(verbose_name='обновлен', auto_now=True)
     banned = models.CharField(max_length=15, choices=BANNED_STATUSES, default=BANNED_FALSE, verbose_name='забанен')
     banned_to = models.DateTimeField(verbose_name='забанен до', **NULLABLE)
-    rating = models.PositiveSmallIntegerField(verbose_name='рейтинг пользователя', default=0)
+    rating = models.DecimalField(verbose_name='рейтинг пользователя', default=0, decimal_places=1, max_digits=3)
 
 
 class HubUserProfile(models.Model):
@@ -70,5 +70,3 @@ class HubUserProfile(models.Model):
 
     def __str__(self):
         return f'{self.user}'
-
-

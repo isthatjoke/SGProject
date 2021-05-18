@@ -5,23 +5,27 @@ import pytz
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.messages.views import SuccessMessageMixin
+import requests
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, Count, F
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
+from django.template import RequestContext
+from django.template.loader import render_to_string
 
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, CreateView, ListView, UpdateView
 from django_tables2 import SingleTableView
+from notifications.signals import notify
 
 from authapp.models import HubUser
 from backend import settings
 from backend.utils import LoginRequiredDispatchMixin
 from hub.models import get_hub_cats_dict
-from post.forms import PostEditForm, PostCreationForm, CommentForm, PostModeratorEditForm
-from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma, Tags, get_all_tags
+from post.forms import PostEditForm, PostCreationForm, CommentForm, PostModeratorEditForm, CreateCommentComplaintForm
+from post.models import Post, PostKarma, Comment, get_all_comments, CommentKarma, Tags, get_all_tags, CommentComplaint
 from post.tables import PostsTable, ModeratorPostsTable
 
 
@@ -54,6 +58,8 @@ def perform_karma_update(post, user, karma):
             post.karma_count = F('karma_count') + karma
             post.save()
             updated_post_karma = Post.objects.filter(id=post.id).first().post_karma
+            notify.send(user, recipient=post.user, verb=f'{user} оценил Ваш пост', description='post_karma',
+                        target=post)
             return JsonResponse({'result': str(updated_post_karma)})
         else:
             already_liked.delete()
@@ -63,6 +69,8 @@ def perform_karma_update(post, user, karma):
                 post.karma_count = F('karma_count') + 1
             post.save()
             updated_post_karma = Post.objects.filter(id=post.id).first().post_karma
+            notify.send(user, recipient=post.user, verb=f'{user} изменил оценку поста', description='post_karma',
+                        target=post)
             return JsonResponse({'result': str(updated_post_karma)})
 
 
@@ -87,10 +95,14 @@ def perform_comment_karma_update(post, comment, user, karma):
         new_object = CommentKarma.objects.create(comment=comment, user=user, karma=karma)
         new_object.save()
         updated_comment_karma = Comment.objects.filter(id=comment.id).first().comment_karma
+        notify.send(user, recipient=comment.author, verb=f'{user} оценил Ваш коммент', description='komment_karma',
+                    target=comment, action_object=comment.comment_post)
         return JsonResponse({'result': str(updated_comment_karma)})
     else:
         already_liked.delete()
         updated_comment_karma = Comment.objects.filter(id=comment.id).first().comment_karma
+        notify.send(user, recipient=comment.author, verb=f'{user} изменил оценку коммента', description='komment_karma',
+                    target=comment, action_object=comment.comment_post)
         return JsonResponse({'result': str(updated_comment_karma)})
 
 
@@ -108,30 +120,6 @@ class PostDetailView(DetailView):
             context['comments'] = Comment.objects.filter(comment_post=self.kwargs['pk']).order_by('path')
             if self.request.user.is_authenticated:
                 context['form'] = self.comment_form
-
-        if self.request.method == 'POST':
-            form = CommentForm(self.request.POST)
-            if form.is_valid():
-                comment = Comment(
-                    path=[],
-                    comment_post=self.object.pk,
-                    author=self.request.user,
-                    content=form.cleaned_data['comment_area']
-                )
-                comment.save()
-
-                # сформируем path после первого сохранения
-                # и пересохраним комментарий
-
-                try:
-                    comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
-                    comment.path.append(comment.id)
-                    # print('получилось')
-                except ObjectDoesNotExist:
-                    comment.path.append(comment.id)
-                    # print('не получилось')
-
-                comment.save()
 
         return context
 
@@ -196,32 +184,129 @@ def delete_comment(request, pk2, pk):
     return redirect(comment.get_absolute_url())
 
 
-@login_required
-@require_http_methods(["POST"])
-def add_comment(request, pk):
-    form = CommentForm(request.POST)
+def ajax_comment_delete(request, pk, comment_id):
+    '''
+    :param request:
+    :param pk: Это id поста к которому относится коммент
+    :param comment_id: Это id комментария
+    :return:
+    '''
+    print(f'view ajax_comment_delete, пост = {pk}, comment.id = {comment_id}')
+    comment = get_object_or_404(Comment, id=comment_id)
+    comment.content = f"[----русские хакеры удалили этот коммент---]"
+    comment.published = False
+    comment.save()
+    comment_form = CommentForm
+    comments = Comment.objects.filter(comment_post=pk).order_by('path')
     post = get_object_or_404(Post, id=pk)
 
+    content = {
+        'comments': comments,
+        'request': request,
+        'form': comment_form,
+        'post': post,
+    }
+
+    result = render_to_string('post/includes/comment_post.html', content, request=request)
+    post_user = HubUser.objects.get(pk=post.user_id)
+    if not request.user == post_user:
+        notify.send(request.user, recipient=post_user, verb=f'{request.user} удалил коммент', description='komment',
+                    target=comment, action_object=post)
+    if request.is_ajax():
+        # print(f'ajax data on view ajax_comment_update')
+        return JsonResponse({'result': result})
+    # print(f'not ajax data on view ajax_comment_update')
+    return redirect(f'/post/{pk}/')
+
+
+def ajax_comment_update(request, pk):
+    comment_form = CommentForm
+
+    if add_comment(request, pk):
+        comments = Comment.objects.filter(comment_post=pk).order_by('path')
+        post = get_object_or_404(Post, id=pk)
+
+        content = {
+            'comments': comments,
+            'request': request,
+            'form': comment_form,
+            'post': post,
+        }
+        result = render_to_string('post/includes/comment_post.html', content, request=request)
+        if request.is_ajax():
+            # print(f'ajax data on view ajax_comment_update')
+            return JsonResponse({'result': result})
+        # print(f'not ajax data on view ajax_comment_update')
+        return redirect(f'/post/{pk}/')
+
+
+# @login_required
+# @require_http_methods(["POST"])
+def add_comment(request, pk):
+    post = get_object_or_404(Post, id=pk)
+    form = CommentForm(request.POST)
+    post_user = HubUser.objects.get(pk=post.user_id)
+    notif_send = False
     if form.is_valid():
-        comment = Comment()
-        comment.path = []
-        comment.comment_post = post
-        comment.author = auth.get_user(request)
-        comment.content = form.cleaned_data['comment_area']
+        comment = Comment(
+            path=[],
+            # comment_post=object.pk,
+            comment_post=post,
+            author=request.user,
+            content=form.cleaned_data['comment_area']
+        )
         comment.save()
 
-        # Django не позволяет увидеть ID комментария по мы не сохраним его,
         # сформируем path после первого сохранения
         # и пересохраним комментарий
+
         try:
-            comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
+            parent_comment = Comment.objects.get(id=form.cleaned_data['parent_comment'])
+            comment.path.extend(parent_comment.path)
             comment.path.append(comment.id)
+
+            if not request.user == parent_comment.author:
+                notify.send(request.user, recipient=parent_comment.author,
+                            verb=f'{request.user} ответил на Ваш коммент',
+                            description='komment',
+                            target=comment, action_object=post)
+                notif_send = True
+            # print('получилось')
         except ObjectDoesNotExist:
             comment.path.append(comment.id)
+            # print('не получилось')
 
         comment.save()
 
-    return redirect(comment.get_absolute_url())
+        if not request.user == post_user and not notif_send:
+            notify.send(request.user, recipient=post_user, verb=f'{request.user} оставил коммент',
+                        description='komment',
+                        target=comment, action_object=post)
+        return True
+
+    # form = CommentForm(request.POST)
+    # post = get_object_or_404(Post, id=pk)
+    #
+    # if form.is_valid():
+    #     comment = Comment()
+    #     comment.path = []
+    #     comment.comment_post = post
+    #     comment.author = auth.get_user(request)
+    #     comment.content = form.cleaned_data['comment_area']
+    #     comment.save()
+    #
+    #     # Django не позволяет увидеть ID комментария по мы не сохраним его,
+    #     # сформируем path после первого сохранения
+    #     # и пересохраним комментарий
+    #     try:
+    #         comment.path.extend(Comment.objects.get(id=form.cleaned_data['parent_comment']).path)
+    #         comment.path.append(comment.id)
+    #     except ObjectDoesNotExist:
+    #         comment.path.append(comment.id)
+    #
+    #     comment.save()
+    #
+    # return True
 
 
 class PostCreateView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin):
@@ -234,14 +319,16 @@ class PostCreateView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin
         messages.add_message(self.request, messages.SUCCESS, self.success_message)
         tags = form.cleaned_data['tags_str']  # строка с тегами из формы
         if tags:
-            tmp_tags = str(tags).split(',') # распарсил теги
+            tmp_tags = str(tags).split(',')  # распарсил теги
             for key, el in enumerate(tmp_tags):
-                tmp_tags[key] = el.strip() # убрал пробелы
+                tmp_tags[key] = el.strip()  # убрал пробелы
 
-            new_tags = [] # массив куда складываются id тэгов для записи в поле тэг поста
+            new_tags = []  # массив куда складываются id тэгов для записи в поле тэг поста
 
             if form.is_valid():
                 f = form.save()
+                form.instance.tags.clear()  # очищаем поле перед новой записью
+
             for tmp_tag in tmp_tags:
                 # проевряем есть тэг в таблице тэгов
                 tag_exists = tmp_tag is not None and Tags.objects.filter(tag=tmp_tag).exists()
@@ -293,8 +380,8 @@ class PostUserListView(SingleTableView, LoginRequiredDispatchMixin):
 
         posts = Post.objects.filter(user=self.request.user)
 
-        if self.request.GET.get('status') == 'unpublished':
-            posts = posts.filter(status='unpublished')
+        if self.request.GET.get('status') == 'published':
+            posts = posts.filter(status='published')
 
         elif self.request.GET.get('status') == 'archive':
             posts = posts.filter(status='archive')
@@ -306,7 +393,7 @@ class PostUserListView(SingleTableView, LoginRequiredDispatchMixin):
             posts = posts.filter(Q(status='on_moderate') | Q(status='need_review') | Q(status='moderate_false'))
 
         else:
-            posts = posts.filter(status='published')
+            posts = posts.filter(status='unpublished')
 
         return posts
 
@@ -363,17 +450,20 @@ class PostUpdateView(UpdateView, LoginRequiredDispatchMixin):
         return HttpResponseRedirect(reverse('post:post', kwargs={'pk': post.id}))
 
     def form_valid(self, form):
+        # print(f'Влидация формы: !!!!!!!!!!!!!!!!!!!!')
         messages.add_message(self.request, messages.SUCCESS, self.success_message)
         tags = form.cleaned_data['tags_str']  # строка с тегами из формы
+        # print(f'tags: {tags}')
         self.object.tags.clear()
         self.object.save()
         if tags:
             tmp_tags = str(tags).split(',')  # распарсил теги
+            print(f'распарсил теги: {tmp_tags}')
             for key, el in enumerate(tmp_tags):
                 tmp_tags[key] = el.strip()  # убрал пробелы
 
             new_tags = []  # массив куда складываются id тэгов для записи в поле тэг поста
-
+            form.instance.tags.clear()  # очищаем поле перед новой записью
             for tmp_tag in tmp_tags:
                 # проевряем есть тэг в таблице тэгов
                 tag_exists = tmp_tag is not None and Tags.objects.filter(tag=tmp_tag).exists()
@@ -392,24 +482,35 @@ class PostUpdateView(UpdateView, LoginRequiredDispatchMixin):
 
 class PostModerateView(UpdateView, LoginRequiredDispatchMixin):
     model = Post
-    template_name = 'post/post_form.html'
+    template_name = 'post/post_moderation.html'
     form_class = PostModeratorEditForm
     success_url = reverse_lazy('post:users_posts')
     success_message = 'пост проверен'
 
     def get_context_data(self, **kwargs):
+        post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
         context = super(PostModerateView, self).get_context_data(**kwargs)
         context['title'] = f'Модерирование поста {self.object.name}'
+        context['form']['tags_str'].initial = post.get_all_tags()
 
         return context
 
     def form_valid(self, form):
         messages.add_message(self.request, messages.SUCCESS, self.success_message)
 
-        if form.instance.status == 'unpublished':
+        if form.instance.status == 'need_review':
+            notify.send(self.object, recipient=form.instance.user, verb='необходимы правки', description='moderate')
+
+        if form.instance.status == 'moderate_false':
+            notify.send(self.object, recipient=form.instance.user, verb='пост не прошел модерацию',
+                        description='moderate')
+
+        if form.instance.status == 'published':
             form.instance.moderated = True
             form.instance.moderated_at = datetime.now(pytz.timezone(settings.TIME_ZONE))
             form.instance.save()
+            notify.send(self.object, recipient=form.instance.user, verb='пост прошел модерацию и опубликован',
+                        description='moderate')
 
         return super().form_valid(form)
 
@@ -554,3 +655,56 @@ def ordering(request):
         posts = posts.order_by('karma_count')
 
     return posts
+
+
+class CreateComplaintView(CreateView, SuccessMessageMixin, LoginRequiredDispatchMixin):
+    template_name = 'post/create_comment_complaint.html'
+    form_class = CreateCommentComplaintForm
+    success_message = 'Жалоба отправлена'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(CreateComplaintView, self).get_context_data(**kwargs)
+        context['form']['user'].initial = self.request.user
+        context['form']['comment'].initial = self.kwargs.get('comment_id', '')
+        context['title'] = 'Жалоба на комментарий'
+        return context
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.SUCCESS, self.success_message)
+        comment = get_object_or_404(Comment, id=self.kwargs.get('comment_id', ''))
+        post = get_object_or_404(Post, id=self.kwargs.get('pk', ''))
+        comment.has_complaint = True
+        comment.save()
+        moderators = HubUser.objects.filter(is_staff=True)
+        notify.send(self.request.user, recipient=moderators, verb='Жалоба на комментарий',
+                    description='comment_complaint', target=comment, action_object=post)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        post_id = self.kwargs.get('pk', None)
+        return reverse_lazy('post:post', kwargs={'pk': post_id})
+
+
+def satisfy_comment_complaint(request, pk, comment_id, complaint_id):
+    post = get_object_or_404(Post, id=pk)
+    comment = get_object_or_404(Comment, id=comment_id)
+    complaint = get_object_or_404(CommentComplaint, id=complaint_id)
+    comment.published = False
+    comment.save()
+    complaint.is_satisfied = True
+    complaint.save()
+    notify.send(request.user, recipient=comment.author, verb='Ваш комментарий был удален по жалобе пользователя',
+                description='komment', target=comment, action_object=post)
+    return HttpResponseRedirect(reverse_lazy('post:post', kwargs={'pk': pk}))
+
+
+def dismiss_comment_complaint(request, pk, comment_id, complaint_id):
+    post = get_object_or_404(Post, id=pk)
+    comment = get_object_or_404(Comment, id=comment_id)
+    complaint = get_object_or_404(CommentComplaint, id=complaint_id)
+    complaint.is_satisfied = False
+    complaint.is_processed = True
+    complaint.save()
+    notify.send(request.user, recipient=complaint.user, verb='Ваша жалоба на комментарий была отклонена',
+                description='komment', target=comment, action_object=post)
+    return HttpResponseRedirect(reverse_lazy('post:post', kwargs={'pk': pk}))
