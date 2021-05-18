@@ -63,5 +63,19 @@ def user_ban(request, pk):
     return HttpResponseRedirect(reverse('adminapp:users_list'))
 
 
+def page_not_found(request, *args, **kwargs):
+    title = '404 - Страница не существует!'
+    context = {
+        'title': title,
+    }
+    return render(request, 'adminapp/pages-404.html', context, status=404)
+
+
+def page_error(request, *args, **kwargs):
+    title = '500 - Ошибка!'
+    context = {
+        'title': title,
+    }
+    return render(request, 'adminapp/pages-500.html', context, status=500)
 
 
