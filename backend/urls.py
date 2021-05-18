@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -20,6 +21,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import path, include
 from ckeditor_uploader import views
 from django.views.decorators.cache import never_cache
+import notifications.urls
 
 urlpatterns = [
     path('', include('hub.urls', namespace='hub')),
@@ -34,6 +36,8 @@ urlpatterns = [
     # path('ckeditor/', include('ckeditor_uploader.urls')),
     path('ckeditor/upload/', login_required(views.upload), name="ckeditor_upload"),
     path('ckeditor/browse/', never_cache(login_required(views.browse)), name="ckeditor_browse"),
+
+    path('inbox/notifications/', include(notifications.urls, namespace='notifications')),
 
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

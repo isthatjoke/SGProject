@@ -39,11 +39,17 @@
                                 <td>
                                 <form action="{% url 'adminapp:user_ban' user.id %}" method="post" class="form" id="form-{{ forloop.counter }}" style="display: none;">
                                     {% csrf_token %}
-                                    {{ form.media }}
-                                    {{ form.as_p }}
+{#                                    {{ form.media }}#}
+{#                                    {{ form.as_p }}#}
+                                <p>
+                                    <input class="ban_time" type="number" name="ban_time" placeholder="кол-во дней" min="1" id="id_ban_time-{{ forloop.counter }}">
+                                </p>
+
+
+
 
                                     <div class="form-button">
-                            <button id="submit" type="submit"
+                            <button id="ban_submit-{{ forloop.counter }}" type="submit"
                                     class="btn btn-success ban-submit">навсегда
                             </button>
                         </div>

@@ -1,33 +1,27 @@
 {% load static %}
 {% block post_status_template %}
-
-
-                                <a href="{% url 'post:post_update' post.id %}" class="btn btn-primary">
-                                    Редактировать
-                                </a>
-
-                        {% if user.banned == 'active' %}
-                            {% if user.rating >= 7 or user.is_staff %}
-                                <a href="{% url 'post:post_publish' post.id %}" class="btn btn-primary">
-                                    Опубликовать
-                                </a>
-                            {% elif user.rating < 7 and post.moderated == True %}
-                                <a href="{% url 'post:post_publish' post.id %}" class="btn btn-primary">
-                                    Опубликовать
-                                </a>
-                            {% else %}
-                                <a href="{% url 'post:post_moderate' post.id %}" class="btn btn-primary">
-                                    Отправить на модерацию
-                                </a>
-                            {% endif %}
-                        {% endif %}
-
-                                <a href="{% url 'post:post_archive' post.id %}" class="btn btn-primary">
-                                    Удалить
-                                </a>
-
-                                <a href="{% url 'post:post_template' post.id %}" class="btn btn-primary">
-                                    Сделать шаблон
-                                </a>
-
+    <a href="{% url 'post:post_update' post.id %}" class="btn btn-primary">
+        Редактировать
+    </a>
+    {% if user.banned == 'active' %}
+        {% if user.rating >= 7 or user.is_staff %}
+            <a href="{% url 'post:post_publish' post.id %}?next={% url 'post:users_posts' %}" class="btn btn-primary">
+                Опубликовать
+            </a>
+        {% elif user.rating < 7 and post.moderated == True %}
+            <a href="{% url 'post:post_publish' post.id %}" class="btn btn-primary">
+                Опубликовать
+            </a>
+        {% else %}
+            <a href="{% url 'post:post_moderate' post.id %}?next={% url 'post:users_posts' %}" class="btn btn-primary">
+                Отправить на модерацию
+            </a>
+        {% endif %}
+    {% endif %}
+    <a href="{% url 'post:post_archive' post.id %}" class="btn btn-primary">
+        Удалить
+    </a>
+    <a href="{% url 'post:post_template' post.id %}" class="btn btn-primary">
+        Сделать шаблон
+    </a>
 {% endblock %}

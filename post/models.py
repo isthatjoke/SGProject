@@ -1,7 +1,12 @@
 import json
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex
+from django.core import serializers
 from django.db import models
+from django.db.models import F
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from django.forms import model_to_dict
 from django.shortcuts import redirect
 
 from authapp.models import HubUser, HubUserProfile
@@ -71,7 +76,7 @@ class Post(models.Model):
     @staticmethod
     def get_all_posts():
         return Post.objects.filter(status=Post.STATUS_PUBLISHED).order_by('-updated_at')
-      
+
     # подсчет постов на модерации
     @staticmethod
     def on_moderate_count():
@@ -137,6 +142,7 @@ class Comment(models.Model):
     author = models.ForeignKey(HubUser, related_name='author_id', verbose_name='пользователь', on_delete=models.CASCADE,
                                **NULLABLE)
     content = models.TextField(verbose_name='комментарий')
+    has_complaint = models.BooleanField(default=False, verbose_name='есть жалобы')
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True)
 
     def __str__(self):
@@ -210,3 +216,99 @@ class CommentKarma(models.Model):
 
     def __str__(self):
         return f'{self.user} - "{self.comment}": {self.karma}'
+
+
+class CommentComplaint(models.Model):
+    SPAM = 'spam'
+    VIOLATION = 'violation'
+    ABUSE = 'abuse'
+    PRON = 'pron'
+
+    STATUSES = (
+        (SPAM, 'Рассылка спама'),
+        (VIOLATION, 'Нарушение правил сайта'),
+        (ABUSE, 'Оскорбления'),
+        (PRON, 'Распространение порнографии'),
+    )
+
+    class Meta:
+        verbose_name = 'жалоба на комментарий'
+        verbose_name_plural = 'жалобы на комментарии'
+        ordering = ('-created_at', '-comment',)
+
+    comment = models.ForeignKey(Comment, related_name='complaint', on_delete=models.CASCADE, verbose_name='комментарий',
+                                **NULLABLE)
+    user = models.ForeignKey(HubUser, related_name='complaint_user', on_delete=models.CASCADE,
+                             verbose_name='пользователь', **NULLABLE)
+    complaint_type = models.CharField(verbose_name='тип жалобы', choices=STATUSES, default=SPAM, max_length=30)
+    complaint_text = models.CharField(max_length=200, verbose_name='текст жалобы', **NULLABLE)
+    is_satisfied = models.BooleanField(verbose_name='жалоба удовлетворена', **NULLABLE)
+    is_processed = models.BooleanField(verbose_name='жалоба обработана', default=False)
+    created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True)
+    updated_at = models.DateTimeField(verbose_name='время изменения', auto_now=True)
+
+
+@receiver(post_save, sender=PostKarma)
+def post_rating_plus(sender, instance, created, **kwargs):
+
+    dict_obj = model_to_dict(instance)
+    post_id = dict_obj.get('post')
+    post = Post.objects.get(pk=post_id)
+    user = HubUser.objects.get(pk=post.user_id)
+
+    if created:
+        if dict_obj.get('karma') > 0:
+            user.rating = F('rating') + 0.1
+        else:
+            user.rating = F('rating') - 0.1
+        user.save()
+
+
+@receiver(post_delete, sender=PostKarma)
+def post_rating_minus(sender, instance, **kwargs):
+
+    dict_obj = model_to_dict(instance)
+    post_id = dict_obj.get('post')
+    post = Post.objects.get(pk=post_id)
+    user = HubUser.objects.get(pk=post.user_id)
+
+    if dict_obj.get('karma') > 0:
+        user.rating = F('rating') - 0.1
+    else:
+        user.rating = F('rating') + 0.1
+    user.save()
+
+
+@receiver(post_save, sender=CommentKarma)
+def comment_rating_plus(sender, instance, created, **kwargs):
+
+    dict_obj = model_to_dict(instance)
+
+    comment_id = dict_obj.get('comment')
+    comment = Comment.objects.get(pk=comment_id)
+    user = HubUser.objects.get(pk=comment.author_id)
+
+    if created:
+        if dict_obj.get('karma') > 0:
+            user.rating = F('rating') + 0.1
+        else:
+            user.rating = F('rating') - 0.1
+        user.save()
+
+
+@receiver(post_delete, sender=CommentKarma)
+def comment_rating_minus(sender, instance, **kwargs):
+
+    dict_obj = model_to_dict(instance)
+
+    comment_id = dict_obj.get('comment')
+    comment = Comment.objects.get(pk=comment_id)
+    user = HubUser.objects.get(pk=comment.author_id)
+
+    if dict_obj.get('karma') > 0:
+        user.rating = F('rating') - 0.1
+    else:
+        user.rating = F('rating') + 0.1
+    user.save()
+
+
