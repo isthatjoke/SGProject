@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sgproject',
+        'NAME': 'sgproject2',
         'USER': 'postgres',
     }
     # 'default': {
