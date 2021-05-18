@@ -1,7 +1,12 @@
 import json
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex
+from django.core import serializers
 from django.db import models
+from django.db.models import F
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from django.forms import model_to_dict
 from django.shortcuts import redirect
 
 from authapp.models import HubUser, HubUserProfile
@@ -241,3 +246,69 @@ class CommentComplaint(models.Model):
     is_processed = models.BooleanField(verbose_name='жалоба обработана', default=False)
     created_at = models.DateTimeField(verbose_name='время создания', auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name='время изменения', auto_now=True)
+
+
+@receiver(post_save, sender=PostKarma)
+def post_rating_plus(sender, instance, created, **kwargs):
+
+    dict_obj = model_to_dict(instance)
+    post_id = dict_obj.get('post')
+    post = Post.objects.get(pk=post_id)
+    user = HubUser.objects.get(pk=post.user_id)
+
+    if created:
+        if dict_obj.get('karma') > 0:
+            user.rating = F('rating') + 0.1
+        else:
+            user.rating = F('rating') - 0.1
+        user.save()
+
+
+@receiver(post_delete, sender=PostKarma)
+def post_rating_minus(sender, instance, **kwargs):
+
+    dict_obj = model_to_dict(instance)
+    post_id = dict_obj.get('post')
+    post = Post.objects.get(pk=post_id)
+    user = HubUser.objects.get(pk=post.user_id)
+
+    if dict_obj.get('karma') > 0:
+        user.rating = F('rating') - 0.1
+    else:
+        user.rating = F('rating') + 0.1
+    user.save()
+
+
+@receiver(post_save, sender=CommentKarma)
+def comment_rating_plus(sender, instance, created, **kwargs):
+
+    dict_obj = model_to_dict(instance)
+
+    comment_id = dict_obj.get('comment')
+    comment = Comment.objects.get(pk=comment_id)
+    user = HubUser.objects.get(pk=comment.author_id)
+
+    if created:
+        if dict_obj.get('karma') > 0:
+            user.rating = F('rating') + 0.1
+        else:
+            user.rating = F('rating') - 0.1
+        user.save()
+
+
+@receiver(post_delete, sender=CommentKarma)
+def comment_rating_minus(sender, instance, **kwargs):
+
+    dict_obj = model_to_dict(instance)
+
+    comment_id = dict_obj.get('comment')
+    comment = Comment.objects.get(pk=comment_id)
+    user = HubUser.objects.get(pk=comment.author_id)
+
+    if dict_obj.get('karma') > 0:
+        user.rating = F('rating') - 0.1
+    else:
+        user.rating = F('rating') + 0.1
+    user.save()
+
+
