@@ -11,10 +11,12 @@ from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, FormView, CreateView, UpdateView
 
 # Create your views here.
+from django_tables2 import SingleTableView
 from notifications.signals import notify
 
 from authapp.forms import HubUserLoginForm, HubUserRegisterForm, HubUserUpdateForm, HubUserProfileUpdateForm
 from authapp.models import HubUser
+from authapp.tables import UsersRatingTable
 from backend.utils import LoginRequiredDispatchMixin
 
 
@@ -76,4 +78,18 @@ class Success(TemplateView):
     template_name = 'authapp/success.html'
 
 
+class UsersRatingListView(SingleTableView):
+    model = HubUser
+    table_class = UsersRatingTable
+    template_name = 'authapp/users_rating.html'
+    context_table_name = 'users'
+    paginate_by = 10
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(UsersRatingListView, self).get_context_data(**kwargs)
+        context['title'] = 'Рейтинг пользователей'
+        return context
+
+    def get_queryset(self):
+        users = HubUser.objects.all().order_by('-rating')
+        return users

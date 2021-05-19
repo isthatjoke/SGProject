@@ -9,6 +9,7 @@ urlpatterns = [
     path('register/', views.HubUserRegisterView.as_view(), name='register'),
     path('update/', views.HubUserUpdateView.as_view(), name='update'),
     path('success/', views.Success.as_view(), name='success'),
+    path('users_rating/', views.UsersRatingListView.as_view(), name='users_rating'),
 ]
 
 
