@@ -369,6 +369,18 @@ class CommentUserlist(ListView):
         return context
 
 
+class ListOfPostsView(SingleTableView):
+    model = Post
+    table_class = PostsTable
+    template_name = 'post/users_posts.html'
+    context_table_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        posts = Post.objects.filter(user=self.kwargs.get('pk')).order_by('moderated_at')
+        return posts
+
+
 class PostUserListView(SingleTableView, LoginRequiredDispatchMixin):
     model = Post
     table_class = PostsTable

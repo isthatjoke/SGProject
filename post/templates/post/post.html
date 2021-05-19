@@ -218,8 +218,7 @@
         {% if post.status == 'published' %}
             {% if form %}
                 <h3 id="write_comment btn btn-primary">
-                    <a style="color: black;" onclick="return show_comments_form('write_comment')">Написать
-                        комментарий</a>
+                    <a style="color: black;" onclick="return show_comments_form('write_comment')">Написать комментарий</a>
                 </h3>
                 <form id="comment_form" method="post" action="comment/update/">
                     <!--                    <form id="comment_form" method="post">-->
@@ -234,11 +233,8 @@
                 </form>
             {% else %}
                 <div class="panel panel-warning">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Комментарии</h3>
-                    </div>
-                    <div class="panel-body">
-                        Только авторизованные пользователи могут оставлять комментарии.<br/>
+                    <div class="panel-body" style="margin: 15px 0;">
+                        <h4>Только авторизованные пользователи могут оставлять комментарии.</h4><br/>
                     </div>
                 </div>
             {% endif %}
