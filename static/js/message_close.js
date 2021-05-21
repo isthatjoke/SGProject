@@ -7,10 +7,17 @@ window.onload = function () {
         if (target.textContent == 'забанить') {
             let form_id = 'form-' + link_num;
             $('#' + form_id).prop('style', 'display:inline');
-        } else {
+            target.textContent = 'отменить';
+        } else if (target.textContent == 'разбанить') {
             let button_id = 'submit-' + link_num;
             $('#' + button_id).prop('style', 'display:inline');
-        }});
+
+        } else {
+            target.textContent = 'забанить';
+            let form_id = 'form-' + link_num;
+            $('#' + form_id).prop('style', 'display:none');
+        }
+    });
 
     $('.ban_time').bind('keyup mouseup', function () {
         let ban_target = event.target;

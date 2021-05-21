@@ -27,9 +27,7 @@
                             {% if user.banned_to or user.banned == 'banned_forever' %}
                                 <button id="link-{{ forloop.counter }}" class="btn btn-success link">разбанить</button>
                             {% else %}
-                                <button type="button" id="link-{{ forloop.counter }}" class="btn btn-danger link">
-                                    забанить
-                                </button>
+                                <button type="button" id="link-{{ forloop.counter }}" class="btn btn-danger link">забанить</button>
                             {% endif %}
                         </td>
                         <td>
