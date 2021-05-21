@@ -85,7 +85,7 @@
             {% endif %}
         </div>
     </div>
-    {% if user.banned == 'active' or not request.user.is_authenticated %}
+
         <h2>Комментарии</h2>
         <div class="comment-reload">
         {% for comment in comments %}
@@ -108,8 +108,8 @@
                                         <span id="{{ comment.id }}"
                                               class="comment__karma__count">{{ comment.comment_karma }}</span>&nbsp;
                                         <span id="{{ comment.id }}" class="comment__karma__msg"></span>&nbsp;
-                                        {% if request.user.is_authenticated %}
-                                            {% if request.user == comment.karma.first.user %}
+                                        {% if user.is_authenticated and user.banned == 'active' %}
+                                            {% if user == comment.karma.first.user %}
                                                 {% if comment.karma.first.karma == 1 %}
                                                     <bottom type="button" id="{{ comment.id }}"
                                                             name="comment_likes_down">
@@ -137,12 +137,12 @@
                                                     <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
                                                 </bottom>
                                             {% endif %}
-                                        {% else %}
-                                            <span>Для выставления оценки авторизуйтесь.</span>
+{#                                        {% else %}#}
+{#                                            <span>Для выставления оценки авторизуйтесь.</span>#}
                                         {% endif %}
-                                        {% if not request.user == comment.author %}
-                                            {% if not request.user.is_staff %}
-                                                {% if not request.user.id == comment.complaint.first.user.id %}&nbsp;
+                                        {% if not user == comment.author and user.banned == 'active' %}
+                                            {% if not user.is_staff and user.is_authenticated%}
+                                                {% if not user.id == comment.complaint.first.user.id %}&nbsp;
                                                     &nbsp;
                                                     <a href="{% url 'post:complaint_create' post.id comment.id %}"
                                                        title="Пожаловаться"><i class="fa fa-exclamation-triangle"></i>
@@ -156,7 +156,7 @@
                                         {% endif %}
                                     </div>
                                 </div>
-                                {% if request.user.is_staff %}
+                                {% if user.is_staff %}
                                     {% if comment.has_complaint %}
                                         {% if not comment.complaint.first.is_processed %}
                                             <div style="background-color: #ffb4b3; border: black solid 1px;">
@@ -176,10 +176,12 @@
                                     {% endif %}
                                 {% endif %}
                                 {% if form %}
+                                    {% if user.banned == 'active' %}
                                     <a class="btn btn-default btn-xs pull-right"
                                        onclick="return show_comments_form({{ comment.id }})">
                                         <i class="fa fa-reply"></i>&nbsp;&nbsp;Ответить
                                     </a>
+                                        {% endif %}
                                     {% if comment.author.username == request.user.username %}
                                         <a onClick="ajax_comment_del('{{ comment.id }}')"
                                            class="btn btn-default btn-xs pull-right"><i class="fa fa-remove"></i>
@@ -239,6 +241,6 @@
                 </div>
             {% endif %}
         {% endif %}
-    {% endif %}
+
 </div>
 {% endblock %}
